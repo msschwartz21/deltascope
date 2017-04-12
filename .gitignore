@@ -1,0 +1,15 @@
+# Compiled python modules
+*.pyc
+
+# Python egg metadata, regenerated from source files
+/*.egg-info
+/*.egg
+
+# Data
+*.csv
+*.json
+*.h5
+*.tiff
+
+# Other
+.DS_Store
