@@ -15,7 +15,14 @@ setup(name='cranium',
 	license='MIT',
 	packages=['cranium'],
 	install_requires=[
-		'markdown'
+		'numpy',
+		'scipy',
+		'h5py',
+		'skimage',
+		'matplotlib',
+		'statsmodels',
+		'mpl_toolkits',
+		'pandas'
 		],
 	include_package_data=True
 	)
