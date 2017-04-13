@@ -33,20 +33,20 @@ class brain:
 		else:
 			return(c2)
 
-	def show_plane(dimension,plane):
+	def show_plane(self,dimension,plane):
 		'''Shows specified plane'''
 
 		if dimension=='x':
-			data = sample.raw_data[:,:,plane]
+			data = self.raw_data[:,:,plane]
 		elif dimension=='y':
-			data = sample.raw_data[:,plane,:]
+			data = self.raw_data[:,plane,:]
 		elif dimension=='z':
-			data = sample.raw_data[plane,:,:]
+			data = self.raw_data[plane,:,:]
 		else:
 			print('Invalid dimension specified, try "x","y","z"')
 
 		fig,ax = plt.subplots()
-		cax = ax.imshow(sample.raw_data[:,:,300],cmap='plasma')
+		cax = ax.imshow(data,cmap='plasma')
 		fig.colorbar(cax)
 
 	def create_dataframe(self):
