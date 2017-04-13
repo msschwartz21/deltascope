@@ -59,3 +59,56 @@ API
 	:param float threshold: float value between 0 and 1, used to select lower bound of values
 	:return: :py:attr:`brain.model`
 	:rtype: dictionary containing the coefficients for the parabolic model of the data
+
+
+
+.. py:class:: plane(model,xx,yy,zz)
+
+	Class to contain model and data associated with a plane
+
+	:param model: OLS fitted model 
+	:param array xx: Meshgrid array of x dimension
+	:param array yy: Meshgrid array of y dimension
+	:param array zz: Meshgrid array of z dimension
+
+	.. py:attribute:: plane.model
+
+		OLS fitted model
+
+	.. py:attribute:: plane.xx
+
+		Meshgrid array of x dimension
+
+	.. py:attribute:: plane.yy
+
+		Meshgrid array of y dimension
+
+	.. py:attribute:: plane.zz
+
+		Meshgrid array of z dimension
+
+
+.. py:class:: math_model(coef)
+
+	Class to contain attribues and data associated with math model
+
+	:param dict coef: Dictionary containing coefficients to define equation of math model
+	:param array x: Array containing x coordinates
+	:param array y: Array containing y coordinates
+	:param array z: Array containing z coordinates
+
+	.. py:attribute:: math_model.coef
+
+		Dictionary containing coefficients of each term of math model
+
+	.. py:attribute:: math_model.x 
+
+		Array containing x coordinates of model
+
+	.. py:attribute:: math_model.y
+
+		Array containing y coordinates of model
+
+	.. py:attribute:: math_model.z
+
+		Array containing z coordinates of model

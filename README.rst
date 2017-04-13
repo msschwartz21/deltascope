@@ -10,5 +10,10 @@ Package hosted on `PyPI <https://pypi.python.org/pypi/cranium>`_. ::
 
 	$ pip install cranium
 
+Documentation
+++++++++++++++
+
+Complete documentation is available on `Read the Docs <http://craniumpy.readthedocs.io/en/latest/>`_.
+
 Basic Usage
 ++++++++++++

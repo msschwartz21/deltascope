@@ -80,23 +80,64 @@ class brain:
 		self.threshold = threshold
 		self.df_thresh = self.df[self.df.value > self.threshold]
 
+		#Create xyz arrays for range of data
+		x = np.linspace(self.df.x.min(),self.df.x.max())
+		y = np.linspace(self.df.y.min(),self.df.y.max())
+		z = np.linspace(self.df.z.min(),self.df.z.max())
+
 		#Identify flat plane
-		self.p_flat = smf.ols(formula='y ~ x + z',data=self.df_thresh).fit()
+		flat_model = smf.ols(formula='y ~ x + z',data=self.df_thresh).fit()
+		xx,zz = np.meshgrid(x,z)
+		Y = flat_model.params[0] + flat_model.params[1]*xx + flat_model.params[2]*zz
+		self.f_plane = plane(flat_model,xx,Y,zz)
 
 		#Identify parabolic plane
-		self.p_para = smf.ols(formula='z ~ y + x + I(x**2)',data=self.df_thresh).fit()
+		para_model = smf.ols(formula='z ~ y + x + I(x**2)',data=self.df_thresh).fit()
+		xx,yy = np.meshgrid(x,y)
+		Z = para_model.params[0] + para_model.params[1]*yy + para_model.params[2]*xx + para_model.params[3]*(xx**2)
+		self.p_plane = plane(para_model,xx,yy,Z)
 
 		#Find intersection
-		self.model = {
-		'a' : self.p_para.params[3],
-		'b' : self.p_para.params[2],
-		'c' : self.p_para.params[1],
-		'd' : self.p_para.params[0],
-		'e' : self.p_flat.params[1],
-		'f' : self.p_flat.params[2],
-		'g' : self.p_flat.params[0]
+		model = {
+		'a' : para_model.params[3],
+		'b' : para_model.params[2],
+		'c' : para_model.params[1],
+		'd' : para_model.params[0],
+		'e' : flat_model.params[1],
+		'f' : flat_model.params[2],
+		'g' : flat_model.params[0]
 		}
 
-		self.model['a_prime'] = (self.model['a']*self.model['f']) / (1 - self.model['c']*self.model['f'])
-		self.model['b_prime'] = (self.model['e'] + self.model['b']*self.model['f']) / (1 - self.model['c']*self.model['f'])
-		self.model['c_prime'] = (self.model['g'] + self.model['d']*self.model['f']) / (1 - self.model['c']*self.model['f'])
+		model['a_prime'] = (model['a']*model['f']) / (1 - model['c']*model['f'])
+		model['b_prime'] = (model['e'] + model['b']*model['f']) / (1 - model['c']*model['f'])
+		model['c_prime'] = (model['g'] + model['d']*model['f']) / (1 - model['c']*model['f'])
+
+		#Parametric equation in terms of t
+		t = np.arange(0,1000)
+		x_line = t
+		y_line = model['a_prime']*(t**2) + model['b_prime']*t + model['c_prime']
+		z_line = (model['a'] + model['c']*model['a_prime'])*(t**2) + (model['b'] + model['c']*model['b_prime'])*t + model['c']*model['c_prime'] + model['d']
+
+		self.parabola = math_model(model,x_line,y_line,z_line)
+
+
+class plane:
+	'''Class to contain attributes and data associated with a plane'''
+
+	def __init__(self,model,xx,yy,zz):
+		'''Save global variables'''
+
+		self.model = model
+		self.xx = xx
+		self.yy = yy
+		self.zz = zz
+
+class math_model:
+	'''Class to contain attribues and data associated with math model'''
+
+	def __init__(self,coef,x,y,z):
+
+		self.coef = coef
+		self.x = x
+		self.y = y
+		self.z = z
