@@ -17,3 +17,13 @@ Complete documentation is available on `Read the Docs <http://craniumpy.readthed
 
 Basic Usage
 ++++++++++++
+
+.. code-block:: python
+
+	import(cranium)
+	file = "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\AT2\\AT_04_Probabilities.h5"
+
+	sample = cranium.brain(file)
+	sample.create_dataframe()
+	sample.fit_model(0.9)
+	sample.plot_model()
