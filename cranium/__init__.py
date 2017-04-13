@@ -81,9 +81,9 @@ class brain:
 		self.df_thresh = self.df[self.df.value > self.threshold]
 
 		#Create xyz arrays for range of data
-		x = np.linspace(self.df.x.min(),self.df.x.max())
-		y = np.linspace(self.df.y.min(),self.df.y.max())
-		z = np.linspace(self.df.z.min(),self.df.z.max())
+		x = np.linspace(self.df_thresh.x.min(),self.df_thresh.x.max())
+		y = np.linspace(self.df_thresh.y.min(),self.df_thresh.y.max())
+		z = np.linspace(self.df_thresh.z.min(),self.df_thresh.z.max())
 
 		#Identify flat plane
 		flat_model = smf.ols(formula='y ~ x + z',data=self.df_thresh).fit()
@@ -119,6 +119,23 @@ class brain:
 		z_line = (model['a'] + model['c']*model['a_prime'])*(t**2) + (model['b'] + model['c']*model['b_prime'])*t + model['c']*model['c_prime'] + model['d']
 
 		self.parabola = math_model(model,x_line,y_line,z_line)
+
+	def plot_model(self,sample_frac=0.5,cmap=plt.cm.Greys):
+		'''Plot two planes, line model, and percentage of points'''
+
+		subset = self.df_thresh.sample(frac=sample_frac)
+
+		fig = plt.figure()
+		ax = Axes3D(fig)
+
+		ax.scatter(subset['x'],subset['y'],subset['z'],alpha=0.1,s=0.1)
+
+		ax.plot_surface(self.f_plane.xx,self.f_plane.yy,self.f_plane.zz,cmap=cmap,alpha=0.6,linewidth=0)
+		ax.plot_surface(self.p_plane.xx,self.p_plane.yy,self.p_plane.zz,cmap=cmap,alpha=0.6,linewidth=0)
+
+		ax.plot(self.parabola.x[:600],self.parabola.y[:600],self.parabola.z[:600])
+
+		plt.show()
 
 
 class plane:
