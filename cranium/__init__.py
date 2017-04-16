@@ -11,6 +11,9 @@ from functools import partial
 import statsmodels.formula.api as smf
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
+import plotly.plotly as py
+import plotly.graph_objs as go
+
 
 class brain:
 
@@ -120,22 +123,64 @@ class brain:
 
 		self.parabola = math_model(model,x_line,y_line,z_line)
 
-	def plot_model(self,sample_frac=0.5,cmap=plt.cm.Greys):
-		'''Plot two planes, line model, and percentage of points'''
+	def plot_model(self,sample_frac=0.5):
+		'''Plot two planes, line model, and percentage of points
+		Returns plotly fig object to be displayed according to user preference'''
 
 		subset = self.df_thresh.sample(frac=sample_frac)
 
-		fig = plt.figure()
-		ax = Axes3D(fig)
+		points = dict(
+			x = subset.x,
+			y = subset.y,
+			z = subset.z,
+			type = 'scatter3d',
+			mode = 'markers',
+			marker = dict(
+				size=3,
+				color='black',
+				opacity=0.01
+				)
+			)
 
-		ax.scatter(subset['x'],subset['y'],subset['z'],alpha=0.1,s=0.1)
+		line = dict(
+			x = self.parabola.x[:600],
+			y = self.parabola.y[:600],
+			z = self.parabola.z[:600],
+			type = 'scatter3d',
+			mode = 'lines',
+			line = dict(
+				width = 3,
+				color = 'green'
+				)
+			)
 
-		ax.plot_surface(self.f_plane.xx,self.f_plane.yy,self.f_plane.zz,cmap=cmap,alpha=0.6,linewidth=0)
-		ax.plot_surface(self.p_plane.xx,self.p_plane.yy,self.p_plane.zz,cmap=cmap,alpha=0.6,linewidth=0)
+		flat = dict(
+			x = self.f_plane.xx,
+			y = self.f_plane.yy,
+			z = self.f_plane.zz,
+			type = 'surface',
+			opacity = 0.6,
+			showscale = False
+			)
 
-		ax.plot(self.parabola.x[:600],self.parabola.y[:600],self.parabola.z[:600])
+		para = dict(
+			x = self.p_plane.xx,
+			y = self.p_plane.yy,
+			z = self.p_plane.zz,
+			type = 'surface',
+			opacity = 0.6,
+			showscale = False
+			)
 
-		plt.show()
+		data = [points,line,flat,para]
+
+		layout = dict(
+			margin = dict(l=0,r=0,b=0,t=0)
+			)
+
+		fig = go.Figure(data=data,layout=layout)
+
+		return(fig)
 
 
 class plane:

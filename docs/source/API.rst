@@ -64,10 +64,11 @@ API
 
 	Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac
 
+	The returned plotly figure object can be most easily visualized using `plotly.offline.iplot(fig,filename='example')
+
 	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
-	:param type: float or none
-	:param cmap: Colormap to use for plotting planes
-	:param type: matplotlib colormap in form plt.cm.name or none
+	:type: float or none
+	:returns: Plotly figure object
 
 
 

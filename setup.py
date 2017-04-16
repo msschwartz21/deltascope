@@ -22,7 +22,8 @@ setup(name='cranium',
 		'matplotlib',
 		'statsmodels',
 		'mpl_toolkits',
-		'pandas'
+		'pandas',
+		'plotly'
 		],
 	include_package_data=True
 	)
