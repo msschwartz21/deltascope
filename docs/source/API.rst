@@ -103,13 +103,28 @@ API
 	Class to contain attribues and data associated with math model
 
 	:param dict coef: Dictionary containing coefficients to define equation of math model
+	:param dict p: Dictionary containing calculated coefficients for y and z parabola
 	:param array x: Array containing x coordinates
 	:param array y: Array containing y coordinates
 	:param array z: Array containing z coordinates
 
 	.. py:attribute:: math_model.coef
 
-		Dictionary containing coefficients of each term of math model
+		Dictionary containing coefficients of each term of math model such that:
+
+		.. math::
+
+			y = ex + fz + g
+			z = ax^2 + bx + cy + d
+
+	.. py:attribute:: math_model.p
+
+		Dictionary containing coefficients of terms in math model such that:
+
+		.. math::
+
+			y = ay*x^2 + by*x + cy
+			z = az*x^2 + bz*x + cz
 
 	.. py:attribute:: math_model.x 
 
@@ -122,3 +137,40 @@ API
 	.. py:attribute:: math_model.z
 
 		Array containing z coordinates of model
+
+	.. py:attribute:: math_model.vx
+
+		x position of the vertex
+
+	.. py:attribute:: math_model.vy
+
+		y position of the vertex
+
+	.. py:attribute:: math_model.vz
+
+		z position of the vertex
+
+	.. py:attribute:: math_model.fx
+
+		x position of the focus
+
+	.. py:attribute:: math_model.fy
+
+		y position of the focus
+
+	.. py:attribute:: math_model.fz
+
+		z position of the focus
+
+.. py:function:: math_model.find_vertex()
+
+	Calculates the position of the vertex
+
+	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
+
+.. py:function:: math_model.find_foucs()
+
+	Calculates the position of the focus
+
+	:returns: :py:attr:`math_model.fx`, :py:attr:`math_model.fy`, :py:attr:`math_model.fz`
+

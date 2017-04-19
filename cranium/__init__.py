@@ -101,6 +101,8 @@ class brain:
 		self.p_plane = plane(para_model,xx,yy,Z)
 
 		#Find intersection
+		# y = ex + fz + g
+		# z = ax**2 + bx + cy + d
 		model = {
 		'a' : para_model.params[3],
 		'b' : para_model.params[2],
@@ -115,13 +117,22 @@ class brain:
 		model['b_prime'] = (model['e'] + model['b']*model['f']) / (1 - model['c']*model['f'])
 		model['c_prime'] = (model['g'] + model['d']*model['f']) / (1 - model['c']*model['f'])
 
+		p = {
+		'ay' : model['a_prime'],
+		'by' : model['b_prime'],
+		'cy' : model['c_prime'],
+		'az' : model['a'] + model['c']*model['a_prime'],
+		'bz' : model['b'] + model['c']*model['b_prime'],
+		'cz' : model['d'] + model['c']*model['c_prime']
+		}
+
 		#Parametric equation in terms of t
 		t = np.arange(0,1000)
 		x_line = t
 		y_line = model['a_prime']*(t**2) + model['b_prime']*t + model['c_prime']
 		z_line = (model['a'] + model['c']*model['a_prime'])*(t**2) + (model['b'] + model['c']*model['b_prime'])*t + model['c']*model['c_prime'] + model['d']
 
-		self.parabola = math_model(model,x_line,y_line,z_line)
+		self.mm = math_model(model,p,x_line,y_line,z_line)
 
 	def plot_model(self,sample_frac=0.5):
 		'''Plot two planes, line model, and percentage of points
@@ -143,9 +154,9 @@ class brain:
 			)
 
 		line = dict(
-			x = self.parabola.x[:600],
-			y = self.parabola.y[:600],
-			z = self.parabola.z[:600],
+			x = self.mm.x[:600],
+			y = self.mm.y[:600],
+			z = self.mm.z[:600],
 			type = 'scatter3d',
 			mode = 'lines',
 			line = dict(
@@ -197,9 +208,30 @@ class plane:
 class math_model:
 	'''Class to contain attribues and data associated with math model'''
 
-	def __init__(self,coef,x,y,z):
+	def __init__(self,coef,p,x,y,z):
 
 		self.coef = coef
+		self.p = p
 		self.x = x
 		self.y = y
 		self.z = z
+
+		self.find_vertex()
+		self.find_focus()
+
+	def find_vertex(self):
+		'''Calculate position of vertex'''
+
+		self.vx = -self.coef['b']/(2*self.coef['a'])
+		self.vy = self.p['ay']*(self.vx**2) + self.p['by']*self.vx + self.p['cy']
+		self.vz = self.p['az']*(self.vx**2) + self.p['bz']*self.vx + self.p['cz']
+
+	def find_focus(self):
+		'''Calculate position of focus'''
+
+		dy = np.sqrt(1/(16*self.coef['a']*((1/self.coef['f'])**2 + 1)))
+		dz = (1/self.coef['f'])*dy
+
+		self.fx = self.vx
+		self.fy = self.vy + dy
+		self.fz = self.vz + dz
