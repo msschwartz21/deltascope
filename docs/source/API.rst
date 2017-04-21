@@ -30,6 +30,10 @@ API
 
 		Dictionary containing the coefficients for the parabolic model of the data
 
+	.. py:attribute:: brain.subset
+
+		Random sample of the dataframe from :py:attr:`brain.df_thresh`
+
 .. py:method:: brain.read_data(filepath)
 
 	Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal
@@ -60,6 +64,37 @@ API
 	:return: :py:attr:`brain.model`
 	:rtype: dictionary containing the coefficients for the parabolic model of the data
 
+.. py:method:: brain.find_distance(t,point)
+
+	Find euclidean distance between a point on the line defined by t and a data point
+
+	:param float t: float value defining point on the line
+	:param array point: array [x,y,z] defining data point
+	:returns: distance between the two points
+	:rtype: float
+
+.. py:method:: brain.find_min_distance(row)
+
+	Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(:py:func:`brain.find_distance`)
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: series containing xc, yc, zc, r
+	:rtype: pd.Series
+
+.. py:method:: transform_coordinates()
+
+	Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to df_thresh
+
+	:returns: appends columns r, xc, yc, zc to :py:attr:`brain.df_thresh`
+
+.. py:method:: brain.subset_data(sample_frac)
+
+	Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac
+
+	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
+	:type: float or none
+	:returns: :py:attr:`brain.subset`
+
 .. py:method:: brain.plot_model(sample_frac=0.5,cmap='plt.cm.Greys')
 
 	Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac
@@ -69,6 +104,8 @@ API
 	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
 	:type: float or none
 	:returns: Plotly figure object
+
+
 
 
 
@@ -162,13 +199,29 @@ API
 
 		z position of the focus
 
-.. py:function:: math_model.find_vertex()
+.. py:method:: math_model.calc_y(t)
+
+	Calculate y value according to a given t
+
+	:param float t: t value along the curve
+	:returns: y value corresponding to t
+	:rtype: float
+
+.. py:method:: math_model.calc_z(t)
+
+	Calculate z value according to a gien t
+
+	:param float t: t value along the curve
+	:returns: z value corresponding to t
+	:rtype: float
+
+.. py:method:: math_model.find_vertex()
 
 	Calculates the position of the vertex
 
 	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
 
-.. py:function:: math_model.find_foucs()
+.. py:method:: math_model.find_foucs()
 
 	Calculates the position of the focus
 

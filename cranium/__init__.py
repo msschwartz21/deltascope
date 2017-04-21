@@ -13,6 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import plotly.plotly as py
 import plotly.graph_objs as go
+from scipy.optimize import minimize
 
 
 class brain:
@@ -134,6 +135,46 @@ class brain:
 
 		self.mm = math_model(model,p,x_line,y_line,z_line)
 
+	def find_distance(self,t,point):
+		'''Find euclidean distance between point on line defined by t and data point'''
+
+		x = float(t)
+		y = self.mm.calc_y(x)
+		z = self.mm.calc_z(x)
+
+		dist = np.linalg.norm(point - np.array([x,y,z]))
+
+		return(dist)
+
+	def find_min_distance(self,row):
+		'''Find the point on the curve that produces the minimum distance between the point and the data point'''
+
+		dpoint = np.array([row.x,row.y,row.z])
+
+		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance
+		result = minimize(self.find_distance, dpoint[0],args=(dpoint))
+
+		x = result['x'][0]
+		y = self.mm.calc_y(x)
+		z = self.mm.calc_z(x)
+		r = result['fun']
+
+		return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
+
+	def transform_coordinates(self):
+		'''Transform coordinate system so that each point is defined relative to 
+		math model by (alpha,theta,r) (only applied to df_thresh'''
+
+		#Find r and closest point to data point on curve (xc,yc,zc)
+		self.df_thresh = self.df_thresh.join(self.df_thresh.apply((lambda row: self.find_min_distance(row)), axis=1))
+
+
+
+	def subset_data(self,sample_frac=0.5):
+		'''Subset data based on proportion set in sample_frac'''
+
+		self.subset = self.df_thresh.sample(frac=sample_frac)
+
 	def plot_model(self,sample_frac=0.5):
 		'''Plot two planes, line model, and percentage of points
 		Returns plotly fig object to be displayed according to user preference'''
@@ -219,12 +260,24 @@ class math_model:
 		self.find_vertex()
 		self.find_focus()
 
+	def calc_y(self,t):
+		'''Calculate y value according to a given t'''
+
+		y = self.p['ay']*(t**2) + self.p['by']*t + self.p['cy']
+		return(y)
+
+	def calc_z(self,t):
+		'''Calculate z value according to a given t'''
+
+		z = self.p['az']*(t**2) + self.p['bz']*t + self.p['cz']
+		return(z)
+
 	def find_vertex(self):
 		'''Calculate position of vertex'''
 
 		self.vx = -self.coef['b']/(2*self.coef['a'])
-		self.vy = self.p['ay']*(self.vx**2) + self.p['by']*self.vx + self.p['cy']
-		self.vz = self.p['az']*(self.vx**2) + self.p['bz']*self.vx + self.p['cz']
+		self.vy = self.calc_y(self.vx)
+		self.vz = self.calc_z(self.vx)
 
 	def find_focus(self):
 		'''Calculate position of focus'''
