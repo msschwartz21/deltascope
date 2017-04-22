@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; craniumPy 0.0.3 documentation</title>
+  <title>API &mdash; craniumPy 0.0.4 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="craniumPy 0.0.3 documentation" href="index.html"/>
+    <link rel="top" title="craniumPy 0.0.4 documentation" href="index.html"/>
         <link rel="prev" title="Introduction" href="introduction.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.0.3
+                0.0.4
               </div>
             
           
@@ -175,6 +175,12 @@
 <dd><p>Dictionary containing the coefficients for the parabolic model of the data</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="brain.subset">
+<code class="descname">subset</code><a class="headerlink" href="#brain.subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random sample of the dataframe from <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="method">
@@ -249,20 +255,184 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.plot_model">
-<code class="descclassname">brain.</code><code class="descname">plot_model</code><span class="sig-paren">(</span><em>sample_frac=0.5</em>, <em>cmap='plt.cm.Greys'</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.plot_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac</p>
+<dt id="brain.find_distance">
+<code class="descclassname">brain.</code><code class="descname">find_distance</code><span class="sig-paren">(</span><em>t</em>, <em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find euclidean distance between a point on the line defined by t and a data point</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>sample_frac</strong> &#8211; Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</li>
-<li><strong>type</strong> &#8211; float or none</li>
-<li><strong>cmap</strong> &#8211; Colormap to use for plotting planes</li>
-<li><strong>type</strong> &#8211; matplotlib colormap in form plt.cm.name or none</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; float value defining point on the line</li>
+<li><strong>point</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; array [x,y,z] defining data point</li>
 </ul>
 </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">distance between the two points</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.find_min_distance">
+<code class="descclassname">brain.</code><code class="descname">find_min_distance</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_min_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(<a class="reference internal" href="#brain.find_distance" title="brain.find_distance"><code class="xref py py-func docutils literal"><span class="pre">brain.find_distance()</span></code></a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">point in the curve (xc, yc, zc) and r</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">floats</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.find_alpha">
+<code class="descclassname">brain.</code><code class="descname">find_alpha</code><span class="sig-paren">(</span><em>xc</em>, <em>yc</em>, <em>zc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_alpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find alpha which is the angle that specifies the position of the point along the curve</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; x position of closest point on curve to datapoint</li>
+<li><strong>yc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; y position of closest point on curve to datapoint</li>
+<li><strong>zc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; zposition of closest point on curve to datapoint</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">alpha, angle along the curve</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.dist_to_plane">
+<code class="descclassname">brain.</code><code class="descname">dist_to_plane</code><span class="sig-paren">(</span><em>xz</em>, <em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.dist_to_plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find shortest distance between point and the plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xz</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; List of form [x position, y position]</li>
+<li><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Distance between the specified point and the plane</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.find_theta">
+<code class="descclassname">brain.</code><code class="descname">find_theta</code><span class="sig-paren">(</span><em>row</em>, <em>yc</em>, <em>zc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate theta for a row containing data point in relationship to the flat plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Shortest distance between the point and the math model</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">theta, angle between point and the flat plane</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.calc_coord">
+<code class="descclassname">brain.</code><code class="descname">calc_coord</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.calc_coord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate alpah, r, theta for a particular row</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Series populated with coordinate of closest point on the math model, r, theta, and alpha</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pd.Series</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="transform_coordinates">
+<code class="descname">transform_coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#transform_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to df_thresh</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">appends columns r, xc, yc, zc, alpha, theta to <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.subset_data">
+<code class="descclassname">brain.</code><code class="descname">subset_data</code><span class="sig-paren">(</span><em>sample_frac</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.subset_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_frac</strong> &#8211; Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">float or none</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#brain.subset" title="brain.subset"><code class="xref py py-attr docutils literal"><span class="pre">brain.subset</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.plot_model">
+<code class="descclassname">brain.</code><code class="descname">plot_model</code><span class="sig-paren">(</span><em>sample_frac=0.5</em>, <em>cmap='plt.cm.Greys'</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.plot_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac</p>
+<p>The returned plotly figure object can be most easily visualized using <a href="#id2"><span class="problematic" id="id3">`</span></a>plotly.offline.iplot(fig,filename=&#8217;example&#8217;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_frac</strong> &#8211; Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">float or none</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Plotly figure object</td>
 </tr>
 </tbody>
 </table>
@@ -322,6 +492,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>coef</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Dictionary containing coefficients to define equation of math model</li>
+<li><strong>p</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Dictionary containing calculated coefficients for y and z parabola</li>
 <li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing x coordinates</li>
 <li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing y coordinates</li>
 <li><strong>z</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing z coordinates</li>
@@ -333,8 +504,20 @@
 <dl class="attribute">
 <dt id="math_model.coef">
 <code class="descname">coef</code><a class="headerlink" href="#math_model.coef" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dictionary containing coefficients of each term of math model</p>
-</dd></dl>
+<dd><p>Dictionary containing coefficients of each term of math model such that:</p>
+<div class="math">
+<p><img src="_images/math/4737c108b268f7fa08776c5b5c6d4f0443787860.png" alt="y = ex + fz + g
+z = ax^2 + bx + cy + d"/></p>
+</div></dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.p">
+<code class="descname">p</code><a class="headerlink" href="#math_model.p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing coefficients of terms in math model such that:</p>
+<div class="math">
+<p><img src="_images/math/c855747718210ce192c918b9a6fb40714a619bb1.png" alt="y = ay*x^2 + by*x + cy
+z = az*x^2 + bz*x + cz"/></p>
+</div></dd></dl>
 
 <dl class="attribute">
 <dt id="math_model.x">
@@ -354,6 +537,106 @@
 <dd><p>Array containing z coordinates of model</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="math_model.vx">
+<code class="descname">vx</code><a class="headerlink" href="#math_model.vx" title="Permalink to this definition">¶</a></dt>
+<dd><p>x position of the vertex</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.vy">
+<code class="descname">vy</code><a class="headerlink" href="#math_model.vy" title="Permalink to this definition">¶</a></dt>
+<dd><p>y position of the vertex</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.vz">
+<code class="descname">vz</code><a class="headerlink" href="#math_model.vz" title="Permalink to this definition">¶</a></dt>
+<dd><p>z position of the vertex</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.fx">
+<code class="descname">fx</code><a class="headerlink" href="#math_model.fx" title="Permalink to this definition">¶</a></dt>
+<dd><p>x position of the focus</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.fy">
+<code class="descname">fy</code><a class="headerlink" href="#math_model.fy" title="Permalink to this definition">¶</a></dt>
+<dd><p>y position of the focus</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.fz">
+<code class="descname">fz</code><a class="headerlink" href="#math_model.fz" title="Permalink to this definition">¶</a></dt>
+<dd><p>z position of the focus</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="math_model.calc_y">
+<code class="descclassname">math_model.</code><code class="descname">calc_y</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model.calc_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate y value according to a given t</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; t value along the curve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">y value corresponding to t</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="math_model.calc_z">
+<code class="descclassname">math_model.</code><code class="descname">calc_z</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model.calc_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate z value according to a gien t</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; t value along the curve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">z value corresponding to t</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="math_model.find_vertex">
+<code class="descclassname">math_model.</code><code class="descname">find_vertex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#math_model.find_vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the position of the vertex</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#math_model.vx" title="math_model.vx"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vx</span></code></a>, <a class="reference internal" href="#math_model.vy" title="math_model.vy"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vy</span></code></a>, <a class="reference internal" href="#math_model.vz" title="math_model.vz"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vz</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="math_model.find_foucs">
+<code class="descclassname">math_model.</code><code class="descname">find_foucs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#math_model.find_foucs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the position of the focus</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#math_model.fx" title="math_model.fx"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fx</span></code></a>, <a class="reference internal" href="#math_model.fy" title="math_model.fy"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fy</span></code></a>, <a class="reference internal" href="#math_model.fz" title="math_model.fz"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fz</span></code></a></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -397,7 +680,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.3',
+            VERSION:'0.0.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

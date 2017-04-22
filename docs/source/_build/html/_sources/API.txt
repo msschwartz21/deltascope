@@ -30,6 +30,10 @@ API
 
 		Dictionary containing the coefficients for the parabolic model of the data
 
+	.. py:attribute:: brain.subset
+
+		Random sample of the dataframe from :py:attr:`brain.df_thresh`
+
 .. py:method:: brain.read_data(filepath)
 
 	Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal
@@ -60,14 +64,84 @@ API
 	:return: :py:attr:`brain.model`
 	:rtype: dictionary containing the coefficients for the parabolic model of the data
 
+.. py:method:: brain.find_distance(t,point)
+
+	Find euclidean distance between a point on the line defined by t and a data point
+
+	:param float t: float value defining point on the line
+	:param array point: array [x,y,z] defining data point
+	:returns: distance between the two points
+	:rtype: float
+
+.. py:method:: brain.find_min_distance(row)
+
+	Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(:py:func:`brain.find_distance`)
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: point in the curve (xc, yc, zc) and r
+	:rtype: floats
+
+.. py:method:: brain.find_alpha(xc,yc,zc)
+
+	Find alpha which is the angle that specifies the position of the point along the curve
+
+	:param float xc: x position of closest point on curve to datapoint
+	:param float yc: y position of closest point on curve to datapoint
+	:param float zc: zposition of closest point on curve to datapoint
+	:returns: alpha, angle along the curve
+	:rtype: float
+
+.. py:method:: brain.dist_to_plane(xz,row)
+
+	Find shortest distance between point and the plane
+
+	:param list xz: List of form [x position, y position]
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: Distance between the specified point and the plane
+	:rtype: float
+
+.. py:method:: brain.find_theta(row,yc,zc)
+
+	Calculate theta for a row containing data point in relationship to the flat plane
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:param float r: Shortest distance between the point and the math model
+	:returns: theta, angle between point and the flat plane
+	:rtype: float
+
+.. py:method:: brain.calc_coord(row)
+
+	Calculate alpah, r, theta for a particular row
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and alpha
+	:rtype: pd.Series 
+
+.. py:method:: transform_coordinates()
+
+	Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to df_thresh
+
+	:returns: appends columns r, xc, yc, zc, alpha, theta to :py:attr:`brain.df_thresh`
+
+.. py:method:: brain.subset_data(sample_frac)
+
+	Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac
+
+	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
+	:type: float or none
+	:returns: :py:attr:`brain.subset`
+
 .. py:method:: brain.plot_model(sample_frac=0.5,cmap='plt.cm.Greys')
 
 	Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac
 
+	The returned plotly figure object can be most easily visualized using `plotly.offline.iplot(fig,filename='example')
+
 	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
-	:param type: float or none
-	:param cmap: Colormap to use for plotting planes
-	:param type: matplotlib colormap in form plt.cm.name or none
+	:type: float or none
+	:returns: Plotly figure object
+
+
 
 
 
@@ -102,13 +176,28 @@ API
 	Class to contain attribues and data associated with math model
 
 	:param dict coef: Dictionary containing coefficients to define equation of math model
+	:param dict p: Dictionary containing calculated coefficients for y and z parabola
 	:param array x: Array containing x coordinates
 	:param array y: Array containing y coordinates
 	:param array z: Array containing z coordinates
 
 	.. py:attribute:: math_model.coef
 
-		Dictionary containing coefficients of each term of math model
+		Dictionary containing coefficients of each term of math model such that:
+
+		.. math::
+
+			y = ex + fz + g
+			z = ax^2 + bx + cy + d
+
+	.. py:attribute:: math_model.p
+
+		Dictionary containing coefficients of terms in math model such that:
+
+		.. math::
+
+			y = ay*x^2 + by*x + cy
+			z = az*x^2 + bz*x + cz
 
 	.. py:attribute:: math_model.x 
 
@@ -121,3 +210,56 @@ API
 	.. py:attribute:: math_model.z
 
 		Array containing z coordinates of model
+
+	.. py:attribute:: math_model.vx
+
+		x position of the vertex
+
+	.. py:attribute:: math_model.vy
+
+		y position of the vertex
+
+	.. py:attribute:: math_model.vz
+
+		z position of the vertex
+
+	.. py:attribute:: math_model.fx
+
+		x position of the focus
+
+	.. py:attribute:: math_model.fy
+
+		y position of the focus
+
+	.. py:attribute:: math_model.fz
+
+		z position of the focus
+
+.. py:method:: math_model.calc_y(t)
+
+	Calculate y value according to a given t
+
+	:param float t: t value along the curve
+	:returns: y value corresponding to t
+	:rtype: float
+
+.. py:method:: math_model.calc_z(t)
+
+	Calculate z value according to a gien t
+
+	:param float t: t value along the curve
+	:returns: z value corresponding to t
+	:rtype: float
+
+.. py:method:: math_model.find_vertex()
+
+	Calculates the position of the vertex
+
+	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
+
+.. py:method:: math_model.find_foucs()
+
+	Calculates the position of the focus
+
+	:returns: :py:attr:`math_model.fx`, :py:attr:`math_model.fy`, :py:attr:`math_model.fz`
+
