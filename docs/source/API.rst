@@ -78,14 +78,50 @@ API
 	Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(:py:func:`brain.find_distance`)
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:returns: series containing xc, yc, zc, r
-	:rtype: pd.Series
+	:returns: point in the curve (xc, yc, zc) and r
+	:rtype: floats
+
+.. py:method:: brain.find_alpha(xc,yc,zc)
+
+	Find alpha which is the angle that specifies the position of the point along the curve
+
+	:param float xc: x position of closest point on curve to datapoint
+	:param float yc: y position of closest point on curve to datapoint
+	:param float zc: zposition of closest point on curve to datapoint
+	:returns: alpha, angle along the curve
+	:rtype: float
+
+.. py:method:: brain.dist_to_plane(xz,row)
+
+	Find shortest distance between point and the plane
+
+	:param list xz: List of form [x position, y position]
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: Distance between the specified point and the plane
+	:rtype: float
+
+.. py:method:: brain.find_theta(row,yc,zc)
+
+	Calculate theta for a row containing data point in relationship to the flat plane
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:param float r: Shortest distance between the point and the math model
+	:returns: theta, angle between point and the flat plane
+	:rtype: float
+
+.. py:method:: brain.calc_coord(row)
+
+	Calculate alpah, r, theta for a particular row
+
+	:param pd.Series row: row from dataframe in the form of a pandas Series
+	:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and alpha
+	:rtype: pd.Series 
 
 .. py:method:: transform_coordinates()
 
 	Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to df_thresh
 
-	:returns: appends columns r, xc, yc, zc to :py:attr:`brain.df_thresh`
+	:returns: appends columns r, xc, yc, zc, alpha, theta to :py:attr:`brain.df_thresh`
 
 .. py:method:: brain.subset_data(sample_frac)
 

@@ -131,7 +131,9 @@ class brain:
 		t = np.arange(0,1000)
 		x_line = t
 		y_line = model['a_prime']*(t**2) + model['b_prime']*t + model['c_prime']
-		z_line = (model['a'] + model['c']*model['a_prime'])*(t**2) + (model['b'] + model['c']*model['b_prime'])*t + model['c']*model['c_prime'] + model['d']
+		z_line = ((model['a'] + model['c']*model['a_prime'])*(t**2) + 
+					(model['b'] + model['c']*model['b_prime'])*t + 
+					model['c']*model['c_prime'] + model['d'])
 
 		self.mm = math_model(model,p,x_line,y_line,z_line)
 
@@ -159,16 +161,58 @@ class brain:
 		z = self.mm.calc_z(x)
 		r = result['fun']
 
-		return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
+		return(x,y,z,r)
+		#return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
+
+	def find_alpha(self,xc,yc,zc):
+		'''Calculate alpha for a row containing point data'''
+
+		#Calculate distances between vertex, focus, and point on the curve
+		vf = np.linalg.norm(np.array([self.mm.vx,self.mm.vy,self.mm.vz]) - 
+			np.array([self.mm.fx,self.mm.fy,self.mm.fz]))
+		fp = np.linalg.norm(np.array([self.mm.fx,self.mm.fy,self.mm.fz]) - 
+			np.array([xc,yc,zc]))
+		pv = np.linalg.norm(np.array([xc,yc,zc]) - 
+			np.array([self.mm.vx,self.mm.vy,self.mm.vz]))
+
+		alpha = np.arccos((vf**2 + fp**2 - pv**2)/(2*vf*fp))
+
+		return(alpha)
+
+	def dist_to_plane(self,xz,row):
+		'''Find shortest distance between point and the plane'''
+
+		#Find y value based on a given x and z
+		y = self.mm.coef['f']*xz[1] + self.mm.coef['e']*xz[0] + self.mm.coef['g']
+
+		dist = np.linalg.norm(np.array([xz[0],y,xz[1]]) - 
+			np.array([row.x,row.y,row.z]))
+		return(dist)
+
+	def find_theta(self,row,r):
+		'''Find theta value for a row describing angle between point and plane'''
+
+		result = minimize(self.dist_to_plane,[row.x,row.z],args=(row))
+
+		theta = np.arccos(result['fun']/r)
+		return(theta)
+
+	def calc_coord(self,row):
+		'''Calculate alpah, r, theta for a particular row'''
+
+		xc,yc,zc,r = self.find_min_distance(row)
+		alpha = self.find_alpha(xc,yc,zc)
+		theta = self.find_theta(row,r)
+
+		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
+					'r':r, 'alpha':alpha, 'theta':theta}))
 
 	def transform_coordinates(self):
 		'''Transform coordinate system so that each point is defined relative to 
 		math model by (alpha,theta,r) (only applied to df_thresh'''
 
-		#Find r and closest point to data point on curve (xc,yc,zc)
-		self.df_thresh = self.df_thresh.join(self.df_thresh.apply((lambda row: self.find_min_distance(row)), axis=1))
-
-
+		#Calculate alpha, theta, r for each row in dataset
+		self.df_thresh = self.df_thresh.join(self.df_thresh.apply((lambda row: self.calc_coord(row)), axis=1))
 
 	def subset_data(self,sample_frac=0.5):
 		'''Subset data based on proportion set in sample_frac'''
