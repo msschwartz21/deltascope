@@ -14,7 +14,7 @@ import pandas as pd
 import plotly.plotly as py
 import plotly.graph_objs as go
 from scipy.optimize import minimize
-import scipy
+
 
 class brain:
 
@@ -177,26 +177,7 @@ class brain:
 
 		alpha = np.arccos((vf**2 + fp**2 - pv**2)/(2*vf*fp))
 
-		#Set alpha sign based on position along x axis in relationship to vertex
-		if xc >= self.mm.vx:
-			return(alpha)
-		elif xc < self.mm.vx:
-			return(-alpha)
-
-	def integrand(self,x):
-		'''Function to integrate to calculate arclength'''
-
-		y_prime = self.mm.p['ay']*2*x + self.mm.p['by']
-		z_prime = self.mm.p['az']*2*x + self.mm.p['bz']
-
-		arclength = np.sqrt(y_prime**2 + z_prime**2)
-		return(arclength)
-
-	def find_length(self,xc):
-		'''Calculate arclength for a row'''
-
-		ac,err = scipy.integrate.quad(self.integrand,xc,self.mm.vx)
-		return(ac)
+		return(alpha)
 
 	def dist_to_plane(self,xz,row):
 		'''Find shortest distance between point and the plane'''
@@ -220,14 +201,11 @@ class brain:
 		'''Calculate alpah, r, theta for a particular row'''
 
 		xc,yc,zc,r = self.find_min_distance(row)
-		print('Found distance')
-		ac = self.find_length(xc)
-		print('Found length')
+		alpha = self.find_alpha(xc,yc,zc)
 		theta = self.find_theta(row,r)
-		print('Found theta')
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
-					'r':r, 'ac':ac, 'theta':theta}))
+					'r':r, 'alpha':alpha, 'theta':theta}))
 
 	def transform_coordinates(self):
 		'''Transform coordinate system so that each point is defined relative to 

@@ -5,7 +5,7 @@ def readme():
 		return f.read()
 
 setup(name='cranium',
-	version='0.0.4',
+	version='0.0.5',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',

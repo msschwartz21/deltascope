@@ -91,6 +91,20 @@ API
 	:returns: alpha, angle along the curve
 	:rtype: float
 
+.. py:method:: brain.integrand(x)
+
+	Function to integrate to calculate arclength
+
+	:param float x: integer value for x
+	:returns: arclength value for integrating
+	:rtype: float
+
+.. py:method:: brain.find_length(xc)
+
+	:param float row: Postion in the x axis along the curve
+	:returns: Length of the arc along the curve between the row and the vertex
+	:rtype: float
+
 .. py:method:: brain.dist_to_plane(xz,row)
 
 	Find shortest distance between point and the plane
@@ -114,14 +128,14 @@ API
 	Calculate alpah, r, theta for a particular row
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and alpha
+	:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and ac (arclength)
 	:rtype: pd.Series 
 
 .. py:method:: transform_coordinates()
 
 	Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to df_thresh
 
-	:returns: appends columns r, xc, yc, zc, alpha, theta to :py:attr:`brain.df_thresh`
+	:returns: appends columns r, xc, yc, zc, ac, theta to :py:attr:`brain.df_thresh`
 
 .. py:method:: brain.subset_data(sample_frac)
 
@@ -140,8 +154,6 @@ API
 	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
 	:type: float or none
 	:returns: Plotly figure object
-
-
 
 
 

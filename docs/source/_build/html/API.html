@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; craniumPy 0.0.4 documentation</title>
+  <title>API &mdash; craniumPy 0.0.5 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="craniumPy 0.0.4 documentation" href="index.html"/>
+    <link rel="top" title="craniumPy 0.0.5 documentation" href="index.html"/>
         <link rel="prev" title="Introduction" href="introduction.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.0.4
+                0.0.5
               </div>
             
           
@@ -322,6 +322,41 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="brain.integrand">
+<code class="descclassname">brain.</code><code class="descname">integrand</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.integrand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to integrate to calculate arclength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; integer value for x</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">arclength value for integrating</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.find_length">
+<code class="descclassname">brain.</code><code class="descname">find_length</code><span class="sig-paren">(</span><em>xc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_length" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Postion in the x axis along the curve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Length of the arc along the curve between the row and the vertex</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="brain.dist_to_plane">
 <code class="descclassname">brain.</code><code class="descname">dist_to_plane</code><span class="sig-paren">(</span><em>xz</em>, <em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.dist_to_plane" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find shortest distance between point and the plane</p>
@@ -379,7 +414,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Series populated with coordinate of closest point on the math model, r, theta, and alpha</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Series populated with coordinate of closest point on the math model, r, theta, and ac (arclength)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pd.Series</td>
 </tr>
@@ -395,7 +430,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">appends columns r, xc, yc, zc, alpha, theta to <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">appends columns r, xc, yc, zc, ac, theta to <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -680,7 +715,7 @@ z = az*x^2 + bz*x + cz"/></p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.4',
+            VERSION:'0.0.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
