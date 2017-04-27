@@ -1,6 +1,9 @@
 # Compiled python modules
 *.pyc
 
+#Distributions
+*.gz
+
 # Python egg metadata, regenerated from source files
 /*.egg-info
 /*.egg
