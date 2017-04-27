@@ -269,9 +269,16 @@ API
 
 	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
 
-.. py:method:: math_model.find_foucs()
+.. py:method:: math_model.find_focus()
 
 	Calculates the position of the focus
 
 	:returns: :py:attr:`math_model.fx`, :py:attr:`math_model.fy`, :py:attr:`math_model.fz`
 
+
+.. py:function:: process_sample(filepath)
+
+	Process single sample through :py:class:`brain` class and saves df to csv
+
+	:param str filepath: Complete filepath to h5 data file
+	:returns: Saves dataframe to csv with name of the original data file 

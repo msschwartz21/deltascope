@@ -11,8 +11,8 @@ from functools import partial
 import statsmodels.formula.api as smf
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
-import plotly.plotly as py
-import plotly.graph_objs as go
+#import plotly.plotly as py
+#import plotly.graph_objs as go
 from scipy.optimize import minimize
 import scipy
 
@@ -212,19 +212,21 @@ class brain:
 		'''Find theta value for a row describing angle between point and plane'''
 
 		result = minimize(self.dist_to_plane,[row.x,row.z],args=(row))
+		planey = self.mm.coef['f']*result['x'][1] + self.mm.coef['e']*result['x'][0] + self.mm.coef['g']
 
 		theta = np.arccos(result['fun']/r)
-		return(theta)
+		#Correct sign of theta based on whether the point is above or below the plane
+		if planey <= row.y:
+			return(theta)
+		elif planey > row.y:
+			return(-theta)
 
 	def calc_coord(self,row):
 		'''Calculate alpah, r, theta for a particular row'''
 
 		xc,yc,zc,r = self.find_min_distance(row)
-		print('Found distance')
 		ac = self.find_length(xc)
-		print('Found length')
 		theta = self.find_theta(row,r)
-		print('Found theta')
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
@@ -296,9 +298,9 @@ class brain:
 			margin = dict(l=0,r=0,b=0,t=0)
 			)
 
-		fig = go.Figure(data=data,layout=layout)
+		#fig = go.Figure(data=data,layout=layout)
 
-		return(fig)
+		#return(fig)
 
 
 class plane:
@@ -354,3 +356,23 @@ class math_model:
 		self.fx = self.vx
 		self.fy = self.vy + dy
 		self.fz = self.vz + dz
+
+def process_sample(filepath):
+	'''Process single sample through brain class and 
+	save df to csv'''
+
+	tic = time.time()
+
+	path = '\\'.join(filepath.split('\\')[:-1])
+	name = filepath.split('\\')[-1].split('.')[0]
+
+	print('Starting',name)
+
+	s = brain(filepath)
+	s.create_dataframe()
+	s.fit_model(0.9)
+	s.transform_coordinates()
+	s.df_thresh.to_csv(os.path.join(path,name+'.csv'))
+
+	toc = time.time()
+	print(name,'complete',toc-tic)
