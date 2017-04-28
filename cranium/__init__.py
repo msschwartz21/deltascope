@@ -208,25 +208,35 @@ class brain:
 			np.array([row.x,row.y,row.z]))
 		return(dist)
 
-	def find_theta(self,row,r):
+	def find_theta(self,row,r,zc):
 		'''Find theta value for a row describing angle between point and plane'''
 
+		#Find the point which minimizes the distance between the point and the plane
 		result = minimize(self.dist_to_plane,[row.x,row.z],args=(row))
 		planey = self.mm.coef['f']*result['x'][1] + self.mm.coef['e']*result['x'][0] + self.mm.coef['g']
 
-		theta = np.arccos(result['fun']/r)
-		#Correct sign of theta based on whether the point is above or below the plane
-		if planey <= row.y:
-			return(theta)
-		elif planey > row.y:
-			return(-theta)
+		#Set height based on whether its above or below the plane
+		ud = self.mm.coef['g']*row.x + self.mm.coef['f']*row.z - row.y + self.mm.coef['g']
+		if ud >= 0: 
+			h = result['fun']
+		elif ud < 0:
+			h = -result['fun']
+
+		#Set sign of r based on whether its left or right of y axis
+		if row.z >= zc:
+			r = r
+		elif row.z < zc:
+			r = -r
+
+		theta = np.arccos(h/r)
+		return(theta)
 
 	def calc_coord(self,row):
 		'''Calculate alpah, r, theta for a particular row'''
 
 		xc,yc,zc,r = self.find_min_distance(row)
 		ac = self.find_length(xc)
-		theta = self.find_theta(row,r)
+		theta = self.find_theta(row,r,zc)
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))

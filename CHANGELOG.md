@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Changed
+- Correcting theta calculation so that the sign is corrected to calculate angles in all four quadrants
 
 ## [O.0.5] - 2017-04-23
 ### Changed

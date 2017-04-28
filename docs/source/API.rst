@@ -114,12 +114,13 @@ API
 	:returns: Distance between the specified point and the plane
 	:rtype: float
 
-.. py:method:: brain.find_theta(row,yc,zc)
+.. py:method:: brain.find_theta(row,r,zc)
 
 	Calculate theta for a row containing data point in relationship to the flat plane
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
 	:param float r: Shortest distance between the point and the math model
+	:param float zc: Z position of the closest point in the curve to the data point
 	:returns: theta, angle between point and the flat plane
 	:rtype: float
 
