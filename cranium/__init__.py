@@ -18,10 +18,8 @@ import scipy
 
 class brain:
 
-	def __init__(self,filepath):
-		'''Read raw data'''
-
-		self.raw_data = self.read_data(filepath)
+	def __init__(self):
+		'''Initialize brain object'''
 
 	def read_data(self,filepath):
 		'''Reads 3D data from file and selects appropriate channel'''
@@ -33,9 +31,9 @@ class brain:
 
 		#Figure out which channels has more zeros and therefore is background
 		if np.count_nonzero(c1<0.1) > np.count_nonzero(c1>0.9):
-			return(c1)
+			self.raw_data = c1
 		else:
-			return(c2)
+			self.raw_data = c2
 
 	def show_plane(self,dimension,plane):
 		'''Shows specified plane'''
@@ -215,21 +213,20 @@ class brain:
 		result = minimize(self.dist_to_plane,[row.x,row.z],args=(row))
 		planey = self.mm.coef['f']*result['x'][1] + self.mm.coef['e']*result['x'][0] + self.mm.coef['g']
 
-		#Set height based on whether its above or below the plane
-		ud = self.mm.coef['g']*row.x + self.mm.coef['f']*row.z - row.y + self.mm.coef['g']
-		if ud >= 0: 
-			h = result['fun']
-		elif ud < 0:
-			h = -result['fun']
-
 		#Set sign of r based on whether its left or right of y axis
 		if row.z >= zc:
 			r = r
 		elif row.z < zc:
 			r = -r
 
-		theta = np.arccos(h/r)
-		return(theta)
+		theta = np.arccos(result['fun']/r)
+
+		#Change sign of theta based on whether its above or below the plane
+		ud = self.mm.coef['e']*row.x + self.mm.coef['f']*row.z - row.y + self.mm.coef['g']
+		if ud >= 0: 
+			return(theta)
+		elif ud < 0:
+			return(-theta)
 
 	def calc_coord(self,row):
 		'''Calculate alpah, r, theta for a particular row'''
@@ -252,6 +249,11 @@ class brain:
 		'''Subset data based on proportion set in sample_frac'''
 
 		self.subset = self.df_thresh.sample(frac=sample_frac)
+
+	def add_thresh_df(self,df):
+		'''Add dataframe of thresholded and transformed data to self.df_thresh'''
+
+		self.df_thresh = df
 
 	def plot_model(self,sample_frac=0.5):
 		'''Plot two planes, line model, and percentage of points
@@ -378,7 +380,8 @@ def process_sample(filepath):
 
 	print('Starting',name)
 
-	s = brain(filepath)
+	s = brain()
+	s.read_data(filepath)
 	s.create_dataframe()
 	s.fit_model(0.9)
 	s.transform_coordinates()

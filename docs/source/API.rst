@@ -4,11 +4,7 @@ API
 
 .. class:: brain(filepath)
 
-	Object to manage biological data and associated functions. Initialization of this object automatically reads the hdf5 file and selects the appropriate channel from the Probability file and saves as global :py:attr:`brain.raw_data` attribute.
-
-	:param str filepath: Filepath to hdf5 probability file
-	:return: :py:attr:`brain.raw_data`
-	:rtype: 3D array
+	Object to manage biological data and associated functions. 
 
 	.. py:attribute:: brain.raw_data
 
@@ -145,6 +141,13 @@ API
 	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
 	:type: float or none
 	:returns: :py:attr:`brain.subset`
+
+.. py:method:: brain.add_thresh_df(df)
+
+	Adds dataframe of thresholded and transformed data to :py:attr:`brain.df_thresh`
+
+	:param pd.DataFrame df: dataframe of thesholded and transformed data
+	:returns: :py:attr:`brain.df_thresh`
 
 .. py:method:: brain.plot_model(sample_frac=0.5,cmap='plt.cm.Greys')
 
