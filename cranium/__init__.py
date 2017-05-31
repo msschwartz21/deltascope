@@ -35,22 +35,6 @@ class brain:
 		else:
 			self.raw_data = c2
 
-	def show_plane(self,dimension,plane):
-		'''Shows specified plane'''
-
-		if dimension=='x':
-			data = self.raw_data[:,:,plane]
-		elif dimension=='y':
-			data = self.raw_data[:,plane,:]
-		elif dimension=='z':
-			data = self.raw_data[plane,:,:]
-		else:
-			print('Invalid dimension specified, try "x","y","z"')
-
-		fig,ax = plt.subplots()
-		cax = ax.imshow(data,cmap='plasma')
-		fig.colorbar(cax)
-
 	def create_dataframe(self):
 		'''Creates a pandas dataframe containing the x,y,z and signal/probability value 
 		for each point in the :py:attr:`brain.raw_data` array'''
@@ -76,64 +60,7 @@ class brain:
 		#Create dataframe of points
 		self.df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
 
-	def fit_model(self,threshold):
-		'''Calculates the mathematical model of the data'''
-
-		self.threshold = threshold
-		self.df_thresh = self.df[self.df.value > self.threshold]
-
-		#Create xyz arrays for range of data
-		x = np.linspace(self.df_thresh.x.min(),self.df_thresh.x.max())
-		y = np.linspace(self.df_thresh.y.min(),self.df_thresh.y.max())
-		z = np.linspace(self.df_thresh.z.min(),self.df_thresh.z.max())
-
-		#Identify flat plane
-		flat_model = smf.ols(formula='y ~ x + z',data=self.df_thresh).fit()
-		xx,zz = np.meshgrid(x,z)
-		Y = flat_model.params[0] + flat_model.params[1]*xx + flat_model.params[2]*zz
-		self.f_plane = plane(flat_model,xx,Y,zz)
-
-		#Identify parabolic plane
-		para_model = smf.ols(formula='z ~ y + x + I(x**2)',data=self.df_thresh).fit()
-		xx,yy = np.meshgrid(x,y)
-		Z = para_model.params[0] + para_model.params[1]*yy + para_model.params[2]*xx + para_model.params[3]*(xx**2)
-		self.p_plane = plane(para_model,xx,yy,Z)
-
-		#Find intersection
-		# y = ex + fz + g
-		# z = ax**2 + bx + cy + d
-		model = {
-		'a' : para_model.params[3],
-		'b' : para_model.params[2],
-		'c' : para_model.params[1],
-		'd' : para_model.params[0],
-		'e' : flat_model.params[1],
-		'f' : flat_model.params[2],
-		'g' : flat_model.params[0]
-		}
-
-		model['a_prime'] = (model['a']*model['f']) / (1 - model['c']*model['f'])
-		model['b_prime'] = (model['e'] + model['b']*model['f']) / (1 - model['c']*model['f'])
-		model['c_prime'] = (model['g'] + model['d']*model['f']) / (1 - model['c']*model['f'])
-
-		p = {
-		'ay' : model['a_prime'],
-		'by' : model['b_prime'],
-		'cy' : model['c_prime'],
-		'az' : model['a'] + model['c']*model['a_prime'],
-		'bz' : model['b'] + model['c']*model['b_prime'],
-		'cz' : model['d'] + model['c']*model['c_prime']
-		}
-
-		#Parametric equation in terms of t
-		t = np.arange(0,1000)
-		x_line = t
-		y_line = model['a_prime']*(t**2) + model['b_prime']*t + model['c_prime']
-		z_line = ((model['a'] + model['c']*model['a_prime'])*(t**2) + 
-					(model['b'] + model['c']*model['b_prime'])*t + 
-					model['c']*model['c_prime'] + model['d'])
-
-		self.mm = math_model(model,p,x_line,y_line,z_line)
+	###### Functions associated with alpha, r, theta coordinate system ######
 
 	def find_distance(self,t,point):
 		'''Find euclidean distance between point on line defined by t and data point'''
@@ -254,77 +181,6 @@ class brain:
 		'''Add dataframe of thresholded and transformed data to self.df_thresh'''
 
 		self.df_thresh = df
-
-	def plot_model(self,sample_frac=0.5):
-		'''Plot two planes, line model, and percentage of points
-		Returns plotly fig object to be displayed according to user preference'''
-
-		subset = self.df_thresh.sample(frac=sample_frac)
-
-		points = dict(
-			x = subset.x,
-			y = subset.y,
-			z = subset.z,
-			type = 'scatter3d',
-			mode = 'markers',
-			marker = dict(
-				size=3,
-				color='black',
-				opacity=0.01
-				)
-			)
-
-		line = dict(
-			x = self.mm.x[:600],
-			y = self.mm.y[:600],
-			z = self.mm.z[:600],
-			type = 'scatter3d',
-			mode = 'lines',
-			line = dict(
-				width = 3,
-				color = 'green'
-				)
-			)
-
-		flat = dict(
-			x = self.f_plane.xx,
-			y = self.f_plane.yy,
-			z = self.f_plane.zz,
-			type = 'surface',
-			opacity = 0.6,
-			showscale = False
-			)
-
-		para = dict(
-			x = self.p_plane.xx,
-			y = self.p_plane.yy,
-			z = self.p_plane.zz,
-			type = 'surface',
-			opacity = 0.6,
-			showscale = False
-			)
-
-		data = [points,line,flat,para]
-
-		layout = dict(
-			margin = dict(l=0,r=0,b=0,t=0)
-			)
-
-		#fig = go.Figure(data=data,layout=layout)
-
-		#return(fig)
-
-
-class plane:
-	'''Class to contain attributes and data associated with a plane'''
-
-	def __init__(self,model,xx,yy,zz):
-		'''Save global variables'''
-
-		self.model = model
-		self.xx = xx
-		self.yy = yy
-		self.zz = zz
 
 class math_model:
 	'''Class to contain attribues and data associated with math model'''
