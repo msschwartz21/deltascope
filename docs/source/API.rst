@@ -44,6 +44,13 @@ API
 	:return: :py:attr:`brain.df`
 	:rtype: Dataframe with four columns: x,y,z,value
 
+.. py:method:: brain.plot_projections(df)
+
+	Plots the x, y, and z projections of the input dataframe in a matplotlib plot
+
+	:param pd.DataFrame df: Dataframe with columns: 'x','y','z'
+	:returns: Matplotlib figure with three labeled scatterplots
+
 .. py:method:: brain.find_distance(t,point)
 
 	Find euclidean distance between a point on the line defined by t and a data point
@@ -134,97 +141,19 @@ API
 	:returns: :py:attr:`brain.df_thresh`
 
 
-.. py:class:: math_model(coef)
+.. py:class:: math_model(model)
 
-	Class to contain attribues and data associated with math model
+	Object to contain attributes associated with the math model of a sample
 
-	:param dict coef: Dictionary containing coefficients to define equation of math model
-	:param dict p: Dictionary containing calculated coefficients for y and z parabola
-	:param array x: Array containing x coordinates
-	:param array y: Array containing y coordinates
-	:param array z: Array containing z coordinates
+	:param array model: Array of coefficients calculated by np.polyfit
 
-	.. py:attribute:: math_model.coef
+	.. py:attribute:: math_model.cf
 
-		Dictionary containing coefficients of each term of math model such that:
-
-		.. math::
-
-			y = ex + fz + g
-			z = ax^2 + bx + cy + d
+		Array of coefficients for the math model
 
 	.. py:attribute:: math_model.p
 
-		Dictionary containing coefficients of terms in math model such that:
-
-		.. math::
-
-			y = ay*x^2 + by*x + cy
-			z = az*x^2 + bz*x + cz
-
-	.. py:attribute:: math_model.x 
-
-		Array containing x coordinates of model
-
-	.. py:attribute:: math_model.y
-
-		Array containing y coordinates of model
-
-	.. py:attribute:: math_model.z
-
-		Array containing z coordinates of model
-
-	.. py:attribute:: math_model.vx
-
-		x position of the vertex
-
-	.. py:attribute:: math_model.vy
-
-		y position of the vertex
-
-	.. py:attribute:: math_model.vz
-
-		z position of the vertex
-
-	.. py:attribute:: math_model.fx
-
-		x position of the focus
-
-	.. py:attribute:: math_model.fy
-
-		y position of the focus
-
-	.. py:attribute:: math_model.fz
-
-		z position of the focus
-
-.. py:method:: math_model.calc_y(t)
-
-	Calculate y value according to a given t
-
-	:param float t: t value along the curve
-	:returns: y value corresponding to t
-	:rtype: float
-
-.. py:method:: math_model.calc_z(t)
-
-	Calculate z value according to a gien t
-
-	:param float t: t value along the curve
-	:returns: z value corresponding to t
-	:rtype: float
-
-.. py:method:: math_model.find_vertex()
-
-	Calculates the position of the vertex
-
-	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
-
-.. py:method:: math_model.find_focus()
-
-	Calculates the position of the focus
-
-	:returns: :py:attr:`math_model.fx`, :py:attr:`math_model.fy`, :py:attr:`math_model.fz`
+		Poly1d function for the math model to allow calculation and plotting of the model
 
 
 .. py:function:: process_sample(filepath)

@@ -15,6 +15,8 @@ import pandas as pd
 #import plotly.graph_objs as go
 from scipy.optimize import minimize
 import scipy
+from sklearn.preprocessing import scale
+from sklearn.decomposition import PCA
 
 class brain:
 
@@ -60,30 +62,102 @@ class brain:
 		#Create dataframe of points
 		self.df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
 
+	def plot_projections(self,df):
+		'''Plots x, y, and z projections from the dataframe'''
+    
+    	#Create figure and subplots
+		fig = plt.figure(figsize=(12,6))
+		ax = fig.add_subplot(131)
+		ay = fig.add_subplot(132)
+		az = fig.add_subplot(133)
+
+		#Create scatter plot for each projection
+		ax.scatter(df['x'],df['z'])
+		ay.scatter(df['x'],df['y'])
+		az.scatter(df['z'],df['y'])
+
+		#Add labels
+		ax.set_title('Y projection')
+		ay.set_title('Z projection')
+		az.set_title('X projection')
+		ax.set_xlabel('X')
+		ax.set_ylabel('Z')
+		ay.set_xlabel('X')
+		ay.set_ylabel('Y')
+		az.set_xlabel('Z')
+		az.set_ylabel('Y')
+
+		#Adjust spacing and show plot
+		plt.subplots_adjust(wspace=0.4)
+		plt.show()
+
+	def align_sample(self,threshold,scale,deg):
+		'''Realigns sample axes using PCA and translates so that the vertex is at the origin'''
+
+		#Create new dataframe with values above threshold
+		self.threshold = threshold
+		self.df_thresh = self.df[self.df.value > self.threshold]
+
+		#Scale xyz by value in scale array to force PCA axis selection
+		self.df_scl = pd.DataFrame({
+			'x':self.df_thresh.x * scale[0], 
+			'y':self.df_thresh.y * scale[1],
+			'z':self.df_thresh.z * scale[2]})
+
+		#Fit pca to data and transform data points
+		pca = PCA(n_components=3)
+		pca_fit = pca.fit_transform(self.df_scl[['x','y','z']])
+
+		#Create pca dataframe and remove scaling
+		df_unscl = pd.DataFrame({
+			'x':pca_fit[:,0]/scale[0],
+			'y':pca_fit[:,1]/scale[1],
+			'z':pca_fit[:,2]/scale[2]
+			})
+
+		#Find first model
+		model = np.polyfit(df_unscl['x'],df_unscl['y'],deg=deg)
+		p = np.poly1d(model)
+
+		#Find vertex
+		vx = -model[1]/(2*model[0])
+		vy = p(vx)
+		vz = df_unscl.z.mean()
+
+		#Translate data so that the vertex is at the origin
+		self.df_align = pd.DataFrame({
+			'x': df_unscl.x - vx,
+			'y': df_unscl.y - vy,
+			'z': df_unscl.z - vz
+			})
+
+		#Calculate final model based on translated and aligned data
+		self.model = math_model(np.polyfit(self.df_align.x, self.df_align.y,deg=deg))
+
 	###### Functions associated with alpha, r, theta coordinate system ######
 
 	def find_distance(self,t,point):
-		'''Find euclidean distance between point on line defined by t and data point'''
+		'''Find euclidean distance between math model(t) and data point in the xy plane'''
 
 		x = float(t)
-		y = self.mm.calc_y(x)
-		z = self.mm.calc_z(x)
+		y = self.mm.p(x)
 
-		dist = np.linalg.norm(point - np.array([x,y,z]))
+		#Calculate distance between two points passed as array
+		dist = np.linalg.norm(point - np.array([x,y]))
 
 		return(dist)
 
 	def find_min_distance(self,row):
 		'''Find the point on the curve that produces the minimum distance between the point and the data point'''
 
-		dpoint = np.array([row.x,row.y,row.z])
+		dpoint = np.array([row.x,row.y])
 
 		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance
-		result = minimize(self.find_distance, dpoint[0],args=(dpoint))
+		result = minimize(self.find_distance, dpoint[0], args=(dpoint))
 
 		x = result['x'][0]
-		y = self.mm.calc_y(x)
-		z = self.mm.calc_z(x)
+		y = self.mm.pp(x)
+		z = 0
 		r = result['fun']
 
 		return(x,y,z,r)
@@ -183,47 +257,12 @@ class brain:
 		self.df_thresh = df
 
 class math_model:
-	'''Class to contain attribues and data associated with math model'''
+	'''Class to contain attributes and data associated with math model'''
 
-	def __init__(self,coef,p,x,y,z):
+	def __init__(self,model):
 
-		self.coef = coef
-		self.p = p
-		self.x = x
-		self.y = y
-		self.z = z
-
-		self.find_vertex()
-		self.find_focus()
-
-	def calc_y(self,t):
-		'''Calculate y value according to a given t'''
-
-		y = self.p['ay']*(t**2) + self.p['by']*t + self.p['cy']
-		return(y)
-
-	def calc_z(self,t):
-		'''Calculate z value according to a given t'''
-
-		z = self.p['az']*(t**2) + self.p['bz']*t + self.p['cz']
-		return(z)
-
-	def find_vertex(self):
-		'''Calculate position of vertex'''
-
-		self.vx = -self.coef['b']/(2*self.coef['a'])
-		self.vy = self.calc_y(self.vx)
-		self.vz = self.calc_z(self.vx)
-
-	def find_focus(self):
-		'''Calculate position of focus'''
-
-		dy = np.sqrt(1/(16*self.coef['a']*((1/self.coef['f'])**2 + 1)))
-		dz = (1/self.coef['f'])*dy
-
-		self.fx = self.vx
-		self.fy = self.vy + dy
-		self.fz = self.vz + dz
+		self.cf = model
+		self.p = np.poly1d(model)
 
 def process_sample(filepath):
 	'''Process single sample through brain class and 
