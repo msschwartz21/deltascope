@@ -37,28 +37,12 @@ API
 	:param str filepath: Filepath to hdf5 probability file
 	:return: Array of shape [z,y,x] containing raw probability data
 
-.. py:method:: brain.show_plane(dimension,plane)
-
-	Displaces single specified plane in a matplotlib figure
-
-	:param str dimension: string specifying dimension of plane, e.g. x,y,z
-	:param int plane: Integer specifying position of plane
-	:return: Matplotlib figure
-
 .. py:method:: brain.create_dataframe()
 
 	Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array
 
 	:return: :py:attr:`brain.df`
 	:rtype: Dataframe with four columns: x,y,z,value
-
-.. py:method:: brain.fit_model(threshold)
-
-	Calculates the mathematical model of the data by identifying the flat plane and parabolic plane that can fit the data before calculating their intersect
-
-	:param float threshold: float value between 0 and 1, used to select lower bound of values
-	:return: :py:attr:`brain.model`
-	:rtype: dictionary containing the coefficients for the parabolic model of the data
 
 .. py:method:: brain.find_distance(t,point)
 
@@ -148,43 +132,6 @@ API
 
 	:param pd.DataFrame df: dataframe of thesholded and transformed data
 	:returns: :py:attr:`brain.df_thresh`
-
-.. py:method:: brain.plot_model(sample_frac=0.5,cmap='plt.cm.Greys')
-
-	Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac
-
-	The returned plotly figure object can be most easily visualized using `plotly.offline.iplot(fig,filename='example')
-
-	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
-	:type: float or none
-	:returns: Plotly figure object
-
-
-
-.. py:class:: plane(model,xx,yy,zz)
-
-	Class to contain model and data associated with a plane
-
-	:param model: OLS fitted model 
-	:param array xx: Meshgrid array of x dimension
-	:param array yy: Meshgrid array of y dimension
-	:param array zz: Meshgrid array of z dimension
-
-	.. py:attribute:: plane.model
-
-		OLS fitted model
-
-	.. py:attribute:: plane.xx
-
-		Meshgrid array of x dimension
-
-	.. py:attribute:: plane.yy
-
-		Meshgrid array of y dimension
-
-	.. py:attribute:: plane.zz
-
-		Meshgrid array of z dimension
 
 
 .. py:class:: math_model(coef)
