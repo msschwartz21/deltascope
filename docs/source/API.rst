@@ -150,6 +150,57 @@ API
 	:returns: :py:attr:`brain.df_thresh`
 
 
+.. py:class:: embryo(name,number,outdir)
+
+	Class to managed multiple brain objects in a multichannel sample
+
+	:param str name: Name of this sample set
+	:param str number: Sample number corresponding to this embryo
+	:param str outdir: Path to directory for output files
+
+	.. py:attribute:: embryo.chnls
+
+		Dictionary containing the :py:class:`brain` object for each channel
+
+	.. py:attribute:: embryo.outdir
+
+		Path to directory for output files
+
+	.. py:attribute:: embryo.name
+
+		Name of this sample set
+
+	.. py:attribute:: embryo.number
+
+		Sample number corresponding to this embryo
+
+.. py:method:: embryo.add_channel(filepath,key)
+
+	Add channel to :py:attr:`embryo.chnls` dictionary
+
+	:param str filepath: Complete filepath to image
+	:param str key: Name of the channel
+
+.. py:method:: embryo.process_channels(threshold,scale,deg)
+	
+	Process all channels through the production of the :py:attr:`brain.df_align` dataframe
+
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param int deg: Degree of the function that should be fit to the model
+
+.. py:method:: embryo.save_projections(subset)
+
+	Save projections of both channels into png files in :py:attr:`embryo.outdir` following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`]_MIP.png
+
+	:param float subset: Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting
+
+.. py:method:: embryo.save_psi()
+
+	Save all channels into psi files following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`].psi
+
+
+
 .. py:class:: math_model(model)
 
 	Object to contain attributes associated with the math model of a sample

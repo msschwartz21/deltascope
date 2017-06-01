@@ -74,9 +74,13 @@ class brain:
 		az = fig.add_subplot(133)
 
 		#Create scatter plot for each projection
-		ax.scatter(df['x'],df['z'])
-		ay.scatter(df['x'],df['y'])
-		az.scatter(df['z'],df['y'])
+		ax.scatter(df.x,df.z)
+		ay.scatter(df.x,df.y)
+		az.scatter(df.z,df.y)
+
+		#Plot model
+		xvalues = np.arange(np.min(df.x),np.max(df.x))
+		ay.plot(xvalues,self.mm.p(xvalues),c='y')
 
 		#Add labels
 		ax.set_title('Y projection')
@@ -224,6 +228,53 @@ class brain:
 		'''Add dataframe of thresholded and transformed data to self.df_thresh'''
 
 		self.df_thresh = df
+
+class embryo:
+	'''Class to managed multiple brain objects in a multichannel sample'''
+
+	def __init__(self,name,number,outdir):
+		'''Initialize embryo object'''
+
+		self.chnls = {}
+		self.outdir = outdir
+		self.name = name
+		self.number = number
+
+	def add_channel(self,filepath,key):
+		'''Add channel to self.chnls dictionary'''
+
+		s = brain()
+		s.read_data(filepath)
+
+		self.chnls[key] = s
+
+	def process_channels(self,threshold,scale,deg):
+		'''Process channels through alignment'''
+
+		for ch in self.chnls.keys():
+			self.chnls[ch].create_dataframe()
+			self.chnls[ch].align_sample(threshold,scale,deg)
+			self.chnls[ch].transform_coordinates()
+			print(ch,'processed')
+
+	def save_projections(self,subset):
+		'''Save projections of both channels into files'''
+
+		for ch in self.chnls.keys()
+			fig = self.chnls[ch].plot_projections(self.chnls[ch].df_align,subset)
+			fig.savefig(os.path.join(self.outdir,
+				self.name+'_'+self.number+'_'+ch+'_MIP.png'))
+
+		print('Projections generated')
+
+	def save_psi(self):
+		'''Save all channels into psi files'''
+
+		for ch in self.chnls.keys():
+			write_data(os.path.join(outdir,
+				self.name+'_'+self.number+'_'+ch+'.psi'))
+
+		print('PSIs generated')
 
 class math_model:
 	'''Class to contain attributes and data associated with math model'''
