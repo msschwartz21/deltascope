@@ -13,6 +13,7 @@
 *.json
 *.h5
 *.tiff
+*.png
 
 # Other
 .DS_Store

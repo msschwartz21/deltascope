@@ -11,9 +11,9 @@ from pushbullet import Pushbullet
 
 if __name__=='__main__':
 
-	dirs = ["C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\AT2",
+	dirs = ["C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\AT2\\Prob",
 	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\ZRF1",
-	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\AT",
+	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\AT\\Prob",
 	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\ZRF1"]
 
 	for d in dirs:
@@ -30,3 +30,5 @@ if __name__=='__main__':
 		pool.map(cranium.process_sample,hfiles)
 		pool.close()
 		pool.join()
+
+		print(d,'complete')

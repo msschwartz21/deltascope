@@ -94,7 +94,7 @@ class brain:
 		
 		return(fig)
 
-	def align_sample(self,threshold,scale,deg):
+	def align_sample(self,threshold,scale,deg=2):
 		'''Realigns sample axes using PCA and translates so that the vertex is at the origin'''
 
 		#Create new dataframe with values above threshold
@@ -102,14 +102,14 @@ class brain:
 		self.df_thresh = self.df[self.df.value > self.threshold]
 
 		#Scale xyz by value in scale array to force PCA axis selection
-		self.df_scl = pd.DataFrame({
+		df_scl = pd.DataFrame({
 			'x':self.df_thresh.x * scale[0], 
 			'y':self.df_thresh.y * scale[1],
 			'z':self.df_thresh.z * scale[2]})
 
 		#Fit pca to data and transform data points
 		pca = PCA(n_components=3)
-		pca_fit = pca.fit_transform(self.df_scl[['x','y','z']])
+		pca_fit = pca.fit_transform(df_scl[['x','y','z']])
 
 		#Create pca dataframe and remove scaling
 		df_unscl = pd.DataFrame({
@@ -121,6 +121,13 @@ class brain:
 		#Find first model
 		model = np.polyfit(df_unscl['x'],df_unscl['y'],deg=deg)
 		p = np.poly1d(model)
+
+		#If parabola is upside down, flip y coordinates
+		if model[0] < 0:
+			df_unscl.y = df_unscl.y * -1
+			#Recalculate model
+			model = np.polyfit(df_unscl['x'],df_unscl['y'],deg=deg)
+			p = np.poly1d(model)
 
 		#Find vertex
 		vx = -model[1]/(2*model[0])
@@ -135,7 +142,12 @@ class brain:
 			})
 
 		#Calculate final model based on translated and aligned data
-		self.mm = math_model(np.polyfit(self.df_align.x, self.df_align.y,deg=deg))
+		self.fit_model(self.df_align,deg)
+
+	def fit_model(self,df,deg):
+		'''Fit model to dataframe'''
+
+		self.mm = math_model(np.polyfit(df.x, df.y, deg=deg))
 
 	###### Functions associated with alpha, r, theta coordinate system ######
 
@@ -235,9 +247,15 @@ def process_sample(filepath):
 	s = brain()
 	s.read_data(filepath)
 	s.create_dataframe()
-	s.fit_model(0.9)
+	s.align_sample(0.9,[6,2,1],2)
 	s.transform_coordinates()
-	s.df_thresh.to_csv(os.path.join(path,name+'.csv'))
+	
+	print('Data processing complete',name)
+
+	fig = s.plot_projections(s.df_align,0.1)
+	fig.savefig(os.path.join(path,name+'proj.png'))
+
+	write_data(os.path.join(path,name+'.psi'),s.df_align)
 
 	toc = time.time()
 	print(name,'complete',toc-tic)

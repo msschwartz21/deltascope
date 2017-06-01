@@ -22,13 +22,17 @@ API
 
 		Data frame containing only points with values above the specified threshold
 
-	.. py:attribute:: brain.model
-
-		Dictionary containing the coefficients for the parabolic model of the data
-
 	.. py:attribute:: brain.subset
 
 		Random sample of the dataframe from :py:attr:`brain.df_thresh`
+
+	.. py:attribute:: brain.df_align
+
+		Dataframe containing point data aligned using PCA
+
+	.. py:attribute:: brain.mm
+
+		Math model object fit to data in brain object
 
 .. py:method:: brain.read_data(filepath)
 
@@ -44,12 +48,30 @@ API
 	:return: :py:attr:`brain.df`
 	:rtype: Dataframe with four columns: x,y,z,value
 
-.. py:method:: brain.plot_projections(df)
+.. py:method:: brain.plot_projections(df,subset)
 
 	Plots the x, y, and z projections of the input dataframe in a matplotlib plot
 
 	:param pd.DataFrame df: Dataframe with columns: 'x','y','z'
+	:param float subset: Value between 0 and 1 indicating what percentage of the df to subsample
 	:returns: Matplotlib figure with three labeled scatterplots
+
+.. py:method:: brain.align_sample(threshold,scale[,deg=2])
+
+	Realigns sample axes using PCA and translates so that the vertex is at the origin
+
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param deg: Degree of the function that should be fit to the model. deg=2 by default
+	:type: int or None
+	:returns: :py:attr:`brain.df_align` and :py:attr:`brain.mm`
+
+.. py:method:: brain.fit_model(df,deg)
+
+	Fit model to dataframe
+
+	:param pd.DataFrame df: Dataframe containing at least x,y,z
+	:param int deg: Degree of the function that should be fit to the model
 
 .. py:method:: brain.find_distance(t,point)
 
