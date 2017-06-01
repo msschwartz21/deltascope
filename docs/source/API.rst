@@ -149,3 +149,26 @@ API
 
 	:param str filepath: Complete filepath to h5 data file
 	:returns: Saves dataframe to csv with name of the original data file 
+
+
+
+.. py:function:: write_header(f)
+
+	Writes header for PSI file with columns Id,x,y,z,ac,r,theta
+
+	:param file f: file object created by 'open(filename,'w')`
+
+.. py:function:: write_data(filepath,df)
+
+	Writes data in PSI format to file after writing header using :py:func:`write_header`. Closes file at the conclusion of writing data.
+
+	:param str filepath: Complete filepath to output file
+	:param pd.DataFrame df: dataframe containing columns x,y,z,ac,r,theta
+
+.. py:function:: read_psi(filepath)
+
+	Reads psi file at the given filepath and returns data in a pandas DataFrame
+
+	:param str filepath: Complete filepath to file
+	:returns: Dataframe containing data
+	:rtype: pd.DataFrame

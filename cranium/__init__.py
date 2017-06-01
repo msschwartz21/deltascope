@@ -62,8 +62,10 @@ class brain:
 		#Create dataframe of points
 		self.df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
 
-	def plot_projections(self,df):
+	def plot_projections(self,df,subset):
 		'''Plots x, y, and z projections from the dataframe'''
+
+		df = df.sample(frac=subset)
     
     	#Create figure and subplots
 		fig = plt.figure(figsize=(12,6))
@@ -89,7 +91,8 @@ class brain:
 
 		#Adjust spacing and show plot
 		plt.subplots_adjust(wspace=0.4)
-		plt.show()
+		
+		return(fig)
 
 	def align_sample(self,threshold,scale,deg):
 		'''Realigns sample axes using PCA and translates so that the vertex is at the origin'''
@@ -238,3 +241,59 @@ def process_sample(filepath):
 
 	toc = time.time()
 	print(name,'complete',toc-tic)
+
+##### PSI file processing ############
+
+def write_header(f):
+	'''Writes header for PSI file with columns Id,x,y,z,ac,r,theta'''
+
+	contents = [
+		'PSI Format 1.0',
+		'',
+		'column[0] = "Id"',
+		'column[1] = "x"',
+		'column[2] = "y"',
+		'column[3] = "z"',
+		'column[4] = "ac"',
+		'column[5] = "r"',
+		'column[6] = "theta"',
+	]
+
+	for line in contents:
+		f.write('# '+ line + '\n')
+
+def write_data(filepath,df):
+	'''Writes data in PSI format to file after writing header'''
+
+	#Open new file at given filepath
+	f = open(filepath,'w')
+
+	#Write header contents to file
+	write_header(f)
+
+	n = df.count()['x']
+    
+	#Write line with sample number
+	f.write(str(n)+' 0 0\n')
+
+	#Write translation matrix
+	f.write('1 0 0\n'+
+			'0 1 0\n'+
+			'0 0 1\n')
+
+	#Write dataframe to file using pandas to_csv function to format
+	f.write(df.to_csv(sep=' ', index=True, header=False))
+
+	f.close()
+
+	print('Write to',filepath,'complete')
+
+def read_psi(filepath):
+	'''Reads psi file and saves data into dataframe'''
+
+	df = pd.read_csv(filepath,
+		sep=' ',
+		header=12,
+		names=['x','y','z','ac','r','theta','xc','yc','zc'])
+
+	return(df)
