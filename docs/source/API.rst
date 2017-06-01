@@ -53,10 +53,10 @@ API
 
 .. py:method:: brain.find_distance(t,point)
 
-	Find euclidean distance between a point on the line defined by t and a data point
+	Find euclidean distance between math model(t) and data point in the xy plane
 
 	:param float t: float value defining point on the line
-	:param array point: array [x,y,z] defining data point
+	:param array point: array [x,y] defining data point
 	:returns: distance between the two points
 	:rtype: float
 
@@ -68,16 +68,6 @@ API
 	:returns: point in the curve (xc, yc, zc) and r
 	:rtype: floats
 
-.. py:method:: brain.find_alpha(xc,yc,zc)
-
-	Find alpha which is the angle that specifies the position of the point along the curve
-
-	:param float xc: x position of closest point on curve to datapoint
-	:param float yc: y position of closest point on curve to datapoint
-	:param float zc: zposition of closest point on curve to datapoint
-	:returns: alpha, angle along the curve
-	:rtype: float
-
 .. py:method:: brain.integrand(x)
 
 	Function to integrate to calculate arclength
@@ -86,29 +76,26 @@ API
 	:returns: arclength value for integrating
 	:rtype: float
 
-.. py:method:: brain.find_length(xc)
+.. py:method:: brain.find_arclength(xc)
+
+	Calculate arclength by integrating the derivative of the math model in xy plane
+
+	.. math:: 
+
+		\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}
 
 	:param float row: Postion in the x axis along the curve
 	:returns: Length of the arc along the curve between the row and the vertex
 	:rtype: float
 
-.. py:method:: brain.dist_to_plane(xz,row)
+.. py:method:: brain.find_theta(row,xc,zc)
 
-	Find shortest distance between point and the plane
-
-	:param list xz: List of form [x position, y position]
-	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:returns: Distance between the specified point and the plane
-	:rtype: float
-
-.. py:method:: brain.find_theta(row,r,zc)
-
-	Calculate theta for a row containing data point in relationship to the flat plane
+	Calculate theta for a row containing data point in relationship to the xy plane
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:param float r: Shortest distance between the point and the math model
+	:param float xc: X position of the closest point in the curve to the data point
 	:param float zc: Z position of the closest point in the curve to the data point
-	:returns: theta, angle between point and the flat plane
+	:returns: theta, angle between point and the xy plane
 	:rtype: float
 
 .. py:method:: brain.calc_coord(row)

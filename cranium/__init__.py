@@ -132,7 +132,7 @@ class brain:
 			})
 
 		#Calculate final model based on translated and aligned data
-		self.model = math_model(np.polyfit(self.df_align.x, self.df_align.y,deg=deg))
+		self.mm = math_model(np.polyfit(self.df_align.x, self.df_align.y,deg=deg))
 
 	###### Functions associated with alpha, r, theta coordinate system ######
 
@@ -156,100 +156,54 @@ class brain:
 		result = minimize(self.find_distance, dpoint[0], args=(dpoint))
 
 		x = result['x'][0]
-		y = self.mm.pp(x)
+		y = self.mm.p(x)
 		z = 0
 		r = result['fun']
 
 		return(x,y,z,r)
 		#return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
 
-	def find_alpha(self,xc,yc,zc):
-		'''Calculate alpha for a row containing point data'''
-
-		#Calculate distances between vertex, focus, and point on the curve
-		vf = np.linalg.norm(np.array([self.mm.vx,self.mm.vy,self.mm.vz]) - 
-			np.array([self.mm.fx,self.mm.fy,self.mm.fz]))
-		fp = np.linalg.norm(np.array([self.mm.fx,self.mm.fy,self.mm.fz]) - 
-			np.array([xc,yc,zc]))
-		pv = np.linalg.norm(np.array([xc,yc,zc]) - 
-			np.array([self.mm.vx,self.mm.vy,self.mm.vz]))
-
-		alpha = np.arccos((vf**2 + fp**2 - pv**2)/(2*vf*fp))
-
-		#Set alpha sign based on position along x axis in relationship to vertex
-		if xc >= self.mm.vx:
-			return(alpha)
-		elif xc < self.mm.vx:
-			return(-alpha)
-
 	def integrand(self,x):
-		'''Function to integrate to calculate arclength'''
+		'''Function to integrate to calculate arclength between vertex and x'''
 
-		y_prime = self.mm.p['ay']*2*x + self.mm.p['by']
-		z_prime = self.mm.p['az']*2*x + self.mm.p['bz']
+		y_prime = self.mm.cf[0]*2*x + self.mm.cf[1]
 
-		arclength = np.sqrt(y_prime**2 + z_prime**2)
+		arclength = np.sqrt(1 + y_prime**2)
 		return(arclength)
 
-	def find_length(self,xc):
+	def find_arclength(self,xc):
 		'''Calculate arclength for a row'''
 
-		ac,err = scipy.integrate.quad(self.integrand,xc,self.mm.vx)
+		ac,err = scipy.integrate.quad(self.integrand,xc,0)
 		return(ac)
 
-	def dist_to_plane(self,xz,row):
-		'''Find shortest distance between point and the plane'''
-
-		#Find y value based on a given x and z
-		y = self.mm.coef['f']*xz[1] + self.mm.coef['e']*xz[0] + self.mm.coef['g']
-
-		dist = np.linalg.norm(np.array([xz[0],y,xz[1]]) - 
-			np.array([row.x,row.y,row.z]))
-		return(dist)
-
-	def find_theta(self,row,r,zc):
+	def find_theta(self,row,xc,zc):
 		'''Find theta value for a row describing angle between point and plane'''
 
-		#Find the point which minimizes the distance between the point and the plane
-		result = minimize(self.dist_to_plane,[row.x,row.z],args=(row))
-		planey = self.mm.coef['f']*result['x'][1] + self.mm.coef['e']*result['x'][0] + self.mm.coef['g']
-
-		#Set sign of r based on whether its left or right of y axis
-		if row.z >= zc:
-			r = r
-		elif row.z < zc:
-			r = -r
-
-		theta = np.arccos(result['fun']/r)
-
-		#Change sign of theta based on whether its above or below the plane
-		ud = self.mm.coef['e']*row.x + self.mm.coef['f']*row.z - row.y + self.mm.coef['g']
-		if ud >= 0: 
-			return(theta)
-		elif ud < 0:
-			return(-theta)
+		theta = np.arctan2(row.z-zc,row.x-xc)
+		return(theta)
 
 	def calc_coord(self,row):
 		'''Calculate alpah, r, theta for a particular row'''
 
 		xc,yc,zc,r = self.find_min_distance(row)
-		ac = self.find_length(xc)
-		theta = self.find_theta(row,r,zc)
+		ac = self.find_arclength(xc)
+		theta = self.find_theta(row,xc,zc)
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
 
 	def transform_coordinates(self):
 		'''Transform coordinate system so that each point is defined relative to 
-		math model by (alpha,theta,r) (only applied to df_thresh'''
+		math model by (alpha,theta,r) (only applied to df_align'''
 
 		#Calculate alpha, theta, r for each row in dataset
-		self.df_thresh = self.df_thresh.join(self.df_thresh.apply((lambda row: self.calc_coord(row)), axis=1))
+		self.df_align = self.df_align.join(self.df_align.apply((lambda row: self.calc_coord(row)), axis=1))
 
 	def subset_data(self,sample_frac=0.5):
 		'''Subset data based on proportion set in sample_frac'''
 
-		self.subset = self.df_thresh.sample(frac=sample_frac)
+		self.subset = self.df_align.sample(frac=sample_frac)
 
 	def add_thresh_df(self,df):
 		'''Add dataframe of thresholded and transformed data to self.df_thresh'''
