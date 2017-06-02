@@ -14,7 +14,11 @@
 *.h5
 *.tiff
 *.png
+*.psi
 
 # Other
 .DS_Store
 *.ipynb
+
+#Amira
+*.hx

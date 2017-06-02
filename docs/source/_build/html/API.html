@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; craniumPy 0.0.5 documentation</title>
+  <title>API &mdash; craniumPy 0.0.6 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="craniumPy 0.0.5 documentation" href="index.html"/>
+    <link rel="top" title="craniumPy 0.0.6 documentation" href="index.html"/>
         <link rel="prev" title="Introduction" href="introduction.html"/> 
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.0.5
+                0.0.6
               </div>
             
           
@@ -127,24 +127,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="id1">
-<h1>API<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="api">
+<span id="id1"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="brain">
 <em class="property">class </em><code class="descname">brain</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#brain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Object to manage biological data and associated functions. Initialization of this object automatically reads the hdf5 file and selects the appropriate channel from the Probability file and saves as global <a class="reference internal" href="#brain.raw_data" title="brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a> attribute.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Filepath to hdf5 probability file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#brain.raw_data" title="brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">3D array</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Object to manage biological data and associated functions.</p>
 <dl class="attribute">
 <dt id="brain.raw_data">
 <code class="descname">raw_data</code><a class="headerlink" href="#brain.raw_data" title="Permalink to this definition">¶</a></dt>
@@ -170,15 +158,51 @@
 </dd></dl>
 
 <dl class="attribute">
-<dt id="brain.model">
-<code class="descname">model</code><a class="headerlink" href="#brain.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dictionary containing the coefficients for the parabolic model of the data</p>
-</dd></dl>
-
-<dl class="attribute">
 <dt id="brain.subset">
 <code class="descname">subset</code><a class="headerlink" href="#brain.subset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Random sample of the dataframe from <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.df_scl">
+<code class="descname">df_scl</code><a class="headerlink" href="#brain.df_scl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataframe containing data from <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a> after a scaling value has been applied</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.scale">
+<code class="descname">scale</code><a class="headerlink" href="#brain.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array with three values representing the constant by which to multiply x,y,z respectively</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.pca">
+<code class="descname">pca</code><a class="headerlink" href="#brain.pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>PCA object managing the transformation matrix and any resulting transformations</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.flip">
+<code class="descname">flip</code><a class="headerlink" href="#brain.flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean value indicating whether or not the sample needs to be inverted along the y axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.vertex">
+<code class="descname">vertex</code><a class="headerlink" href="#brain.vertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of shape [vx,vy,vz] containing values to use for translating sample</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.df_align">
+<code class="descname">df_align</code><a class="headerlink" href="#brain.df_align" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataframe containing point data aligned using PCA</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="brain.mm">
+<code class="descname">mm</code><a class="headerlink" href="#brain.mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Math model object fit to data in brain object</p>
 </dd></dl>
 
 </dd></dl>
@@ -194,27 +218,6 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Filepath to hdf5 probability file</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Array of shape [z,y,x] containing raw probability data</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="brain.show_plane">
-<code class="descclassname">brain.</code><code class="descname">show_plane</code><span class="sig-paren">(</span><em>dimension</em>, <em>plane</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.show_plane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Displaces single specified plane in a matplotlib figure</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dimension</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; string specifying dimension of plane, e.g. x,y,z</li>
-<li><strong>plane</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Integer specifying position of plane</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Matplotlib figure</p>
-</td>
 </tr>
 </tbody>
 </table>
@@ -237,18 +240,111 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.fit_model">
-<code class="descclassname">brain.</code><code class="descname">fit_model</code><span class="sig-paren">(</span><em>threshold</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.fit_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the mathematical model of the data by identifying the flat plane and parabolic plane that can fit the data before calculating their intersect</p>
+<dt id="brain.plot_projections">
+<code class="descclassname">brain.</code><code class="descname">plot_projections</code><span class="sig-paren">(</span><em>df</em>, <em>subset</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.plot_projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the x, y, and z projections of the input dataframe in a matplotlib plot</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; float value between 0 and 1, used to select lower bound of values</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) &#8211; Dataframe with columns: &#8216;x&#8217;,&#8217;y&#8217;,&#8217;z&#8217;</li>
+<li><strong>subset</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Value between 0 and 1 indicating what percentage of the df to subsample</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#brain.model" title="brain.model"><code class="xref py py-attr docutils literal"><span class="pre">brain.model</span></code></a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Matplotlib figure with three labeled scatterplots</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dictionary containing the coefficients for the parabolic model of the data</td>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.preprocess_data">
+<code class="descclassname">brain.</code><code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>threshold</em>, <em>scale</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.preprocess_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thresholds and scales data prior to PCA</p>
+<p>Creates <a class="reference internal" href="#brain.threshold" title="brain.threshold"><code class="xref py py-attr docutils literal"><span class="pre">brain.threshold</span></code></a>, <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a>, and <a class="reference internal" href="#brain.df_scl" title="brain.df_scl"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_scl</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array with three values representing the constant by which to multiply x,y,z respectively</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.calculate_pca">
+<code class="descclassname">brain.</code><code class="descname">calculate_pca</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#brain.calculate_pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create pca object and calculate transformation matrix in <a class="reference internal" href="#brain.pca" title="brain.pca"><code class="xref py py-attr docutils literal"><span class="pre">brain.pca</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.add_pca">
+<code class="descclassname">brain.</code><code class="descname">add_pca</code><span class="sig-paren">(</span><em>pca</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.add_pca" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add pca object from another channel and save as <a class="reference internal" href="#brain.pca" title="brain.pca"><code class="xref py py-attr docutils literal"><span class="pre">brain.pca</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pca</strong> (<em>sklearn.decomposition.PCA</em>) &#8211; PCA object containing transformation components that are already calculated</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.pca_transform">
+<code class="descclassname">brain.</code><code class="descname">pca_transform</code><span class="sig-paren">(</span><span class="optional">[</span><em>deg=2</em>, <em>mm=None</em>, <em>flip=None</em>, <em>vertex=None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#brain.pca_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms data according to PCA transformation matrix and translates the sample so that the vertex of the parabola is at the origin</p>
+<p>Creates <a class="reference internal" href="#brain.df_align" title="brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>deg</strong> &#8211; Degree of the function that should be fit to the model. deg=2 by default</li>
+<li><strong>mm</strong> &#8211; Math model for primary channel</li>
+<li><strong>flip</strong> &#8211; Boolean value to indicate whether or not the points need to be inverted along the y axis</li>
+<li><strong>vertex</strong> &#8211; Array indicating the translation values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">int or None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#math_model" title="math_model"><code class="xref py py-class docutils literal"><span class="pre">math_model</span></code></a> (<a class="reference internal" href="#brain.mm" title="brain.mm"><code class="xref py py-attr docutils literal"><span class="pre">brain.mm</span></code></a>) or None</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">Boolean (<a class="reference internal" href="#brain.flip" title="brain.flip"><code class="xref py py-attr docutils literal"><span class="pre">brain.flip</span></code></a>) or None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">Array [vx,vy,vz] (<a class="reference internal" href="#brain.vertex" title="brain.vertex"><code class="xref py py-attr docutils literal"><span class="pre">brain.vertex</span></code></a>) or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="brain.fit_model">
+<code class="descclassname">brain.</code><code class="descname">fit_model</code><span class="sig-paren">(</span><em>df</em>, <em>deg</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.fit_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit model to dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) &#8211; Dataframe containing at least x,y,z</li>
+<li><strong>deg</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Degree of the function that should be fit to the model</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -257,14 +353,14 @@
 <dl class="method">
 <dt id="brain.find_distance">
 <code class="descclassname">brain.</code><code class="descname">find_distance</code><span class="sig-paren">(</span><em>t</em>, <em>point</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_distance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find euclidean distance between a point on the line defined by t and a data point</p>
+<dd><p>Find euclidean distance between math model(t) and data point in the xy plane</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; float value defining point on the line</li>
-<li><strong>point</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; array [x,y,z] defining data point</li>
+<li><strong>point</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; array [x,y] defining data point</li>
 </ul>
 </td>
 </tr>
@@ -297,31 +393,6 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.find_alpha">
-<code class="descclassname">brain.</code><code class="descname">find_alpha</code><span class="sig-paren">(</span><em>xc</em>, <em>yc</em>, <em>zc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_alpha" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find alpha which is the angle that specifies the position of the point along the curve</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; x position of closest point on curve to datapoint</li>
-<li><strong>yc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; y position of closest point on curve to datapoint</li>
-<li><strong>zc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; zposition of closest point on curve to datapoint</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">alpha, angle along the curve</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="brain.integrand">
 <code class="descclassname">brain.</code><code class="descname">integrand</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.integrand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to integrate to calculate arclength</p>
@@ -340,9 +411,12 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.find_length">
-<code class="descclassname">brain.</code><code class="descname">find_length</code><span class="sig-paren">(</span><em>xc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_length" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dt id="brain.find_arclength">
+<code class="descclassname">brain.</code><code class="descname">find_arclength</code><span class="sig-paren">(</span><em>xc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_arclength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate arclength by integrating the derivative of the math model in xy plane</p>
+<div class="math">
+<p><img src="_images/math/8c543fb5db84ac682af6f6cacb3ae3d61c07f125.png" alt="\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -357,44 +431,21 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.dist_to_plane">
-<code class="descclassname">brain.</code><code class="descname">dist_to_plane</code><span class="sig-paren">(</span><em>xz</em>, <em>row</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.dist_to_plane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find shortest distance between point and the plane</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>xz</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; List of form [x position, y position]</li>
-<li><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Distance between the specified point and the plane</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="brain.find_theta">
-<code class="descclassname">brain.</code><code class="descname">find_theta</code><span class="sig-paren">(</span><em>row</em>, <em>yc</em>, <em>zc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_theta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate theta for a row containing data point in relationship to the flat plane</p>
+<code class="descclassname">brain.</code><code class="descname">find_theta</code><span class="sig-paren">(</span><em>row</em>, <em>xc</em>, <em>zc</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.find_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate theta for a row containing data point in relationship to the xy plane</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>row</strong> (<em>pd.Series</em>) &#8211; row from dataframe in the form of a pandas Series</li>
-<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Shortest distance between the point and the math model</li>
+<li><strong>xc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; X position of the closest point in the curve to the data point</li>
+<li><strong>zc</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Z position of the closest point in the curve to the data point</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">theta, angle between point and the flat plane</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">theta, angle between point and the xy plane</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></p>
@@ -455,220 +506,219 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="brain.plot_model">
-<code class="descclassname">brain.</code><code class="descname">plot_model</code><span class="sig-paren">(</span><em>sample_frac=0.5</em>, <em>cmap='plt.cm.Greys'</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.plot_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac</p>
-<p>The returned plotly figure object can be most easily visualized using <a href="#id2"><span class="problematic" id="id3">`</span></a>plotly.offline.iplot(fig,filename=&#8217;example&#8217;)</p>
+<dt id="brain.add_thresh_df">
+<code class="descclassname">brain.</code><code class="descname">add_thresh_df</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#brain.add_thresh_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds dataframe of thresholded and transformed data to <a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sample_frac</strong> &#8211; Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>pd.DataFrame</em>) &#8211; dataframe of thesholded and transformed data</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">float or none</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Plotly figure object</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#brain.df_thresh" title="brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="class">
-<dt id="plane">
-<em class="property">class </em><code class="descname">plane</code><span class="sig-paren">(</span><em>model</em>, <em>xx</em>, <em>yy</em>, <em>zz</em><span class="sig-paren">)</span><a class="headerlink" href="#plane" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to contain model and data associated with a plane</p>
+<dt id="embryo">
+<em class="property">class </em><code class="descname">embryo</code><span class="sig-paren">(</span><em>name</em>, <em>number</em>, <em>outdir</em><span class="sig-paren">)</span><a class="headerlink" href="#embryo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to managed multiple brain objects in a multichannel sample</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>model</strong> &#8211; OLS fitted model</li>
-<li><strong>xx</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Meshgrid array of x dimension</li>
-<li><strong>yy</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Meshgrid array of y dimension</li>
-<li><strong>zz</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Meshgrid array of z dimension</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of this sample set</li>
+<li><strong>number</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Sample number corresponding to this embryo</li>
+<li><strong>outdir</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path to directory for output files</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
 <dl class="attribute">
-<dt id="plane.model">
-<code class="descname">model</code><a class="headerlink" href="#plane.model" title="Permalink to this definition">¶</a></dt>
-<dd><p>OLS fitted model</p>
+<dt id="embryo.chnls">
+<code class="descname">chnls</code><a class="headerlink" href="#embryo.chnls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing the <a class="reference internal" href="#brain" title="brain"><code class="xref py py-class docutils literal"><span class="pre">brain</span></code></a> object for each channel</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="plane.xx">
-<code class="descname">xx</code><a class="headerlink" href="#plane.xx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Meshgrid array of x dimension</p>
+<dt id="embryo.outdir">
+<code class="descname">outdir</code><a class="headerlink" href="#embryo.outdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to directory for output files</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="plane.yy">
-<code class="descname">yy</code><a class="headerlink" href="#plane.yy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Meshgrid array of y dimension</p>
+<dt id="embryo.name">
+<code class="descname">name</code><a class="headerlink" href="#embryo.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of this sample set</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="plane.zz">
-<code class="descname">zz</code><a class="headerlink" href="#plane.zz" title="Permalink to this definition">¶</a></dt>
-<dd><p>Meshgrid array of z dimension</p>
+<dt id="embryo.number">
+<code class="descname">number</code><a class="headerlink" href="#embryo.number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample number corresponding to this embryo</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="method">
+<dt id="embryo.add_channel">
+<code class="descclassname">embryo.</code><code class="descname">add_channel</code><span class="sig-paren">(</span><em>filepath</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#embryo.add_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add channel to <a class="reference internal" href="#embryo.chnls" title="embryo.chnls"><code class="xref py py-attr docutils literal"><span class="pre">embryo.chnls</span></code></a> dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Complete filepath to image</li>
+<li><strong>key</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name of the channel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="embryo.process_channels">
+<code class="descclassname">embryo.</code><code class="descname">process_channels</code><span class="sig-paren">(</span><em>threshold</em>, <em>scale</em>, <em>deg</em>, <em>primary_key</em><span class="sig-paren">)</span><a class="headerlink" href="#embryo.process_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all channels through the production of the <a class="reference internal" href="#brain.df_align" title="brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a> dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array with three values representing the constant by which to multiply x,y,z respectively</li>
+<li><strong>deg</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Degree of the function that should be fit to the model</li>
+<li><strong>primary_key</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Key for the primary structural channel which PCA and the model should be fit too</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="embryo.save_projections">
+<code class="descclassname">embryo.</code><code class="descname">save_projections</code><span class="sig-paren">(</span><em>subset</em><span class="sig-paren">)</span><a class="headerlink" href="#embryo.save_projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save projections of both channels into png files in <a class="reference internal" href="#embryo.outdir" title="embryo.outdir"><code class="xref py py-attr docutils literal"><span class="pre">embryo.outdir</span></code></a> following the naming scheme [<a class="reference internal" href="#embryo.name" title="embryo.name"><code class="xref py py-attr docutils literal"><span class="pre">embryo.name</span></code></a>]_[<a class="reference internal" href="#embryo.number" title="embryo.number"><code class="xref py py-attr docutils literal"><span class="pre">embryo.number</span></code></a>]_[<cite>channel name</cite>]_MIP.png</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subset</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="embryo.save_psi">
+<code class="descclassname">embryo.</code><code class="descname">save_psi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#embryo.save_psi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save all channels into psi files following the naming scheme [<a class="reference internal" href="#embryo.name" title="embryo.name"><code class="xref py py-attr docutils literal"><span class="pre">embryo.name</span></code></a>]_[<a class="reference internal" href="#embryo.number" title="embryo.number"><code class="xref py py-attr docutils literal"><span class="pre">embryo.number</span></code></a>]_[<cite>channel name</cite>].psi</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="math_model">
-<em class="property">class </em><code class="descname">math_model</code><span class="sig-paren">(</span><em>coef</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to contain attribues and data associated with math model</p>
+<em class="property">class </em><code class="descname">math_model</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to contain attributes associated with the math model of a sample</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array of coefficients calculated by np.polyfit</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="math_model.cf">
+<code class="descname">cf</code><a class="headerlink" href="#math_model.cf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of coefficients for the math model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="math_model.p">
+<code class="descname">p</code><a class="headerlink" href="#math_model.p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Poly1d function for the math model to allow calculation and plotting of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="process_sample">
+<code class="descname">process_sample</code><span class="sig-paren">(</span><em>num</em>, <em>root</em>, <em>outdir</em>, <em>name</em>, <em>chs</em>, <em>prefixes</em>, <em>threshold</em>, <em>scale</em>, <em>deg</em>, <em>primary_key</em><span class="sig-paren">)</span><a class="headerlink" href="#process_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process single sample through <a class="reference internal" href="#brain" title="brain"><code class="xref py py-class docutils literal"><span class="pre">brain</span></code></a> class and saves df to csv</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>coef</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Dictionary containing coefficients to define equation of math model</li>
-<li><strong>p</strong> (<a class="reference external" href="https://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Dictionary containing calculated coefficients for y and z parabola</li>
-<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing x coordinates</li>
-<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing y coordinates</li>
-<li><strong>z</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing z coordinates</li>
+<li><strong>num</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Sample number</li>
+<li><strong>root</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Complete path to the root directory for this sample set</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Name describing this sample set</li>
+<li><strong>outdir</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Complete path to output directory</li>
+<li><strong>chs</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing strings specifying the directories for each channel</li>
+<li><strong>prefixes</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array containing strings specifying the file prefix for each channel</li>
+<li><strong>threshold</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>scale</strong> (<a class="reference external" href="https://docs.python.org/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; Array with three values representing the constant by which to multiply x,y,z respectively</li>
+<li><strong>deg</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Degree of the function that should be fit to the model</li>
+<li><strong>primary_key</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Key for the primary structural channel which PCA and the model should be fit too</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<dl class="attribute">
-<dt id="math_model.coef">
-<code class="descname">coef</code><a class="headerlink" href="#math_model.coef" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dictionary containing coefficients of each term of math model such that:</p>
-<div class="math">
-<p><img src="_images/math/4737c108b268f7fa08776c5b5c6d4f0443787860.png" alt="y = ex + fz + g
-z = ax^2 + bx + cy + d"/></p>
-</div></dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.p">
-<code class="descname">p</code><a class="headerlink" href="#math_model.p" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dictionary containing coefficients of terms in math model such that:</p>
-<div class="math">
-<p><img src="_images/math/c855747718210ce192c918b9a6fb40714a619bb1.png" alt="y = ay*x^2 + by*x + cy
-z = az*x^2 + bz*x + cz"/></p>
-</div></dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.x">
-<code class="descname">x</code><a class="headerlink" href="#math_model.x" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array containing x coordinates of model</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="math_model.y">
-<code class="descname">y</code><a class="headerlink" href="#math_model.y" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array containing y coordinates of model</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.z">
-<code class="descname">z</code><a class="headerlink" href="#math_model.z" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array containing z coordinates of model</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.vx">
-<code class="descname">vx</code><a class="headerlink" href="#math_model.vx" title="Permalink to this definition">¶</a></dt>
-<dd><p>x position of the vertex</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.vy">
-<code class="descname">vy</code><a class="headerlink" href="#math_model.vy" title="Permalink to this definition">¶</a></dt>
-<dd><p>y position of the vertex</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.vz">
-<code class="descname">vz</code><a class="headerlink" href="#math_model.vz" title="Permalink to this definition">¶</a></dt>
-<dd><p>z position of the vertex</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.fx">
-<code class="descname">fx</code><a class="headerlink" href="#math_model.fx" title="Permalink to this definition">¶</a></dt>
-<dd><p>x position of the focus</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.fy">
-<code class="descname">fy</code><a class="headerlink" href="#math_model.fy" title="Permalink to this definition">¶</a></dt>
-<dd><p>y position of the focus</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="math_model.fz">
-<code class="descname">fz</code><a class="headerlink" href="#math_model.fz" title="Permalink to this definition">¶</a></dt>
-<dd><p>z position of the focus</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="method">
-<dt id="math_model.calc_y">
-<code class="descclassname">math_model.</code><code class="descname">calc_y</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model.calc_y" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate y value according to a given t</p>
+<dl class="function">
+<dt id="write_header">
+<code class="descname">write_header</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#write_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes header for PSI file with columns Id,x,y,z,ac,r,theta</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; t value along the curve</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">y value corresponding to t</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#file" title="(in Python v2.7)"><em>file</em></a>) &#8211; file object created by &#8216;open(filename,&#8217;w&#8217;)`</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="math_model.calc_z">
-<code class="descclassname">math_model.</code><code class="descname">calc_z</code><span class="sig-paren">(</span><em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#math_model.calc_z" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate z value according to a gien t</p>
+<dl class="function">
+<dt id="write_data">
+<code class="descname">write_data</code><span class="sig-paren">(</span><em>filepath</em>, <em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#write_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes data in PSI format to file after writing header using <a class="reference internal" href="#write_header" title="write_header"><code class="xref py py-func docutils literal"><span class="pre">write_header()</span></code></a>. Closes file at the conclusion of writing data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>t</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; t value along the curve</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">z value corresponding to t</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/library/functions.html#float" title="(in Python v2.7)">float</a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Complete filepath to output file</li>
+<li><strong>df</strong> (<em>pd.DataFrame</em>) &#8211; dataframe containing columns x,y,z,ac,r,theta</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="math_model.find_vertex">
-<code class="descclassname">math_model.</code><code class="descname">find_vertex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#math_model.find_vertex" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the position of the vertex</p>
+<dl class="function">
+<dt id="read_psi">
+<code class="descname">read_psi</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#read_psi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads psi file at the given filepath and returns data in a pandas DataFrame</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#math_model.vx" title="math_model.vx"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vx</span></code></a>, <a class="reference internal" href="#math_model.vy" title="math_model.vy"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vy</span></code></a>, <a class="reference internal" href="#math_model.vz" title="math_model.vz"><code class="xref py py-attr docutils literal"><span class="pre">math_model.vz</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Complete filepath to file</td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="math_model.find_foucs">
-<code class="descclassname">math_model.</code><code class="descname">find_foucs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#math_model.find_foucs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the position of the focus</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#math_model.fx" title="math_model.fx"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fx</span></code></a>, <a class="reference internal" href="#math_model.fy" title="math_model.fy"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fy</span></code></a>, <a class="reference internal" href="#math_model.fz" title="math_model.fz"><code class="xref py py-attr docutils literal"><span class="pre">math_model.fz</span></code></a></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dataframe containing data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pd.DataFrame</td>
 </tr>
 </tbody>
 </table>
@@ -715,7 +765,7 @@ z = az*x^2 + bz*x + cz"/></p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.5',
+            VERSION:'0.0.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

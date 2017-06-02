@@ -1,14 +1,11 @@
 .. _api:
+
 API
 ====
 
 .. class:: brain(filepath)
 
-	Object to manage biological data and associated functions. Initialization of this object automatically reads the hdf5 file and selects the appropriate channel from the Probability file and saves as global :py:attr:`brain.raw_data` attribute.
-
-	:param str filepath: Filepath to hdf5 probability file
-	:return: :py:attr:`brain.raw_data`
-	:rtype: 3D array
+	Object to manage biological data and associated functions. 
 
 	.. py:attribute:: brain.raw_data
 
@@ -26,13 +23,37 @@ API
 
 		Data frame containing only points with values above the specified threshold
 
-	.. py:attribute:: brain.model
-
-		Dictionary containing the coefficients for the parabolic model of the data
-
 	.. py:attribute:: brain.subset
 
 		Random sample of the dataframe from :py:attr:`brain.df_thresh`
+
+	.. py:attribute:: brain.df_scl
+
+		Dataframe containing data from :py:attr:`brain.df_thresh` after a scaling value has been applied
+
+	.. py:attribute:: brain.scale
+
+		Array with three values representing the constant by which to multiply x,y,z respectively
+
+	.. py:attribute:: brain.pca
+
+		PCA object managing the transformation matrix and any resulting transformations
+
+	.. py:attribute:: brain.flip
+
+		Boolean value indicating whether or not the sample needs to be inverted along the y axis
+
+	.. py:attribute:: brain.vertex
+
+		Array of shape [vx,vy,vz] containing values to use for translating sample
+
+	.. py:attribute:: brain.df_align
+
+		Dataframe containing point data aligned using PCA
+
+	.. py:attribute:: brain.mm
+
+		Math model object fit to data in brain object
 
 .. py:method:: brain.read_data(filepath)
 
@@ -41,14 +62,6 @@ API
 	:param str filepath: Filepath to hdf5 probability file
 	:return: Array of shape [z,y,x] containing raw probability data
 
-.. py:method:: brain.show_plane(dimension,plane)
-
-	Displaces single specified plane in a matplotlib figure
-
-	:param str dimension: string specifying dimension of plane, e.g. x,y,z
-	:param int plane: Integer specifying position of plane
-	:return: Matplotlib figure
-
 .. py:method:: brain.create_dataframe()
 
 	Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array
@@ -56,20 +69,61 @@ API
 	:return: :py:attr:`brain.df`
 	:rtype: Dataframe with four columns: x,y,z,value
 
-.. py:method:: brain.fit_model(threshold)
+.. py:method:: brain.plot_projections(df,subset)
 
-	Calculates the mathematical model of the data by identifying the flat plane and parabolic plane that can fit the data before calculating their intersect
+	Plots the x, y, and z projections of the input dataframe in a matplotlib plot
 
-	:param float threshold: float value between 0 and 1, used to select lower bound of values
-	:return: :py:attr:`brain.model`
-	:rtype: dictionary containing the coefficients for the parabolic model of the data
+	:param pd.DataFrame df: Dataframe with columns: 'x','y','z'
+	:param float subset: Value between 0 and 1 indicating what percentage of the df to subsample
+	:returns: Matplotlib figure with three labeled scatterplots
+
+.. py:method:: brain.preprocess_data(threshold,scale)
+
+	Thresholds and scales data prior to PCA
+
+	Creates :py:attr:`brain.threshold`, :py:attr:`brain.df_thresh`, and :py:attr:`brain.df_scl`
+
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+
+.. py:method:: brain.calculate_pca()
+
+	Create pca object and calculate transformation matrix in :py:attr:`brain.pca`
+
+.. py:method:: brain.add_pca(pca)
+
+	Add pca object from another channel and save as :py:attr:`brain.pca`
+
+	:param sklearn.decomposition.PCA pca: PCA object containing transformation components that are already calculated
+
+.. py:method:: brain.pca_transform([deg=2,mm=None,flip=None,vertex=None])
+
+	Transforms data according to PCA transformation matrix and translates the sample so that the vertex of the parabola is at the origin
+
+	Creates :py:attr:`brain.df_align`
+
+	:param deg: Degree of the function that should be fit to the model. deg=2 by default
+	:type: int or None
+	:param mm: Math model for primary channel
+	:type: :py:class:`math_model` (:py:attr:`brain.mm`) or None
+	:param flip: Boolean value to indicate whether or not the points need to be inverted along the y axis
+	:type: Boolean (:py:attr:`brain.flip`) or None
+	:param vertex: Array indicating the translation values
+	:type: Array [vx,vy,vz] (:py:attr:`brain.vertex`) or None
+
+.. py:method:: brain.fit_model(df,deg)
+
+	Fit model to dataframe
+
+	:param pd.DataFrame df: Dataframe containing at least x,y,z
+	:param int deg: Degree of the function that should be fit to the model
 
 .. py:method:: brain.find_distance(t,point)
 
-	Find euclidean distance between a point on the line defined by t and a data point
+	Find euclidean distance between math model(t) and data point in the xy plane
 
 	:param float t: float value defining point on the line
-	:param array point: array [x,y,z] defining data point
+	:param array point: array [x,y] defining data point
 	:returns: distance between the two points
 	:rtype: float
 
@@ -81,16 +135,6 @@ API
 	:returns: point in the curve (xc, yc, zc) and r
 	:rtype: floats
 
-.. py:method:: brain.find_alpha(xc,yc,zc)
-
-	Find alpha which is the angle that specifies the position of the point along the curve
-
-	:param float xc: x position of closest point on curve to datapoint
-	:param float yc: y position of closest point on curve to datapoint
-	:param float zc: zposition of closest point on curve to datapoint
-	:returns: alpha, angle along the curve
-	:rtype: float
-
 .. py:method:: brain.integrand(x)
 
 	Function to integrate to calculate arclength
@@ -99,28 +143,26 @@ API
 	:returns: arclength value for integrating
 	:rtype: float
 
-.. py:method:: brain.find_length(xc)
+.. py:method:: brain.find_arclength(xc)
+
+	Calculate arclength by integrating the derivative of the math model in xy plane
+
+	.. math:: 
+
+		\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}
 
 	:param float row: Postion in the x axis along the curve
 	:returns: Length of the arc along the curve between the row and the vertex
 	:rtype: float
 
-.. py:method:: brain.dist_to_plane(xz,row)
+.. py:method:: brain.find_theta(row,xc,zc)
 
-	Find shortest distance between point and the plane
-
-	:param list xz: List of form [x position, y position]
-	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:returns: Distance between the specified point and the plane
-	:rtype: float
-
-.. py:method:: brain.find_theta(row,yc,zc)
-
-	Calculate theta for a row containing data point in relationship to the flat plane
+	Calculate theta for a row containing data point in relationship to the xy plane
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:param float r: Shortest distance between the point and the math model
-	:returns: theta, angle between point and the flat plane
+	:param float xc: X position of the closest point in the curve to the data point
+	:param float zc: Z position of the closest point in the curve to the data point
+	:returns: theta, angle between point and the xy plane
 	:rtype: float
 
 .. py:method:: brain.calc_coord(row)
@@ -145,133 +187,115 @@ API
 	:type: float or none
 	:returns: :py:attr:`brain.subset`
 
-.. py:method:: brain.plot_model(sample_frac=0.5,cmap='plt.cm.Greys')
+.. py:method:: brain.add_thresh_df(df)
 
-	Plot two planes, line model, and percentage of points. Data is downsampled based on the value between 0 and 1 defined for sample_frac
+	Adds dataframe of thresholded and transformed data to :py:attr:`brain.df_thresh`
 
-	The returned plotly figure object can be most easily visualized using `plotly.offline.iplot(fig,filename='example')
-
-	:param sample_frac: Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
-	:type: float or none
-	:returns: Plotly figure object
+	:param pd.DataFrame df: dataframe of thesholded and transformed data
+	:returns: :py:attr:`brain.df_thresh`
 
 
+.. py:class:: embryo(name,number,outdir)
 
-.. py:class:: plane(model,xx,yy,zz)
+	Class to managed multiple brain objects in a multichannel sample
 
-	Class to contain model and data associated with a plane
+	:param str name: Name of this sample set
+	:param str number: Sample number corresponding to this embryo
+	:param str outdir: Path to directory for output files
 
-	:param model: OLS fitted model 
-	:param array xx: Meshgrid array of x dimension
-	:param array yy: Meshgrid array of y dimension
-	:param array zz: Meshgrid array of z dimension
+	.. py:attribute:: embryo.chnls
 
-	.. py:attribute:: plane.model
+		Dictionary containing the :py:class:`brain` object for each channel
 
-		OLS fitted model
+	.. py:attribute:: embryo.outdir
 
-	.. py:attribute:: plane.xx
+		Path to directory for output files
 
-		Meshgrid array of x dimension
+	.. py:attribute:: embryo.name
 
-	.. py:attribute:: plane.yy
+		Name of this sample set
 
-		Meshgrid array of y dimension
+	.. py:attribute:: embryo.number
 
-	.. py:attribute:: plane.zz
+		Sample number corresponding to this embryo
 
-		Meshgrid array of z dimension
+.. py:method:: embryo.add_channel(filepath,key)
+
+	Add channel to :py:attr:`embryo.chnls` dictionary
+
+	:param str filepath: Complete filepath to image
+	:param str key: Name of the channel
+
+.. py:method:: embryo.process_channels(threshold,scale,deg,primary_key)
+	
+	Process all channels through the production of the :py:attr:`brain.df_align` dataframe
+
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param int deg: Degree of the function that should be fit to the model
+	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
+
+.. py:method:: embryo.save_projections(subset)
+
+	Save projections of both channels into png files in :py:attr:`embryo.outdir` following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`]_MIP.png
+
+	:param float subset: Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting
+
+.. py:method:: embryo.save_psi()
+
+	Save all channels into psi files following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`].psi
 
 
-.. py:class:: math_model(coef)
 
-	Class to contain attribues and data associated with math model
+.. py:class:: math_model(model)
 
-	:param dict coef: Dictionary containing coefficients to define equation of math model
-	:param dict p: Dictionary containing calculated coefficients for y and z parabola
-	:param array x: Array containing x coordinates
-	:param array y: Array containing y coordinates
-	:param array z: Array containing z coordinates
+	Object to contain attributes associated with the math model of a sample
 
-	.. py:attribute:: math_model.coef
+	:param array model: Array of coefficients calculated by np.polyfit
 
-		Dictionary containing coefficients of each term of math model such that:
+	.. py:attribute:: math_model.cf
 
-		.. math::
-
-			y = ex + fz + g
-			z = ax^2 + bx + cy + d
+		Array of coefficients for the math model
 
 	.. py:attribute:: math_model.p
 
-		Dictionary containing coefficients of terms in math model such that:
+		Poly1d function for the math model to allow calculation and plotting of the model
 
-		.. math::
 
-			y = ay*x^2 + by*x + cy
-			z = az*x^2 + bz*x + cz
+.. py:function:: process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key)
 
-	.. py:attribute:: math_model.x 
+	Process single sample through :py:class:`brain` class and saves df to csv
 
-		Array containing x coordinates of model
+	:param str num: Sample number
+	:param str root: Complete path to the root directory for this sample set
+	:param str name: Name describing this sample set
+	:param str outdir: Complete path to output directory
+	:param array chs: Array containing strings specifying the directories for each channel
+	:param array prefixes: Array containing strings specifying the file prefix for each channel
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param int deg: Degree of the function that should be fit to the model
+	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
 
-	.. py:attribute:: math_model.y
 
-		Array containing y coordinates of model
 
-	.. py:attribute:: math_model.z
+.. py:function:: write_header(f)
 
-		Array containing z coordinates of model
+	Writes header for PSI file with columns Id,x,y,z,ac,r,theta
 
-	.. py:attribute:: math_model.vx
+	:param file f: file object created by 'open(filename,'w')`
 
-		x position of the vertex
+.. py:function:: write_data(filepath,df)
 
-	.. py:attribute:: math_model.vy
+	Writes data in PSI format to file after writing header using :py:func:`write_header`. Closes file at the conclusion of writing data.
 
-		y position of the vertex
+	:param str filepath: Complete filepath to output file
+	:param pd.DataFrame df: dataframe containing columns x,y,z,ac,r,theta
 
-	.. py:attribute:: math_model.vz
+.. py:function:: read_psi(filepath)
 
-		z position of the vertex
+	Reads psi file at the given filepath and returns data in a pandas DataFrame
 
-	.. py:attribute:: math_model.fx
-
-		x position of the focus
-
-	.. py:attribute:: math_model.fy
-
-		y position of the focus
-
-	.. py:attribute:: math_model.fz
-
-		z position of the focus
-
-.. py:method:: math_model.calc_y(t)
-
-	Calculate y value according to a given t
-
-	:param float t: t value along the curve
-	:returns: y value corresponding to t
-	:rtype: float
-
-.. py:method:: math_model.calc_z(t)
-
-	Calculate z value according to a gien t
-
-	:param float t: t value along the curve
-	:returns: z value corresponding to t
-	:rtype: float
-
-.. py:method:: math_model.find_vertex()
-
-	Calculates the position of the vertex
-
-	:returns: :py:attr:`math_model.vx`, :py:attr:`math_model.vy`, :py:attr:`math_model.vz`
-
-.. py:method:: math_model.find_foucs()
-
-	Calculates the position of the focus
-
-	:returns: :py:attr:`math_model.fx`, :py:attr:`math_model.fy`, :py:attr:`math_model.fz`
-
+	:param str filepath: Complete filepath to file
+	:returns: Dataframe containing data
+	:rtype: pd.DataFrame

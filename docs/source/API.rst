@@ -1,4 +1,5 @@
 .. _api:
+
 API
 ====
 
@@ -25,6 +26,26 @@ API
 	.. py:attribute:: brain.subset
 
 		Random sample of the dataframe from :py:attr:`brain.df_thresh`
+
+	.. py:attribute:: brain.df_scl
+
+		Dataframe containing data from :py:attr:`brain.df_thresh` after a scaling value has been applied
+
+	.. py:attribute:: brain.scale
+
+		Array with three values representing the constant by which to multiply x,y,z respectively
+
+	.. py:attribute:: brain.pca
+
+		PCA object managing the transformation matrix and any resulting transformations
+
+	.. py:attribute:: brain.flip
+
+		Boolean value indicating whether or not the sample needs to be inverted along the y axis
+
+	.. py:attribute:: brain.vertex
+
+		Array of shape [vx,vy,vz] containing values to use for translating sample
 
 	.. py:attribute:: brain.df_align
 
@@ -56,15 +77,39 @@ API
 	:param float subset: Value between 0 and 1 indicating what percentage of the df to subsample
 	:returns: Matplotlib figure with three labeled scatterplots
 
-.. py:method:: brain.align_sample(threshold,scale[,deg=2])
+.. py:method:: brain.preprocess_data(threshold,scale)
 
-	Realigns sample axes using PCA and translates so that the vertex is at the origin
+	Thresholds and scales data prior to PCA
+
+	Creates :py:attr:`brain.threshold`, :py:attr:`brain.df_thresh`, and :py:attr:`brain.df_scl`
 
 	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
 	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+
+.. py:method:: brain.calculate_pca()
+
+	Create pca object and calculate transformation matrix in :py:attr:`brain.pca`
+
+.. py:method:: brain.add_pca(pca)
+
+	Add pca object from another channel and save as :py:attr:`brain.pca`
+
+	:param sklearn.decomposition.PCA pca: PCA object containing transformation components that are already calculated
+
+.. py:method:: brain.pca_transform([deg=2,mm=None,flip=None,vertex=None])
+
+	Transforms data according to PCA transformation matrix and translates the sample so that the vertex of the parabola is at the origin
+
+	Creates :py:attr:`brain.df_align`
+
 	:param deg: Degree of the function that should be fit to the model. deg=2 by default
 	:type: int or None
-	:returns: :py:attr:`brain.df_align` and :py:attr:`brain.mm`
+	:param mm: Math model for primary channel
+	:type: :py:class:`math_model` (:py:attr:`brain.mm`) or None
+	:param flip: Boolean value to indicate whether or not the points need to be inverted along the y axis
+	:type: Boolean (:py:attr:`brain.flip`) or None
+	:param vertex: Array indicating the translation values
+	:type: Array [vx,vy,vz] (:py:attr:`brain.vertex`) or None
 
 .. py:method:: brain.fit_model(df,deg)
 
@@ -181,13 +226,14 @@ API
 	:param str filepath: Complete filepath to image
 	:param str key: Name of the channel
 
-.. py:method:: embryo.process_channels(threshold,scale,deg)
+.. py:method:: embryo.process_channels(threshold,scale,deg,primary_key)
 	
 	Process all channels through the production of the :py:attr:`brain.df_align` dataframe
 
 	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
 	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
 	:param int deg: Degree of the function that should be fit to the model
+	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
 
 .. py:method:: embryo.save_projections(subset)
 
@@ -216,12 +262,20 @@ API
 		Poly1d function for the math model to allow calculation and plotting of the model
 
 
-.. py:function:: process_sample(filepath)
+.. py:function:: process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key)
 
 	Process single sample through :py:class:`brain` class and saves df to csv
 
-	:param str filepath: Complete filepath to h5 data file
-	:returns: Saves dataframe to csv with name of the original data file 
+	:param str num: Sample number
+	:param str root: Complete path to the root directory for this sample set
+	:param str name: Name describing this sample set
+	:param str outdir: Complete path to output directory
+	:param array chs: Array containing strings specifying the directories for each channel
+	:param array prefixes: Array containing strings specifying the file prefix for each channel
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param int deg: Degree of the function that should be fit to the model
+	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
 
 
 

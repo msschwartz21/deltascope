@@ -15,7 +15,6 @@ import pandas as pd
 #import plotly.graph_objs as go
 from scipy.optimize import minimize
 import scipy
-from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
 
 class brain:
@@ -98,45 +97,73 @@ class brain:
 		
 		return(fig)
 
-	def align_sample(self,threshold,scale,deg=2):
-		'''Realigns sample axes using PCA and translates so that the vertex is at the origin'''
+	def preprocess_data(self,threshold,scale):
+		'''Thresholds and scales data prior to PCA'''
 
 		#Create new dataframe with values above threshold
 		self.threshold = threshold
 		self.df_thresh = self.df[self.df.value > self.threshold]
 
 		#Scale xyz by value in scale array to force PCA axis selection
-		df_scl = pd.DataFrame({
-			'x':self.df_thresh.x * scale[0], 
-			'y':self.df_thresh.y * scale[1],
-			'z':self.df_thresh.z * scale[2]})
+		self.scale = scale
+		self.df_scl = pd.DataFrame({
+			'x':self.df_thresh.x * self.scale[0], 
+			'y':self.df_thresh.y * self.scale[1],
+			'z':self.df_thresh.z * self.scale[2]})
 
-		#Fit pca to data and transform data points
-		pca = PCA(n_components=3)
-		pca_fit = pca.fit_transform(df_scl[['x','y','z']])
+	def calculate_pca(self):
+		'''Create pca object and calculate transformation matrix'''
+
+		self.pca = PCA(n_components=3)
+		self.pca.fit(self.df_scl[['x','y','z']])
+
+	def add_pca(self,pca):
+		'''Add pca object from another channel'''
+
+		self.pca = pca
+
+	def pca_transform(self,deg=2,mm=None,flip=None,vertex=None):
+		'''Transform data according to PCA fit parameters'''
+
+		pca_fit = self.pca.transform(self.df_scl[['x','y','z']])
 
 		#Create pca dataframe and remove scaling
 		df_unscl = pd.DataFrame({
-			'x':pca_fit[:,0]/scale[0],
-			'y':pca_fit[:,1]/scale[1],
-			'z':pca_fit[:,2]/scale[2]
+			'x':pca_fit[:,0]/self.scale[0],
+			'y':pca_fit[:,1]/self.scale[1],
+			'z':pca_fit[:,2]/self.scale[2]
 			})
 
-		#Find first model
-		model = np.polyfit(df_unscl['x'],df_unscl['y'],deg=deg)
-		p = np.poly1d(model)
-
-		#If parabola is upside down, flip y coordinates
-		if model[0] < 0:
-			df_unscl.y = df_unscl.y * -1
-			#Recalculate model
-			model = np.polyfit(df_unscl['x'],df_unscl['y'],deg=deg)
+		#if flip = None, then this is the primary channel
+		if flip == None:
+			#Find first model
+			model = np.polyfit(df_unscl.x,df_unscl.y,deg=deg)
 			p = np.poly1d(model)
 
-		#Find vertex
-		vx = -model[1]/(2*model[0])
-		vy = p(vx)
-		vz = df_unscl.z.mean()
+			#If parabola is upside down, flip y coordinates and set flip value
+			if model[0] < 0:
+				self.flip = True
+				df_unscl.y = df_unscl.y * -1
+				#Recalculate model
+				model = np.polyfit(df_unscl.x,df_unscl.y,deg=deg)
+				p = np.poly1d(model)
+			else:
+				self.flip = False
+		else:
+			if flip == True:
+				df_unscl.y = df_unscl.y * -1
+
+		#If vertex for translation is not included
+		if vertex == None:
+			#Find vertex
+			vx = -model[1]/(2*model[0])
+			vy = p(vx)
+			vz = df_unscl.z.mean()
+			self.vertex = [vx,vy,vz]
+		else:
+			vx = vertex[0]
+			vy = vertex[1]
+			vz = vertex[2]
 
 		#Translate data so that the vertex is at the origin
 		self.df_align = pd.DataFrame({
@@ -145,8 +172,11 @@ class brain:
 			'z': df_unscl.z - vz
 			})
 
-		#Calculate final model based on translated and aligned data
-		self.fit_model(self.df_align,deg)
+		if mm == None:
+			#Calculate final model based on translated and aligned data
+			self.fit_model(self.df_align,deg)
+		else:
+			self.mm = mm
 
 	def fit_model(self,df,deg):
 		'''Fit model to dataframe'''
@@ -248,19 +278,33 @@ class embryo:
 
 		self.chnls[key] = s
 
-	def process_channels(self,threshold,scale,deg):
+	def process_channels(self,threshold,scale,deg,primary_key):
 		'''Process channels through alignment'''
 
+		#Process primary channel
+		self.chnls[primary_key].create_dataframe()
+		self.chnls[primary_key].preprocess_data(threshold,scale)
+		self.chnls[primary_key].calculate_pca()
+		self.chnls[primary_key].pca_transform(deg=deg)
+		self.chnls[primary_key].transform_coordinates()
+
+		print('Primary channel',primary_key,'processing complete')
+
 		for ch in self.chnls.keys():
-			self.chnls[ch].create_dataframe()
-			self.chnls[ch].align_sample(threshold,scale,deg)
-			self.chnls[ch].transform_coordinates()
-			print(ch,'processed')
+			if ch != primary_key:
+				self.chnls[ch].create_dataframe()
+				self.chnls[ch].preprocess_data(threshold,scale)
+				self.chnls[ch].add_pca(self.chnls[primary_key].pca)
+				self.chnls[ch].pca_transform(mm=self.chnls[primary_key].mm,
+					flip=self.chnls[primary_key].flip,
+					vertex=self.chnls[primary_key].vertex)
+				self.chnls[ch].transform_coordinates()
+				print(ch,'processed')
 
 	def save_projections(self,subset):
 		'''Save projections of both channels into files'''
 
-		for ch in self.chnls.keys()
+		for ch in self.chnls.keys():
 			fig = self.chnls[ch].plot_projections(self.chnls[ch].df_align,subset)
 			fig.savefig(os.path.join(self.outdir,
 				self.name+'_'+self.number+'_'+ch+'_MIP.png'))
@@ -270,9 +314,12 @@ class embryo:
 	def save_psi(self):
 		'''Save all channels into psi files'''
 
+		columns = ['x','y','z','ac','r','theta']
+
 		for ch in self.chnls.keys():
-			write_data(os.path.join(outdir,
-				self.name+'_'+self.number+'_'+ch+'.psi'))
+			write_data(os.path.join(self.outdir,
+				self.name+'_'+self.number+'_'+ch+'.psi'),
+				self.chnls[ch].df_align[columns])
 
 		print('PSIs generated')
 
@@ -284,29 +331,24 @@ class math_model:
 		self.cf = model
 		self.p = np.poly1d(model)
 
-def process_sample(filepath):
-	'''Process single sample through brain class and 
+def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key):
+	'''Process single sample through embryo class and 
 	save df to csv'''
 
 	tic = time.time()
 
-	path = '\\'.join(filepath.split('\\')[:-1])
-	name = filepath.split('\\')[-1].split('.')[0]
+	print(num,'Starting',name)
 
-	print('Starting',name)
-
-	s = brain()
-	s.read_data(filepath)
-	s.create_dataframe()
-	s.align_sample(0.9,[6,2,1],2)
-	s.transform_coordinates()
+	e = embryo(name,num,outdir)
+	e.add_channel(os.path.join(root,chs[0],prefixes[0]+'_'+num+'_Probabilities.h5'),
+		'at')
+	e.add_channel(os.path.join(root,chs[1],prefixes[1]+'_'+num+'_Probabilities.h5'),'zrf1')
+	e.process_channels(threshold,scale,deg,primary_key)
 	
-	print('Data processing complete',name)
+	print(num,'Data processing complete',name)
 
-	fig = s.plot_projections(s.df_align,0.1)
-	fig.savefig(os.path.join(path,name+'proj.png'))
-
-	write_data(os.path.join(path,name+'.psi'),s.df_align)
+	e.save_projections(0.1)
+	e.save_psi()
 
 	toc = time.time()
 	print(name,'complete',toc-tic)
@@ -324,8 +366,14 @@ def write_header(f):
 		'column[2] = "y"',
 		'column[3] = "z"',
 		'column[4] = "ac"',
+		'symbol[4] = "A"',
+		'type[4] = float',
 		'column[5] = "r"',
+		'symbol[5] = "R"',
+		'type[5] = float',
 		'column[6] = "theta"',
+		'symbol[6] = "T"',
+		'type[6] = float'
 	]
 
 	for line in contents:
@@ -362,7 +410,7 @@ def read_psi(filepath):
 
 	df = pd.read_csv(filepath,
 		sep=' ',
-		header=12,
-		names=['x','y','z','ac','r','theta','xc','yc','zc'])
+		header=12, #This value is now wrong
+		names=['x','y','z','ac','r','theta','xc','yc','zc']) #may also be wrong
 
 	return(df)
