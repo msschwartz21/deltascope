@@ -245,6 +245,12 @@ API
 
 	Save all channels into psi files following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`].psi
 
+.. py:method:: embryo.add_psi_data(filepath,key)
+
+	Read psi data into a channel dataframe
+
+	:param str filepath: Complete filepath to data
+	:param str key: Descriptive key for channel dataframe in dictionary
 
 
 .. py:class:: math_model(model)

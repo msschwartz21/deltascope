@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Changed
+- Fit model in the xz plane as opposed to the xy plane to match natural position of the parabolic commissure in approximately xz
 
 ## [0.0.6] - 2017-06-02
 ### Added

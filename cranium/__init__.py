@@ -79,7 +79,7 @@ class brain:
 
 		#Plot model
 		xvalues = np.arange(np.min(df.x),np.max(df.x))
-		ay.plot(xvalues,self.mm.p(xvalues),c='y')
+		ax.plot(xvalues,self.mm.p(xvalues),c='y')
 
 		#Add labels
 		ax.set_title('Y projection')
@@ -137,28 +137,28 @@ class brain:
 		#if flip = None, then this is the primary channel
 		if flip == None:
 			#Find first model
-			model = np.polyfit(df_unscl.x,df_unscl.y,deg=deg)
+			model = np.polyfit(df_unscl.x,df_unscl.z,deg=deg)
 			p = np.poly1d(model)
 
 			#If parabola is upside down, flip y coordinates and set flip value
 			if model[0] < 0:
 				self.flip = True
-				df_unscl.y = df_unscl.y * -1
+				df_unscl.z = df_unscl.z * -1
 				#Recalculate model
-				model = np.polyfit(df_unscl.x,df_unscl.y,deg=deg)
+				model = np.polyfit(df_unscl.x,df_unscl.z,deg=deg)
 				p = np.poly1d(model)
 			else:
 				self.flip = False
 		else:
 			if flip == True:
-				df_unscl.y = df_unscl.y * -1
+				df_unscl.z = df_unscl.z * -1
 
 		#If vertex for translation is not included
 		if vertex == None:
 			#Find vertex
 			vx = -model[1]/(2*model[0])
-			vy = p(vx)
-			vz = df_unscl.z.mean()
+			vy = df_unscl.y.mean()
+			vz = p(vx)
 			self.vertex = [vx,vy,vz]
 		else:
 			vx = vertex[0]
@@ -181,7 +181,7 @@ class brain:
 	def fit_model(self,df,deg):
 		'''Fit model to dataframe'''
 
-		self.mm = math_model(np.polyfit(df.x, df.y, deg=deg))
+		self.mm = math_model(np.polyfit(df.x, df.z, deg=deg))
 
 	###### Functions associated with alpha, r, theta coordinate system ######
 
@@ -259,6 +259,11 @@ class brain:
 
 		self.df_thresh = df
 
+	def add_aligned_df(self,df):
+		'''Add dataframe of aligned data'''
+
+		self.df_align = df
+
 class embryo:
 	'''Class to managed multiple brain objects in a multichannel sample'''
 
@@ -322,6 +327,11 @@ class embryo:
 				self.chnls[ch].df_align[columns])
 
 		print('PSIs generated')
+
+	def add_psi_data(self,filepath,key):
+		''''Read in previously processed psi data as a dataframe'''
+
+		self.chnls[key] = read_psi(filepath)
 
 class math_model:
 	'''Class to contain attributes and data associated with math model'''
@@ -410,7 +420,7 @@ def read_psi(filepath):
 
 	df = pd.read_csv(filepath,
 		sep=' ',
-		header=12, #This value is now wrong
-		names=['x','y','z','ac','r','theta','xc','yc','zc']) #may also be wrong
+		header=19, #This value is now wrong
+		names=['x','y','z','ac','r','theta']) #may also be wrong
 
 	return(df)
