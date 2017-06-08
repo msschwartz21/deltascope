@@ -14,7 +14,7 @@ from random import randint
 if __name__=='__main__':
 
 	root = 'C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um'
-	stypes = ['yot'] #['wt','yot']
+	stypes = ['wt']#,'yot'] #['wt','yot']
 	chs = ['AT2\\Prob','ZRF1']
 	prefixes = ['AT','ZRF1']
 
@@ -43,9 +43,12 @@ if __name__=='__main__':
 			chs=chs,
 			prefixes=prefixes,
 			threshold=0.5,
-			scale=[1000,100,1],
+			scale=[100000,1,1000],
 			deg=2,
-			primary_key='at')
+			primary_key='at',
+			comp_order=[0,2,1],
+			fit_dim=['x','z'],
+			flip_dim='z')
 
 		n = len(nums)
 		for i in range(0,n,5):

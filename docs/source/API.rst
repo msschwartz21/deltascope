@@ -96,12 +96,15 @@ API
 
 	:param sklearn.decomposition.PCA pca: PCA object containing transformation components that are already calculated
 
-.. py:method:: brain.pca_transform([deg=2,mm=None,flip=None,vertex=None])
+.. py:method:: brain.pca_transform(comp_order,fit_dim,flip_dim,[deg=2,mm=None,flip=None,vertex=None])
 
 	Transforms data according to PCA transformation matrix and translates the sample so that the vertex of the parabola is at the origin
 
 	Creates :py:attr:`brain.df_align`
 
+	:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+	:param str flip_dim: String specifying the dimension in which to flip the data if necessary, e.g. 'z'
 	:param deg: Degree of the function that should be fit to the model. deg=2 by default
 	:type: int or None
 	:param mm: Math model for primary channel
@@ -111,12 +114,13 @@ API
 	:param vertex: Array indicating the translation values
 	:type: Array [vx,vy,vz] (:py:attr:`brain.vertex`) or None
 
-.. py:method:: brain.fit_model(df,deg)
+.. py:method:: brain.fit_model(df,deg,fit_dim)
 
 	Fit model to dataframe
 
 	:param pd.DataFrame df: Dataframe containing at least x,y,z
 	:param int deg: Degree of the function that should be fit to the model
+	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
 
 .. py:method:: brain.find_distance(t,point)
 
@@ -226,7 +230,7 @@ API
 	:param str filepath: Complete filepath to image
 	:param str key: Name of the channel
 
-.. py:method:: embryo.process_channels(threshold,scale,deg,primary_key)
+.. py:method:: embryo.process_channels(threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim)
 	
 	Process all channels through the production of the :py:attr:`brain.df_align` dataframe
 
@@ -234,6 +238,9 @@ API
 	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
 	:param int deg: Degree of the function that should be fit to the model
 	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
+	:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+	:param str flip_dim: String specifying the dimension in which to flip the data if necessary, e.g. 'z'
 
 .. py:method:: embryo.save_projections(subset)
 

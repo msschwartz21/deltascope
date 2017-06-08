@@ -122,43 +122,65 @@ class brain:
 
 		self.pca = pca
 
-	def pca_transform(self,deg=2,mm=None,flip=None,vertex=None):
+	def pca_transform(self,comp_order,fit_dim,flip_dim,deg=2,mm=None,flip=None,vertex=None):
 		'''Transform data according to PCA fit parameters'''
 
 		pca_fit = self.pca.transform(self.df_scl[['x','y','z']])
 
 		#Create pca dataframe and remove scaling
 		df_unscl = pd.DataFrame({
-			'x':pca_fit[:,0]/self.scale[0],
-			'y':pca_fit[:,1]/self.scale[1],
-			'z':pca_fit[:,2]/self.scale[2]
+			'x':pca_fit[:,comp_order[0]]/self.scale[0],
+			'y':pca_fit[:,comp_order[1]]/self.scale[1],
+			'z':pca_fit[:,comp_order[2]]/self.scale[2]
 			})
 
 		#if flip = None, then this is the primary channel
 		if flip == None:
 			#Find first model
-			model = np.polyfit(df_unscl.x,df_unscl.z,deg=deg)
+			model = np.polyfit(df_unscl[fit_dim[0]],df_unscl[fit_dim[1]],deg=deg)
 			p = np.poly1d(model)
 
 			#If parabola is upside down, flip y coordinates and set flip value
 			if model[0] < 0:
 				self.flip = True
-				df_unscl.z = df_unscl.z * -1
+				df_unscl[flip_dim] = df_unscl[flip_dim] * -1
 				#Recalculate model
-				model = np.polyfit(df_unscl.x,df_unscl.z,deg=deg)
+				model = np.polyfit(df_unscl[fit_dim[0]],df_unscl[fit_dim[1]],deg=deg)
 				p = np.poly1d(model)
 			else:
 				self.flip = False
 		else:
 			if flip == True:
-				df_unscl.z = df_unscl.z * -1
+				df_unscl[flip_dim] = df_unscl[flip_dim] * -1
 
 		#If vertex for translation is not included
 		if vertex == None:
 			#Find vertex
-			vx = -model[1]/(2*model[0])
-			vy = df_unscl.y.mean()
-			vz = p(vx)
+			a = -model[1]/(2*model[0])
+			if fit_dim[0] == 'x':
+				vx = a
+				if fit_dim[1] == 'y':
+					vy = p(vx)
+					vz = df_unscl.y.mean()
+				else:
+					vz = p(vx)
+					vy = df_unscl.z.mean()
+			elif fit_dim[0] == 'y':
+				vy = a
+				if fit_dim[1] == 'x':
+					vx = p(a)
+					vz = df_unscl.z.mean()
+				else:
+					vz = p(a)
+					vx = df_unscl.x.mean()
+			elif fit_dim[0] == 'z':
+				vz = a
+				if fit_dim[1] == 'x':
+					vx = p(a)
+					vy = df_unscl.y.mean()
+				else:
+					vy = p(a)
+					vx = df_unscl.x.mean()
 			self.vertex = [vx,vy,vz]
 		else:
 			vx = vertex[0]
@@ -174,14 +196,14 @@ class brain:
 
 		if mm == None:
 			#Calculate final model based on translated and aligned data
-			self.fit_model(self.df_align,deg)
+			self.fit_model(self.df_align,deg,fit_dim)
 		else:
 			self.mm = mm
 
-	def fit_model(self,df,deg):
+	def fit_model(self,df,deg,fit_dim):
 		'''Fit model to dataframe'''
 
-		self.mm = math_model(np.polyfit(df.x, df.z, deg=deg))
+		self.mm = math_model(np.polyfit(df[fit_dim[0]], df[fit_dim[1]], deg=deg))
 
 	###### Functions associated with alpha, r, theta coordinate system ######
 
@@ -283,14 +305,14 @@ class embryo:
 
 		self.chnls[key] = s
 
-	def process_channels(self,threshold,scale,deg,primary_key):
+	def process_channels(self,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
 		'''Process channels through alignment'''
 
 		#Process primary channel
 		self.chnls[primary_key].create_dataframe()
 		self.chnls[primary_key].preprocess_data(threshold,scale)
 		self.chnls[primary_key].calculate_pca()
-		self.chnls[primary_key].pca_transform(deg=deg)
+		self.chnls[primary_key].pca_transform(comp_order,fit_dim,flip_dim,deg=deg)
 		self.chnls[primary_key].transform_coordinates()
 
 		print('Primary channel',primary_key,'processing complete')
@@ -300,7 +322,7 @@ class embryo:
 				self.chnls[ch].create_dataframe()
 				self.chnls[ch].preprocess_data(threshold,scale)
 				self.chnls[ch].add_pca(self.chnls[primary_key].pca)
-				self.chnls[ch].pca_transform(mm=self.chnls[primary_key].mm,
+				self.chnls[ch].pca_transform(comp_order,fit_dim,flip_dim,mm=self.chnls[primary_key].mm,
 					flip=self.chnls[primary_key].flip,
 					vertex=self.chnls[primary_key].vertex)
 				self.chnls[ch].transform_coordinates()
@@ -341,7 +363,7 @@ class math_model:
 		self.cf = model
 		self.p = np.poly1d(model)
 
-def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key):
+def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
 	'''Process single sample through embryo class and 
 	save df to csv'''
 
@@ -353,7 +375,7 @@ def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary
 	e.add_channel(os.path.join(root,chs[0],prefixes[0]+'_'+num+'_Probabilities.h5'),
 		'at')
 	e.add_channel(os.path.join(root,chs[1],prefixes[1]+'_'+num+'_Probabilities.h5'),'zrf1')
-	e.process_channels(threshold,scale,deg,primary_key)
+	e.process_channels(threshold,scale,deg,primary_key,[0,2,1],['x','z'],'z')
 	
 	print(num,'Data processing complete',name)
 
@@ -424,3 +446,17 @@ def read_psi(filepath):
 		names=['x','y','z','ac','r','theta']) #may also be wrong
 
 	return(df)
+
+def calculate_models(Ldf):
+	'''Calculate models for each sample based on a list of at dataframes that are already aligned'''
+
+	modeldf = pd.DataFrame({'a':[],'b':[],'c':[]})
+
+	for df in Ldf:
+		s = cranium.brain()
+		s.add_aligned_df(df)
+		s.fit_model(s.df_align,2)
+
+		modeldf = modeldf.append(pd.DataFrame({'a':[s.mm.cf[0]],'b':[s.mm.cf[1]],'c':[s.mm.cf[2]]}))
+
+	return(modeldf)
