@@ -1,15 +1,23 @@
-import cranium
-import multiprocessing as mp
-import time
-import os
-import sys
-from pushbullet import Pushbullet
-from functools import partial
-from random import randint
+
 #import plotly
 
 #plotly.tools.set_credentials_file(username='msschwartz21', api_key='OrM0hMDBvseeT6SCjxNb')
 
+def process_data(path):
+
+	tic = time.time()
+
+	s = cranium.brain()
+	s.read_data(path)
+	s.create_dataframe()
+	s.pca_double_transform(0.5,['x','z'])
+	s.transform_coordinates()
+
+	columns = ['x','y','z','ac','r','theta']
+	cranium.write_data(path[:-3]+'.psi',s.df_align[columns])
+
+	toc = time.time()
+	print(toc-tic)
 
 if __name__=='__main__':
 
@@ -32,7 +40,7 @@ if __name__=='__main__':
 		nums = []
 		for file in files:
 			if 'h5' in file and 'Probabilities' in file:
-				nums.append(file.split('_')[1])
+				nums.append(os.path.join(d,file))
 
 		print(nums)
 
@@ -58,7 +66,7 @@ if __name__=='__main__':
 				L = nums[i:i+5]
 
 			pool = mp.Pool()
-			pool.map(processfxn,L)
+			pool.map(process_data,L)
 			pool.close()
 			pool.join()
 

@@ -62,12 +62,12 @@ API
 	:param str filepath: Filepath to hdf5 probability file
 	:return: Array of shape [z,y,x] containing raw probability data
 
-.. py:method:: brain.create_dataframe()
+.. py:method:: brain.create_dataframe(data)
 
 	Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array
 
-	:return: :py:attr:`brain.df`
-	:rtype: Dataframe with four columns: x,y,z,value
+	:param array data: Raw probability data in 3D array
+	:return: Pandas DataFrame with xyz and probability value for each point
 
 .. py:method:: brain.plot_projections(df,subset)
 
@@ -96,6 +96,38 @@ API
 
 	:param sklearn.decomposition.PCA pca: PCA object containing transformation components that are already calculated
 
+.. py:method:: brain.process_alignment_data(data,threshold,radius)
+
+	Applies a double median filter to data to use for alignment
+
+	:param array data: 3D array containing raw probability data
+	:param float threshold: Value indicating the lower cutoff for positive signal
+	:param int radius: Radius of the neighborhood that should be considered for the median filter
+	:returns: dataframe after applying median filter twice and thresholding once
+	:rtype: Pandas DataFrame
+
+.. py:method:: brain.calculate_pca_median(data,threshold,radius)
+
+	Calculate PCA transformation matrix based on data after applying median filter and threshold
+
+	:param array data: 3D array containing raw probability data
+	:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal
+	:param int radius: Radius of neighborhood that should be considered for the median filter
+
+.. py:method:: brain.align_data(df,pca,comp_order,fit_dim[,deg=2,mm=None,vertex=None])
+
+	Apply PCA transformation matrix and align data so that the vertex is at the origin
+
+	:param pd.DataFrame df: dataframe containing thresholded xyz data
+	:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+	:param deg: Degree of the function that should be fit to the model. deg=2 by default
+	:type: int or None
+	:param mm: Math model for primary channel
+	:type: :py:class:`math_model` (:py:attr:`brain.mm`) or None
+	:param vertex: Array indicating the translation values
+	:type: Array [vx,vy,vz] (:py:attr:`brain.vertex`) or None
+
 .. py:method:: brain.pca_transform(comp_order,fit_dim,flip_dim,[deg=2,mm=None,flip=None,vertex=None])
 
 	Transforms data according to PCA transformation matrix and translates the sample so that the vertex of the parabola is at the origin
@@ -121,6 +153,8 @@ API
 	:param pd.DataFrame df: Dataframe containing at least x,y,z
 	:param int deg: Degree of the function that should be fit to the model
 	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+	:returns: math model
+	:rtype: :py:class:`math_model`
 
 .. py:method:: brain.find_distance(t,point)
 
@@ -230,17 +264,18 @@ API
 	:param str filepath: Complete filepath to image
 	:param str key: Name of the channel
 
-.. py:method:: embryo.process_channels(threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim)
+.. py:method:: embryo.process_channels(mthresh,gthresh,radius,scale,deg,primary_key,comp_order,fit_dim)
 	
 	Process all channels through the production of the :py:attr:`brain.df_align` dataframe
 
-	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param float mthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for median data
+	:param float gthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for general data
+	:param int radius: Size of the neighborhood area to examine with median filter
 	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
 	:param int deg: Degree of the function that should be fit to the model
 	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
 	:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
 	:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
-	:param str flip_dim: String specifying the dimension in which to flip the data if necessary, e.g. 'z'
 
 .. py:method:: embryo.save_projections(subset)
 

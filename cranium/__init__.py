@@ -16,6 +16,8 @@ import pandas as pd
 from scipy.optimize import minimize
 import scipy
 from sklearn.decomposition import PCA
+from skimage.filters import median
+from skimage.morphology import disk
 
 class brain:
 
@@ -27,8 +29,15 @@ class brain:
 
 		#Read h5 file and extract probability data
 		f = h5py.File(filepath,'r')
-		c1 = np.array(f.get('exported_data')[:,:,:,0])
-		c2 = np.array(f.get('exported_data')[:,:,:,1])
+
+		#Select either channe0/1 or exported_data
+		d = f.get('exported_data')
+		if d != None:
+			c1 = np.array(d[:,:,:,0])
+			c2 = np.array(d[:,:,:,1])
+		elif d == None:
+			c1 = np.array(f.get('channel0'))
+			c2 = np.array(f.get('channel1'))
 
 		#Figure out which channels has more zeros and therefore is background
 		if np.count_nonzero(c1<0.1) > np.count_nonzero(c1>0.9):
@@ -36,18 +45,18 @@ class brain:
 		else:
 			self.raw_data = c2
 
-	def create_dataframe(self):
+	def create_dataframe(self,data):
 		'''Creates a pandas dataframe containing the x,y,z and signal/probability value 
 		for each point in the :py:attr:`brain.raw_data` array'''
 
-		dim = self.raw_data.shape
+		dim = data.shape
 		xyz = np.zeros((dim[0],dim[1],dim[2],4))
 
 		#Generate array with xyz values for each point
 		for x in range(dim[2]):
 
 			xyz[:,:,x,2] = x
-			xyz[:,:,x,3] = self.raw_data[:,:,x]
+			xyz[:,:,x,3] = data[:,:,x]
 
 			zindex = np.arange(0,dim[0],1)
 			yindex = np.arange(0,dim[1],1)
@@ -59,7 +68,8 @@ class brain:
 		flat = np.reshape(xyz,(-1,4))
 
 		#Create dataframe of points
-		self.df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
+		df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
+		return(df)
 
 	def plot_projections(self,df,subset):
 		'''Plots x, y, and z projections from the dataframe'''
@@ -100,6 +110,8 @@ class brain:
 	def preprocess_data(self,threshold,scale):
 		'''Thresholds and scales data prior to PCA'''
 
+		self.df = self.create_dataframe(self.raw_data)
+
 		#Create new dataframe with values above threshold
 		self.threshold = threshold
 		self.df_thresh = self.df[self.df.value > self.threshold]
@@ -111,16 +123,94 @@ class brain:
 			'y':self.df_thresh.y * self.scale[1],
 			'z':self.df_thresh.z * self.scale[2]})
 
-	def calculate_pca(self):
-		'''Create pca object and calculate transformation matrix'''
+	def process_alignment_data(self,data,threshold,radius):
+		'''Applies a double median filter to data to use for alignment'''
 
-		self.pca = PCA(n_components=3)
-		self.pca.fit(self.df_scl[['x','y','z']])
+		#Iterate over each plane and apply median filter twice
+		out = np.zeros(data.shape)
+		for z in range(data.shape[0]):
+			out[z] = median(median(data[z],disk(radius)),disk(radius))
 
-	def add_pca(self,pca):
-		'''Add pca object from another channel'''
+		outdf = self.create_dataframe(out)
+		thresh = outdf[outdf.value > threshold]
+		return(thresh)
 
-		self.pca = pca
+	def calculate_pca_median(self,data,threshold,radius):
+		'''Transform data according to median filtered raw data'''
+
+		self.median = self.process_alignment_data(data,threshold,radius)
+
+		self.pcamed = PCA()
+		self.pcamed.fit(self.median[['x','y','z']])
+	
+	def align_data(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None):
+		'''Apply PCA transformation matrix and align data so that 
+		the vertex is at the origin'''
+
+		#PCA transformation matrix
+		fit = pca.transform(df[['x','y','z']])
+		df_fit = pd.DataFrame({
+			'x':fit[:,comp_order[0]],
+			'y':fit[:,comp_order[1]],
+			'z':fit[:,comp_order[2]]
+			})
+
+		#If vertex for translation is not included
+		if vertex == None:
+			#Calculate model
+			model = np.polyfit(df_fit[fit_dim[0]],df_fit[fit_dim[1]],deg=deg)
+			p = np.poly1d(model)
+
+			#Find vertex
+			a = -model[1]/(2*model[0])
+			if fit_dim[0] == 'x':
+				vx = a
+				if fit_dim[1] == 'y':
+					vy = p(vx)
+					vz = df_fit.y.mean()
+				else:
+					vz = p(vx)
+					vy = df_fit.z.mean()
+			elif fit_dim[0] == 'y':
+				vy = a
+				if fit_dim[1] == 'x':
+					vx = p(a)
+					vz = df_fit.z.mean()
+				else:
+					vz = p(a)
+					vx = df_fit.x.mean()
+			elif fit_dim[0] == 'z':
+				vz = a
+				if fit_dim[1] == 'x':
+					vx = p(a)
+					vy = df_fit.y.mean()
+				else:
+					vy = p(a)
+					vx = df_fit.x.mean()
+			self.vertex = [vx,vy,vz]
+		else:
+			self.vertex = vertex
+
+		#Translate data so that the vertex is at the origin
+		self.df_align = pd.DataFrame({
+			'x': df_fit.x - self.vertex[0],
+			'y': df_fit.y - self.vertex[1],
+			'z': df_fit.z - self.vertex[2]
+			})
+
+		#Calculate final math model
+		if mm == None:
+			self.mm = self.fit_model(self.df_align,deg,fit_dim)
+		else:
+			self.mm = mm
+
+	def fit_model(self,df,deg,fit_dim):
+		'''Fit model to dataframe'''
+
+		mm = math_model(np.polyfit(df[fit_dim[0]], df[fit_dim[1]], deg=deg))
+		return(mm)
+
+	##### Deprecated PCA functions
 
 	def pca_transform(self,comp_order,fit_dim,flip_dim,deg=2,mm=None,flip=None,vertex=None):
 		'''Transform data according to PCA fit parameters'''
@@ -196,15 +286,109 @@ class brain:
 
 		if mm == None:
 			#Calculate final model based on translated and aligned data
-			self.fit_model(self.df_align,deg,fit_dim)
+			self.mm = self.fit_model(self.df_align,deg,fit_dim)
 		else:
 			self.mm = mm
 
-	def fit_model(self,df,deg,fit_dim):
-		'''Fit model to dataframe'''
+	def calculate_pca(self):
+		'''Create pca object and calculate transformation matrix'''
 
-		self.mm = math_model(np.polyfit(df[fit_dim[0]], df[fit_dim[1]], deg=deg))
+		self.pca = PCA(n_components=3)
+		self.pca.fit(self.df_scl[['x','y','z']])
 
+	def add_pca(self,pca):
+		'''Add pca object from another channel'''
+
+		self.pca = pca
+
+	def pca_double_transform(self,threshold,fit_dim,pca1=None,pca2=None,deg=2,mm=None,vertex=None):
+		'''Transform data twice to align in plane'''
+
+		#Create new dataframe with values above threshold
+		self.threshold = threshold
+		self.df_thresh = self.df[self.df.value > self.threshold]
+
+		#Calulate first transformation matrix
+		if pca1 == None:
+			self.pca1 = PCA(n_components=3)
+			self.pca1.fit(self.df_thresh[['x','y','z']])
+		else:
+			self.pca1 = pca1
+
+		#Transform data according to assigned components
+		fit1 = self.pca1.transform(self.df_thresh[['x','y','z']])
+		#Create array for second pca transformation
+		a = np.zeros((fit1.shape[0],2))
+		a[:,0] = fit1[:,1]
+		a[:,1] = fit1[:,2]
+
+		if pca2 == None:
+			self.pca2 = PCA(n_components=2)
+			self.pca2.fit(a)
+		else:
+			self.pca2 = pca2
+
+		#Transform second according to second PCA
+		fit2 = self.pca2.transform(a)
+
+		#Put data in inbetween dataframe
+		df = pd.DataFrame({
+			'x': fit1[:,0],
+			'y': fit2[:,1],
+			'z': fit2[:,0]
+			})
+
+		if mm == None:
+			model = self.fit_model(df,deg,fit_dim)
+		else:
+			self.mm = mm
+
+		#If vertex for translation is not included
+		if vertex == None:
+			#Find vertex
+			a = -model.cf[1]/(2*model.cf[0])
+			if fit_dim[0] == 'x':
+				vx = a
+				if fit_dim[1] == 'y':
+					vy = model.p(vx)
+					vz = df.y.mean()
+				else:
+					vz = model.p(vx)
+					vy = df.z.mean()
+			elif fit_dim[0] == 'y':
+				vy = a
+				if fit_dim[1] == 'x':
+					vx = model.p(a)
+					vz = df.z.mean()
+				else:
+					vz = model.p(a)
+					vx = df.x.mean()
+			elif fit_dim[0] == 'z':
+				vz = a
+				if fit_dim[1] == 'x':
+					vx = model.p(a)
+					vy = df.y.mean()
+				else:
+					vy = model.p(a)
+					vx = df.x.mean()
+			self.vertex = [vx,vy,vz]
+		else:
+			vx = vertex[0]
+			vy = vertex[1]
+			vz = vertex[2]
+
+		#Translate data so that the vertex is at the origin
+		self.df_align = pd.DataFrame({
+			'x': df.x - vx,
+			'y': df.y - vy,
+			'z': df.z - vz
+			})
+
+		if mm == None:
+			#Calculate final model based on translated and aligned data
+			self.mm = self.fit_model(self.df,deg,fit_dim)
+		else:
+			self.mm = mm
 	###### Functions associated with alpha, r, theta coordinate system ######
 
 	def find_distance(self,t,point):
@@ -305,26 +489,33 @@ class embryo:
 
 		self.chnls[key] = s
 
-	def process_channels(self,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
+	def process_channels(self,mthresh,gthresh,radius,scale,deg,primary_key,comp_order,fit_dim):
 		'''Process channels through alignment'''
 
 		#Process primary channel
-		self.chnls[primary_key].create_dataframe()
-		self.chnls[primary_key].preprocess_data(threshold,scale)
-		self.chnls[primary_key].calculate_pca()
-		self.chnls[primary_key].pca_transform(comp_order,fit_dim,flip_dim,deg=deg)
+		self.chnls[primary_key].preprocess_data(gthresh,scale)
+
+		self.chnls[primary_key].calculate_pca_median(self.chnls[primary_key].raw_data,
+			mthresh,radius)
+		self.pca = self.chnls[primary_key].pcamed
+
+		self.chnls[primary_key].align_data(self.chnls[primary_key].df_thresh,
+			self.pca,comp_order,fit_dim,deg=deg)
+		self.mm = self.chnls[primary_key].mm
+		self.vertex = self.chnls[primary_key].vertex
+
 		self.chnls[primary_key].transform_coordinates()
 
 		print('Primary channel',primary_key,'processing complete')
 
 		for ch in self.chnls.keys():
 			if ch != primary_key:
-				self.chnls[ch].create_dataframe()
-				self.chnls[ch].preprocess_data(threshold,scale)
-				self.chnls[ch].add_pca(self.chnls[primary_key].pca)
-				self.chnls[ch].pca_transform(comp_order,fit_dim,flip_dim,mm=self.chnls[primary_key].mm,
-					flip=self.chnls[primary_key].flip,
-					vertex=self.chnls[primary_key].vertex)
+				self.chnls[ch].preprocess_data(gthresh,scale)
+				
+				self.chnls[ch].align_data(self.chnls[ch].df_thresh,
+					self.pca,comp_order,fit_dim,deg=deg,
+					mm = self.mm, vertex = self.vertex)
+
 				self.chnls[ch].transform_coordinates()
 				print(ch,'processed')
 
