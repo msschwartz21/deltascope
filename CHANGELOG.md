@@ -1,8 +1,16 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Apply double median filter to primary channel to calculate PCA fit; Removes noise to create a cleaner dataset which fits the POC into the xz plane
 ### Changed
 - Fit model in the xz plane as opposed to the xy plane to match natural position of the parabolic commissure in approximately xz
+- Upside down samples are fliped using a 180 degree rotation matrix as opposed to multiplying the z axis by -1
+### Deprecated
+- pca_transform
+- calculate_pca
+- add_pca
+- pca_double_transform
 
 ## [0.0.6] - 2017-06-02
 ### Added

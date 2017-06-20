@@ -143,7 +143,7 @@ class brain:
 		self.pcamed = PCA()
 		self.pcamed.fit(self.median[['x','y','z']])
 	
-	def align_data(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None):
+	def align_data(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
 		'''Apply PCA transformation matrix and align data so that 
 		the vertex is at the origin'''
 
@@ -167,10 +167,10 @@ class brain:
 				vx = a
 				if fit_dim[1] == 'y':
 					vy = p(vx)
-					vz = df_fit.y.mean()
+					vz = df_fit.z.mean()
 				else:
 					vz = p(vx)
-					vy = df_fit.z.mean()
+					vy = df_fit.y.mean()
 			elif fit_dim[0] == 'y':
 				vy = a
 				if fit_dim[1] == 'x':
@@ -198,11 +198,35 @@ class brain:
 			'z': df_fit.z - self.vertex[2]
 			})
 
+		#Rotate data by 180 degrees if necessary
+		if flip == None:
+			#Calculate model
+			model = np.polyfit(df_fit[fit_dim[0]],df_fit[fit_dim[1]],deg=deg)
+			p = np.poly1d(model)
+
+			#If a is less than 0, rotate data
+			if model[0] < 0:
+				self.df_align = self.flip_data(self.df_align)
+		elif flip == True:
+			self.df_align = self.flip_data(self.df_align)
+
 		#Calculate final math model
 		if mm == None:
 			self.mm = self.fit_model(self.df_align,deg,fit_dim)
 		else:
 			self.mm = mm
+
+	def flip_data(self,df):
+		'''Rotate data by 180 degrees'''
+
+		r = np.array([[np.cos(np.pi),0,np.sin(np.pi)],
+			[0,1,0],
+			[-np.sin(np.pi),0,np.cos(np.pi)]])
+
+		rot = np.dot(np.array(df),r)
+
+		dfr = pd.DataFrame({'x':rot[:,0],'y':rot[:,1],'z':rot[:,2]})
+		return(dfr)
 
 	def fit_model(self,df,deg,fit_dim):
 		'''Fit model to dataframe'''
