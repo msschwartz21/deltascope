@@ -18,6 +18,7 @@ import scipy
 from sklearn.decomposition import PCA
 from skimage.filters import median
 from skimage.morphology import disk
+from sklearn.metrics import mean_squared_error
 
 class brain:
 
@@ -675,3 +676,325 @@ def calculate_models(Ldf):
 		modeldf = modeldf.append(pd.DataFrame({'a':[s.mm.cf[0]],'b':[s.mm.cf[1]],'c':[s.mm.cf[2]]}))
 
 	return(modeldf)
+
+def fit_distribution(y,var,distname):
+	'''Fit beta distribution to subset of data and return figure'''
+
+	dist = getattr(scipy.stats, distname)
+	sbst = y[var].sample(frac=0.01)
+
+	x = np.linspace(y[var].min(),y[var].max(),100)
+
+	param = dist.fit(sbst)
+	if distname == 'beta':
+		pdf_fit = dist.pdf(x,param[0],param[1],loc=param[2],scale=param[3])
+	elif distname == 'uniform':
+		pdf_fit = dist.pdf(x,param[0],param[1])
+
+	fig,ax = plt.subplots()
+	ax.hist(sbst,bins=15,normed=True)
+	ax.plot(x,pdf_fit,c='y')
+	#ax.set_ylim([0,1])
+
+	ax.set_title(distname+str(param))
+
+	return(fig,param)
+
+def calculate_rms(df):
+	'''Calculated the residual mean error for a sample'''
+
+	return(np.sqrt(np.sum(df.r**2)/df.size))
+
+def test_distributions(y,snum,plot=False,outdir=None):
+	'''Data should be a single series already processed, e.g. sampled or absolute value'''
+
+	#fit gamma distribution
+	gout = fit_gamma(y,plot=plot)
+
+	#fit beta distribuiton
+	bout = fit_beta(y,plot=plot)
+
+	#fit half normal distribution
+	hnout = fit_halfnorm(y,plot=plot)
+
+	if plot==True:
+		if outdir == None:
+			outdir = os.getcwd()
+		gout[-1].savefig(os.path.join(outdir,'gamma'+str(snum)+'.jpg'))
+		bout[-1].savefig(os.path.join(outdir,'beta'+str(snum)+'.jpg'))
+		hnout[-1].savefig(os.path.join(outdir,'halfnorm'+str(snum)+'.jpg'))
+
+	df = pd.DataFrame({'snum':[snum],
+		'g_a':[gout[0][0]], 'g_loc':[gout[0][1]], 'g_scale':[gout[0][2]],
+		'g_D':[gout[1]],'g_p':[gout[2]],
+		'b_a':[bout[0][0]], 'b_b':[bout[0][1]], 'b_loc':[bout[0][2]], 'b_scale':[bout[0][3]],
+		'b_D':[bout[1]], 'b_p':[bout[2]],
+		'hn_loc':[hnout[0][0]], 'hn_scale':[hnout[0][1]],
+		'hn_D':[hnout[1]], 'hn_p':[hnout[2]]
+		})
+
+	return(df)
+
+def test_beta(y,snum,plot=False,outdir=None):
+	'''Data should be a single series already processed, e.g. sampled or absolute value'''
+
+	#fit beta distribuiton
+	bout = fit_beta(y,plot=plot)
+
+	if plot==True:
+		if outdir == None:
+			outdir = os.getcwd()
+		bout[-1].savefig(os.path.join(outdir,'beta'+str(snum)+'.jpg'))
+
+	df = pd.DataFrame({'snum':[snum],
+		'b_a':[bout[0][0]], 'b_b':[bout[0][1]], 'b_loc':[bout[0][2]], 'b_scale':[bout[0][3]],
+		'b_D':[bout[1]], 'b_p':[bout[2]]
+		})
+
+	return(df)
+
+def test_gamma(y,snum,plot=False,outdir=None):
+	'''Data should be a single series already processed, e.g. sampled or absolute value'''
+
+	#fit beta distribuiton
+	gout = fit_gamma(y,plot=plot)
+
+	if plot==True:
+		if outdir == None:
+			outdir = os.getcwd()
+		gout[-1].savefig(os.path.join(outdir,'beta'+str(snum)+'.jpg'))
+
+	df = pd.DataFrame({'snum':[snum],
+		'g_a':[gout[0][0]], 'g_loc':[gout[0][1]], 'g_scale':[gout[0][2]],
+		'g_D':[gout[1]],'g_p':[gout[2]]
+		})
+
+	return(df)
+    
+def fit_gamma(y,plot=False):
+	'''Fit a gamma distribution to data
+	Returns: parameters, ks test, and plot if specified'''
+
+	gamma = scipy.stats.gamma
+
+	#Calculate parameters of gamma distribution
+	param = gamma.fit(y)
+
+	#Calculate range over which to test data
+	x = np.linspace(gamma.ppf(0.01,param[0],loc=param[1],scale=param[2]),
+		gamma.ppf(0.99,param[0],loc=param[1],scale=param[2]),y.size)
+
+	#Calculate pdf and cdf
+	pdf = gamma.pdf(x,param[0],loc=param[1],scale=param[2])
+	cdf = gamma.cdf(x,param[0],loc=param[1],scale=param[2])
+
+	#Calculate estimated cdf
+	ecdf_x = np.sort(y)
+	ecdf_y = np.array(range(len(ecdf_x)))/float(len(ecdf_x))
+
+	#Calculate ks test for goodness of fit
+	D,pvalue = scipy.stats.kstest(y,'gamma',args=(param[0],param[1],param[2]))
+
+	if plot == True:
+		fig = plt.figure()
+		ax = fig.add_subplot(121)
+		ay = fig.add_subplot(122)
+
+		ax.plot(ecdf_x,ecdf_y,label='ecdf')
+		ax.plot(x,cdf,label='cdf')
+		ax.set_title('Gamma distribution')
+		ax.legend()
+
+		ay.hist(y,normed=True)
+		ay.plot(x,pdf)
+
+		return(param,D,pvalue,fig)
+	else:
+		return(param,D,pvalue)
+
+def fit_beta(y,plot=False):
+	'''Fit beta distribution and test fit'''
+
+	beta = scipy.stats.beta
+
+	#Calculate beta parameters
+	param = beta.fit(y)
+
+	#Calculate x range
+	x = np.linspace(beta.ppf(0.01,param[0],param[1],loc=param[2],scale=param[3]),
+		beta.ppf(0.99,param[0],param[1],loc=param[2],scale=param[3]),y.size)
+
+	#Calculate pdf and cdf
+	pdf = beta.pdf(x,param[0],param[1],loc=param[2],scale=param[3])
+	cdf = beta.cdf(x,param[0],param[1],loc=param[2],scale=param[3])
+
+	#Calculate ecdf
+	ecdf_x = np.sort(y)
+	ecdf_y = np.array(range(len(ecdf_x)))/float(len(ecdf_x))
+
+	#Calculate ks test for goodness of fit
+	D,pvalue = scipy.stats.kstest(y,'beta',args=(param[0],param[1],param[2],param[3]))
+
+	if plot == True:
+		fig = plt.figure()
+		ax = fig.add_subplot(121)
+		ay = fig.add_subplot(122)
+
+		ax.plot(ecdf_x,ecdf_y,label='ecdf')
+		ax.plot(x,cdf,label='cdf')
+		ax.set_title('Beta Distribution')
+		ax.legend()
+
+		ay.hist(y,normed=True)
+		ay.plot(x,pdf)
+
+		return(param,D,pvalue,fig)
+	else:
+		return(param,D,pvalue)
+
+def fit_halfnorm(y,plot=False):
+	'''Fit halfnorm distribution'''
+
+	halfnorm = scipy.stats.norm
+
+	#Fit parameters
+	param = halfnorm.fit(y)
+
+	#Calculate x 
+	x = np.linspace(halfnorm.ppf(0.01,loc=param[0],scale=param[1]),
+		halfnorm.ppf(0.99,loc=param[0],scale=param[1]),y.size)
+
+	#Calculate cdf and pdf
+	pdf = halfnorm.pdf(x,loc=param[0],scale=param[1])
+	cdf = halfnorm.cdf(x,loc=param[0],scale=param[1])
+
+	#Calculate ecdf
+	ecdf_x = np.sort(y)
+	ecdf_y = np.array(range(len(ecdf_x)))/float(len(ecdf_x))
+
+	#Calculate ks test for goodness of fit
+	D,pvalue = scipy.stats.kstest(y,'halfnorm',args=(param[0],param[1]))
+
+	if plot == True:
+		fig = plt.figure()
+		ax = fig.add_subplot(121)
+		ay = fig.add_subplot(122)
+
+		ax.plot(ecdf_x,ecdf_y,label='ecdf')
+		ax.plot(x,cdf,label='cdf')
+		ax.set_title('Halfnorm Fit')
+		ax.legend()
+
+		ay.hist(y,normed=True)
+		ay.plot(x,pdf)
+
+		return(param,D,pvalue,fig)
+	else:
+		return(param,D,pvalue)
+
+def calculate_sample_error(y,param,distname,n):
+	'''Calculate RMSE based on KDE of sample and PDF of distribution'''
+
+	#Define x range
+	x = np.linspace(np.min(y),np.max(y),n)
+
+	#Calculate kde
+	gkde = scipy.stats.gaussian_kde(y)
+	kdepdf = gkde.evaluate(x)
+
+	#Calculate pdf
+	if distname == 'beta':
+		pdf = scipy.stats.beta.pdf(x,param[0],param[1],loc=param[2],scale=param[3])
+	elif distname == 'gamma':
+		pdf = scipy.stats.gamma.pdf(x,param[0],loc=param[1],scale=param[2])
+
+	error = np.sqrt(mean_squared_error(kdepdf,pdf))
+
+	return(error)
+
+def beta_pdf(x,param):
+	return(scipy.stats.beta.pdf(x,param[0],param[1],loc=param[2],scale=param[3]))
+
+def norm_pdf(x,param):
+	return(scipy.stats.norm.pdf(x,loc=param[0],scale=param[1]))
+
+def gamma_pdf(x,param):
+	return(scipy.stats.gamma.pdf(x,param[0],loc=param[1],scale=param[2]))
+
+def beta_rvs(param):
+	return(scipy.stats.beta.rvs(param[0],param[1],loc=param[2],scale=param[3],size=50000))
+
+def gamma_rvs(param):
+	return(scipy.stats.gamma.rvs(param[0],loc=param[1],scale=param[2],size=50000))
+
+def calculate_xcurve(ac,a):
+
+	b=0
+
+	xone = (-b + np.sqrt(b**2 + 4*a*ac))/2*a
+	xtwo = (-b - np.sqrt(b**2 + 4*a*ac))/2*a
+
+	if ac < 0:
+		if xone < 0:
+			return(xone)
+		else:
+			return(xtwo)
+	else:
+		if xone > 0:
+			return(xone)
+		else:
+			return(xtwo)
+
+def calculate_zcurve(x,a):
+
+	p = np.poly1d([a,0,0])
+
+	return(p(x))
+
+def calculate_y(theta,r):
+
+	return(r*np.sin(theta))
+
+def calculate_xyz(row,a):
+
+	ac,theta,r = row.ac,row.theta,row.r
+
+	xc = calculate_xcurve(ac,a)
+	zc = calculate_zcurve(xc,a)
+
+	gamma = np.arctan(-1/(2*a*xc))
+	k = r*np.cos(theta)
+	alpha = k*np.sin(gamma)
+	beta = k*np.cos(gamma)
+
+	x = xc + alpha
+	z = zc + beta
+	y = calculate_y(theta,r)
+
+	return(pd.Series({'x':x, 'y':y, 'z':z}))
+	                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+
+def generate_poc(ac,theta,r,a,outpath):
+	'''dist name as last item in param list
+	second to last is tuple with range of data'''
+
+	if ac[-1] == 'beta':
+		Lac = beta_rvs(ac[:-1])
+
+	if theta[-1] == 'beta':
+		Ltheta = beta_rvs(theta[:-1])
+
+	if r[-1] == 'beta':
+		Lr = beta_rvs(r[:-1])
+	elif r[-1] == 'gamma':
+		Lr = gamma_rvs(r[:-1])
+
+	df = pd.DataFrame({
+		'ac':Lac,
+		'theta':Ltheta,
+		'r':Lr
+		})
+
+	df = df.join(df.apply((lambda row: calculate_xyz(row,a)), axis=1))
+
+	write_data(outpath,df)
