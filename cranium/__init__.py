@@ -19,6 +19,7 @@ from sklearn.decomposition import PCA
 from skimage.filters import median
 from skimage.morphology import disk
 from sklearn.metrics import mean_squared_error
+from scipy.integrate import simps
 
 class brain:
 
@@ -715,7 +716,7 @@ def test_distributions(y,snum,plot=False,outdir=None):
 	bout = fit_beta(y,plot=plot)
 
 	#fit half normal distribution
-	hnout = fit_halfnorm(y,plot=plot)
+	hnout = fit_norm(y,plot=plot)
 
 	if plot==True:
 		if outdir == None:
@@ -852,7 +853,7 @@ def fit_beta(y,plot=False):
 	else:
 		return(param,D,pvalue)
 
-def fit_halfnorm(y,plot=False):
+def fit_norm(y,plot=False):
 	'''Fit halfnorm distribution'''
 
 	halfnorm = scipy.stats.norm
@@ -998,3 +999,104 @@ def generate_poc(ac,theta,r,a,outpath):
 	df = df.join(df.apply((lambda row: calculate_xyz(row,a)), axis=1))
 
 	write_data(outpath,df)
+
+def read_psi_to_dict(directory,dtype):
+	'''Read psi in directory into dict of df'''
+
+	dfs = {}
+	for f in os.listdir(directory):
+		if dtype in f:
+			df = read_psi(os.path.join(directory,f))
+			num = f.split('_')[1][:2]
+			dfs[num] = df
+
+	return(dfs)
+
+def concatenate_dfs(dfdict):
+	'''Concatenated dfs from dict into one df'''
+
+	L = []
+	for key in wtdf.keys():
+		L.append(dfdict[key])
+
+	alldf = pd.concat(L)
+
+	return(alldf)
+
+def generate_kde(data,var,x,absv=False):
+	'''Generate list of kde from either dict or list'''
+
+	L = []
+
+	#Dictionary workflow
+	if type(data) ==  type({}):
+		for key in data.keys():
+			if absv == False:
+				y = data[key][var]
+			elif absv == True:
+				y = np.abs(data[key][var])
+			kde = scipy.stats.gaussian_kde(y).evaluate(x)
+			L.append(kde)
+	#List workflow
+	elif type(data) == type([]):
+		for df in data:
+			if absv == False:
+				y = df[var]
+			elif absv == True:
+				y = np.abs(df[var])
+			kde = scipy.stats.gaussian_kde(y).evaluate(x)
+			L.append(kde)
+
+	return(L)
+
+def fit_bimodal_theta(D,split,frac,x):
+	'''Fit bimodal theta to concatenated df from dict D'''
+
+	alldf = concatenate_dfs(D)
+	y = alldf.theta.sample(frac=frac)
+
+	lpoints = len(y[y<0])
+	rpoints = len(y[y>0])
+
+	pleft = fit_norm(y[y<0])
+	pright = fit_norm(y[y>0])
+
+	pdfl = norm_pdf(x,pleft[0])*(lpoints/(lpoints+rpoints))
+	pdfr = norm_pdf(x,pright[0])*(rpoints/(lpoints+rpoints))
+
+	return(pdfl+pdfr)
+
+def calculate_area_error(pdf,Lkde,x):
+	'''Calculate area between pdf and each Lkde'''
+
+	L = []
+
+	for kde in Lkde:
+		L.append(simps(np.abs(pdf-kde),x))
+
+	return(L)
+
+def rescale_variable(Ddfs,var,newvar):
+	'''Rescale variable from -1 to 1 and save in newvar in dict'''
+
+	Dout = []
+
+	for key in Ddfs.keys():
+		df = Ddfs[key]
+		y = df[var]
+
+		#Find min and max values
+		mi,ma = y.min(),y.max()
+
+		#Divide dataframe
+		dfmin = df[y < 0]
+		dfmax = df[y >= 0]
+
+		#Add rescaled variable to dataframe
+		dfmin = dfmin.join(pd.DataFrame({newvar:y/np.abs(mi)}))
+		dfmax = dfmax.join(pd.DataFrame({newvar:y/np.abs(ma)}))
+
+		dfout = dfmin.append(dfmax)
+		Dout[key] = dfout
+
+	return(Dout)

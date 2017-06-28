@@ -347,3 +347,222 @@ API
 	:param str filepath: Complete filepath to file
 	:returns: Dataframe containing data
 	:rtype: pd.DataFrame
+
+.. py:function:: calculate_models(Ldf)
+
+	Calculate model for each dataframe in list and add to new dataframe
+
+	:param list Ldf: List of dataframes containing aligned data
+	:returns: Dataframe with a,b,c values for parabolic model
+	:rtype: pd.DataFrame
+
+.. py:function:: fit_distribution(y,var,distname)
+
+	Fit specified distribution to downsample data and return parameters and figure with plotted data
+
+	:param pd.DataFrame y: Dataframe with complete data
+	:param str var: Name of column in variable, which needs to be fitting
+	:param str distname: 'beta' or 'uniform'
+	:returns: Matplotlib figure object and parameter list
+
+.. py:function:: calculate_rms(df)
+
+	Calculate root mean squared error for a sample using r values
+
+	:param pd.DataFrame df: Dataframe containing 'r'
+	:returns: RMSE value
+	:rtype: float
+
+.. py:function:: test_distributions(y,snum[,plot=False,outdir=None])
+
+	Tests fit of gamma, beta, and normal distributions on preprocessed data
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param str snum: String with sample number
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+	:param str outdir: Set to path to outdir otherwise files will save in current working directory
+	:returns: Dataframe containing parameters and KS test output for each distribution
+
+.. py:function:: test_beta(y,snum[,plot=False,outdir=None])
+
+	Fits beta distrubtion to data and returns parameters in df
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param str snum: String with sample number
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+	:param str outdir: Set to path to outdir otherwise files will save in current working directory
+	:returns: Dataframe with parameters and KS test result
+	:rtype: pd.DataFrame
+
+.. py:function:: test_gamma(y,snum[,plot=False,outdir=None])
+
+	Fits gamma distrubtion to data and returns parameters in df
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param str snum: String with sample number
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+	:param str outdir: Set to path to outdir otherwise files will save in current working directory
+	:returns: Dataframe with parameters and KS test result
+	:rtype: pd.DataFrame
+
+.. py:function:: fit_gamma(y[,plot=False])
+
+	Fit a gamma distribution to data and return parameter and plot if specified
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+
+.. py:function:: fit_beta(y[,plot=False])
+
+	Fit a beta distribution to data and return parameter and plot if specified
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+
+.. py:function:: fit_norm(y[,plot=False])
+
+	Fit a normal distribution to data and return parameter and plot if specified
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param plot: Set to True to receive plotted data in outdir
+	:type: Boolean or None
+
+.. py:function:: calculate_sample_error(y,param,distname,n)
+
+	Calculate RMSE based on KDE of a sample and PDF of a distribution
+
+	:param array y: Array of preprocessed data to be used for distribution fit
+	:param array param: Array of parameters for specified distribution
+	:param str distname: 'beta' or 'gamma'
+	:param int n: Length of x for fitting data
+	:returns: Root mean squared error value
+	:rtype: float
+
+.. py:function:: beta_pdf(x,param)
+
+	Fit beta distribution to array x to get probability distribution function
+
+	:param array x: Array to fit pdf to
+	:param array param: Array of [a,b,loc,scale] for beta distribution
+	:returns: Beta probability distribution function
+	:rtype: array
+
+.. py:function:: gamma_pdf(x,param)
+
+	Fit gamma distribution to array x to get probability distribution function
+
+	:param array x: Array to fit pdf to
+	:param array param: Array of [a,loc,scale] for gamma distribution
+	:returns: Gamma probability distribution function
+	:rtype: array
+
+.. py:function:: norm_pdf(x,param)
+
+	Fit normal distribution to array x to get probability distribution function
+
+	:param array x: Array to fit pdf to
+	:param array param: Array of [loc,scale] for normal distribution
+	:returns: Normal probability distribution function
+	:rtype: array
+
+.. py:function:: beta_rvs(param)
+
+	Generate sampling of random points from specified beta distribution
+
+	:param array param: Array of [a,b,loc,scale] for beta distribution
+	:returns: Array of random values from distribution
+	:rtype: array
+
+.. py:function:: gamma_rvs(param)
+
+	Generate sampling of random points from specified gamma distribution
+
+	:param array param: Array of [a,loc,scale] for gamma distribution
+	:returns: Array of random values from distribution
+	:rtype: array
+
+.. py:function:: calculate_xcurve
+
+	.. warning:: not working
+
+.. py:function:: calculate_zcurve
+
+	.. warning:: not working
+
+.. py:function:: calculate_y
+
+	.. warning:: not working
+
+.. py:function:: calculate_xyz
+
+	.. warning:: not working
+
+.. py:function:: generate_poc
+
+	.. warning:: not working
+
+.. py:function:: read_psi_to_dict(directory,dtype)
+
+	Read psis from directory into dictionary of dfs with filtering based on dtype
+
+	:param str directory: Directory to get psis from 
+	:param str dtype: Usually 'AT' or 'ZRF1'
+	:returns: Dictionary of pd.DataFrame
+	:rtypes: dictionary
+
+.. py:function:: concatenate_dfs(dfdict)
+
+	Concatenated a dictionary of dfs into one df
+
+	:param dict dfdict: Dictionary of pd.DataFrames
+	:returns: Concatenated df
+	:rtype: pd.DataFrame
+
+.. py:function:: generate_kde(data,var,x[,absv=False])
+
+	Generate list of KDEs from either dictionary or list of data
+
+	:param data: pd.DataFrames to convert
+	:type: dict or list
+	:param str var: Name of column to select from df
+	:param array x: Array of datapoints to evaluate KDE on
+	:param absv: Set to True to use absolute value of selected data for KDE calculation
+	:type: boolean or None
+	:returns: List of KDE arrays
+
+.. py:function:: fit_bimodal_theta(D,split,frac,x)
+
+	Fit two distributions to bimodal theta data from dict D
+
+	:param dict D: dictionary of pd.DataFrame
+	:param split: Value to divide data for two distributions
+	:type: int or float
+	:param float frac: Fraction of the data to sample for distribution fitting
+	:param array x: Array of datapoint to evaluate pdf on 
+	:returns: Single pdf array containing both distributions scaled to proportion of points in each half of data
+	:rtype: array
+
+.. py:function:: calculate_area_error(pdf,Lkde,x)
+
+	Calculate area between PDF and each kde in Lkde
+
+	:param array pdf: Array of probability distribution function that is the same shape as kdes in Lkde
+	:param list Lkde: List of arrays of Kdes 
+	:param array x: Array of datapoints used to generate pdf and kdes
+	:returns: List of error values for each kde in Lkde
+	:rtype: list
+
+.. py:function:: rescale_variable(Ddfs,var,newvar)
+
+	Rescale variable from -1 to 1 and save in newvar column on original dataframe
+
+	:param dict Ddfs: Dictionary of pd.DataFrames
+	:param str var: Name of column to select from dfs
+	:param str newvar: Name to use for new data in appended column
+	:returns: Dictionary of dataframes containing column of rescaled data
+
