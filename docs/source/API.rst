@@ -62,11 +62,12 @@ API
 	:param str filepath: Filepath to hdf5 probability file
 	:return: Array of shape [z,y,x] containing raw probability data
 
-.. py:method:: brain.create_dataframe(data)
+.. py:method:: brain.create_dataframe(data,scale)
 
 	Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array
 
 	:param array data: Raw probability data in 3D array
+	:param array scale: Array of length three containing the micron values for [x,y,z]
 	:return: Pandas DataFrame with xyz and probability value for each point
 
 .. py:method:: brain.plot_projections(df,subset)
@@ -193,14 +194,14 @@ API
 	:returns: Length of the arc along the curve between the row and the vertex
 	:rtype: float
 
-.. py:method:: brain.find_theta(row,xc,zc)
+.. py:method:: brain.find_theta(row,zc,yc)
 
-	Calculate theta for a row containing data point in relationship to the xy plane
+	Calculate theta for a row containing data point in relationship to the xz plane
 
 	:param pd.Series row: row from dataframe in the form of a pandas Series
-	:param float xc: X position of the closest point in the curve to the data point
+	:param float yc: Y position of the closest point in the curve to the data point
 	:param float zc: Z position of the closest point in the curve to the data point
-	:returns: theta, angle between point and the xy plane
+	:returns: theta, angle between point and the xz plane
 	:rtype: float
 
 .. py:method:: brain.calc_coord(row)

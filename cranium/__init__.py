@@ -47,7 +47,7 @@ class brain:
 		else:
 			self.raw_data = c2
 
-	def create_dataframe(self,data):
+	def create_dataframe(self,data,scale):
 		'''Creates a pandas dataframe containing the x,y,z and signal/probability value 
 		for each point in the :py:attr:`brain.raw_data` array'''
 
@@ -69,8 +69,8 @@ class brain:
 
 		flat = np.reshape(xyz,(-1,4))
 
-		#Create dataframe of points
-		df = pd.DataFrame({'x':flat[:,2],'y':flat[:,1],'z':flat[:,0],'value':flat[:,3]})
+		#Create dataframe of points and scale to microns
+		df = pd.DataFrame({'x':flat[:,2]*scale[0],'y':flat[:,1]*scale[1],'z':flat[:,0]*scale[2],'value':flat[:,3]})
 		return(df)
 
 	def plot_projections(self,df,subset):
@@ -109,10 +109,10 @@ class brain:
 		
 		return(fig)
 
-	def preprocess_data(self,threshold,scale):
+	def preprocess_data(self,threshold,scale,microns):
 		'''Thresholds and scales data prior to PCA'''
 
-		self.df = self.create_dataframe(self.raw_data)
+		self.df = self.create_dataframe(self.raw_data,microns)
 
 		#Create new dataframe with values above threshold
 		self.threshold = threshold
@@ -125,7 +125,7 @@ class brain:
 			'y':self.df_thresh.y * self.scale[1],
 			'z':self.df_thresh.z * self.scale[2]})
 
-	def process_alignment_data(self,data,threshold,radius):
+	def process_alignment_data(self,data,threshold,radius,microns):
 		'''Applies a double median filter to data to use for alignment'''
 
 		#Iterate over each plane and apply median filter twice
@@ -133,14 +133,14 @@ class brain:
 		for z in range(data.shape[0]):
 			out[z] = median(median(data[z],disk(radius)),disk(radius))
 
-		outdf = self.create_dataframe(out)
+		outdf = self.create_dataframe(out,microns)
 		thresh = outdf[outdf.value > threshold]
 		return(thresh)
 
-	def calculate_pca_median(self,data,threshold,radius):
+	def calculate_pca_median(self,data,threshold,radius,microns):
 		'''Transform data according to median filtered raw data'''
 
-		self.median = self.process_alignment_data(data,threshold,radius)
+		self.median = self.process_alignment_data(data,threshold,radius,microns)
 
 		self.pcamed = PCA()
 		self.pcamed.fit(self.median[['x','y','z']])
@@ -418,27 +418,28 @@ class brain:
 	###### Functions associated with alpha, r, theta coordinate system ######
 
 	def find_distance(self,t,point):
-		'''Find euclidean distance between math model(t) and data point in the xy plane'''
+		'''Find euclidean distance between math model(t) and data point in the xz plane'''
 
 		x = float(t)
-		y = self.mm.p(x)
+		z = self.mm.p(x)
 
 		#Calculate distance between two points passed as array
-		dist = np.linalg.norm(point - np.array([x,y]))
+		dist = np.linalg.norm(point - np.array([x,z]))
 
 		return(dist)
 
 	def find_min_distance(self,row):
 		'''Find the point on the curve that produces the minimum distance between the point and the data point'''
 
-		dpoint = np.array([row.x,row.y])
+		dpoint = np.array([row.x,row.z])
 
-		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance
+		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance, 
+		#dpoint[0] is starting guess for x value
 		result = minimize(self.find_distance, dpoint[0], args=(dpoint))
 
 		x = result['x'][0]
-		y = self.mm.p(x)
-		z = 0
+		y = 0
+		z = self.mm.p(x)
 		r = result['fun']
 
 		return(x,y,z,r)
@@ -458,10 +459,10 @@ class brain:
 		ac,err = scipy.integrate.quad(self.integrand,xc,0)
 		return(ac)
 
-	def find_theta(self,row,xc,zc):
+	def find_theta(self,row,zc,yc):
 		'''Find theta value for a row describing angle between point and plane'''
 
-		theta = np.arctan2(row.z-zc,row.x-xc)
+		theta = np.arctan2(row.y-yc,row.z-zc)
 		return(theta)
 
 	def calc_coord(self,row):
@@ -469,7 +470,7 @@ class brain:
 
 		xc,yc,zc,r = self.find_min_distance(row)
 		ac = self.find_arclength(xc)
-		theta = self.find_theta(row,xc,zc)
+		theta = self.find_theta(row,ac,yc)
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
@@ -515,14 +516,14 @@ class embryo:
 
 		self.chnls[key] = s
 
-	def process_channels(self,mthresh,gthresh,radius,scale,deg,primary_key,comp_order,fit_dim):
+	def process_channels(self,mthresh,gthresh,radius,scale,microns,deg,primary_key,comp_order,fit_dim):
 		'''Process channels through alignment'''
 
 		#Process primary channel
-		self.chnls[primary_key].preprocess_data(gthresh,scale)
+		self.chnls[primary_key].preprocess_data(gthresh,scale,microns)
 
 		self.chnls[primary_key].calculate_pca_median(self.chnls[primary_key].raw_data,
-			mthresh,radius)
+			mthresh,radius,microns)
 		self.pca = self.chnls[primary_key].pcamed
 
 		self.chnls[primary_key].align_data(self.chnls[primary_key].df_thresh,
@@ -536,7 +537,7 @@ class embryo:
 
 		for ch in self.chnls.keys():
 			if ch != primary_key:
-				self.chnls[ch].preprocess_data(gthresh,scale)
+				self.chnls[ch].preprocess_data(gthresh,scale,microns)
 				
 				self.chnls[ch].align_data(self.chnls[ch].df_thresh,
 					self.pca,comp_order,fit_dim,deg=deg,
@@ -1007,7 +1008,7 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[1][:2]
+			num = f.split('_')[-2][:2]
 			dfs[num] = df
 
 	return(dfs)
@@ -1016,7 +1017,7 @@ def concatenate_dfs(dfdict):
 	'''Concatenated dfs from dict into one df'''
 
 	L = []
-	for key in wtdf.keys():
+	for key in dfdict.keys():
 		L.append(dfdict[key])
 
 	alldf = pd.concat(L)
@@ -1079,7 +1080,7 @@ def calculate_area_error(pdf,Lkde,x):
 def rescale_variable(Ddfs,var,newvar):
 	'''Rescale variable from -1 to 1 and save in newvar in dict'''
 
-	Dout = []
+	Dout = {}
 
 	for key in Ddfs.keys():
 		df = Ddfs[key]
