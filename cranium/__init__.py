@@ -470,7 +470,7 @@ class brain:
 
 		xc,yc,zc,r = self.find_min_distance(row)
 		ac = self.find_arclength(xc)
-		theta = self.find_theta(row,ac,yc)
+		theta = self.find_theta(row,zc,yc)
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
@@ -1056,11 +1056,11 @@ def fit_bimodal_theta(D,split,frac,x):
 	alldf = concatenate_dfs(D)
 	y = alldf.theta.sample(frac=frac)
 
-	lpoints = len(y[y<0])
-	rpoints = len(y[y>0])
+	lpoints = len(y[y<split])
+	rpoints = len(y[y>split])
 
-	pleft = fit_norm(y[y<0])
-	pright = fit_norm(y[y>0])
+	pleft = fit_norm(y[y<split])
+	pright = fit_norm(y[y>split])
 
 	pdfl = norm_pdf(x,pleft[0])*(lpoints/(lpoints+rpoints))
 	pdfr = norm_pdf(x,pright[0])*(rpoints/(lpoints+rpoints))
