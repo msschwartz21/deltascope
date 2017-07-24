@@ -4,6 +4,9 @@ from builtins import str
 from builtins import range
 __author__ = 'Hans Petter Langtangen <hpl@simula.no>'
 
+#example
+#python .\ipynb_generator.py datareport.aipynb test.ipynb WTDIR="C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\Output69semifinal" MUTDIR="C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\Output92semifinal" DTYPE='AT' MYVAR=4 GRADE='excellent'
+
 import sys, os, re, logging
 
 # Mapping of shortnames like py to full language
@@ -117,6 +120,28 @@ def read(text, argv=sys.argv[2:]):
 def write(cells, nb_version=4):
     """Turn cells list into valid IPython notebook code."""
     # Use IPython.nbformat functionality for writing the notebook
+    
+    Dmetadata = {
+        "anaconda-cloud": {},
+        "kernalspec": {
+            "display_name": "Python [Root]",
+            "language": "python",
+            "name": "Python [Root]"
+        },
+        "language_info": {
+            "codemirror_mode": {
+            "name": "ipython",
+            "version": 3
+            }
+        },
+        "file_extension": ".py",
+        "mimetype": "test/x-python",
+        "name": "python",
+        "nbconvert_exporter": "python",
+        "pygments_lexer": "ipython3",
+        "version": "3.5.2"
+    }
+
     if nb_version == 3:
         from nbformat.v3 import (
             new_code_cell, new_text_cell, new_worksheet,
@@ -151,7 +176,7 @@ def write(cells, nb_version=4):
         # Convert nb to json format
         filestr = nbjson.writes(nb)
     elif nb_version == 4:
-        nb = new_notebook(cells=nb_cells)
+        nb = new_notebook(cells=nb_cells, metadata=Dmetadata)
         from nbformat import writes
         filestr = writes(nb, version=4)
     return filestr
@@ -166,10 +191,10 @@ def driver():
         print('Usage: %s filename' % (sys.argv[0]))
         print(e)
         sys.exit(1)
-    cells = read(text, argv=sys.argv[2:])
+    cells = read(text, argv=sys.argv[3:])
     filestr = write(cells, 3)
-    filename = filename[-5:] + '.ipynb'
-    with open(filename, 'w') as f:
+    outname = sys.argv[2]
+    with open(outname, 'w') as f:
         f.write(filestr)
 
 
