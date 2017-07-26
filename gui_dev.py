@@ -19,9 +19,9 @@ class Gui:
 		Button(self.tab1.tab,text='Select Channel 2',command=self.open_dir2).grid(row=2,column=2)
 
 		self.tab2 = page(self.master,note,'2')
-		note.grid(row=1)
+		note.grid(row=1,columnspan=2)
 
-		Button(self.tab2.tab,text='Identify sample numbers',command=self.calc_num).grid(row=3,colspan=2)
+		Button(self.tab2.tab,text='Identify sample numbers',command=self.calc_num).grid(row=3,columnspan=2)
 
 		# self.greet_button = Button(master,text="greet", command = self.greet)
 		# self.greet_button.pack()

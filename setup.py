@@ -23,7 +23,8 @@ setup(name='cranium',
 		'statsmodels',
 		'mpl_toolkits',
 		'pandas',
-		'plotly'
+		'plotly',
+		'yaml'
 		],
 	include_package_data=True
 	)
