@@ -19,26 +19,14 @@ class Application(tk.Frame):
 		tk.Frame.__init__(self,master)
 
 		self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
-		# self.createWidgets()
 		self.createNotebook()
 		self.s = ttk.Style()
 
 		#Create none variables so that app can always be saved
 		self.fnums, self.Lnums = None,None
 
-
-	def createWidgets(self):
-		top = self.winfo_toplevel()
-		top.rowconfigure(0,weight=1)
-		top.columnconfigure(0,weight=1)
-		self.rowconfigure(0,weight=1)
-		self.columnconfigure(0,weight=1)
-
-		self.quitButton = tk.Button(self, text='Quit',command=self.quit)
-		self.quitButton.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W)
-
-
 	def createNotebook(self):
+		'''Create notebook to contain different tabs with data processing steps'''
 		self.note = ttk.Notebook(self)
 		self.note.grid()
 
@@ -57,11 +45,13 @@ class Application(tk.Frame):
 		self.createTab3()
 
 	def createTab1(self):
+		'''Create tab that allows user to define the source directory for data'''
 
-		##### Tab 1 #####
+		#Deactivated next button that turns on after user adds data to channel 1
 		self.nextB = tk.Button(self.tab1,text='Next',command=lambda:self.note.select(self.tab2),state=tk.DISABLED)
 		self.nextB.grid(row=4,column=2)
 
+		#Initialize channel objects to support selection of source directories
 		self.cs = channelMaster(self.tab1,'Structural channel: ',0)
 		self.cs.dButton.bind('<Button-1>',lambda e:self.activate(self.nextB,self.note,self.tab2))
 		self.c2 = channelMaster(self.tab1,'Channel 2: ',1)
@@ -69,22 +59,29 @@ class Application(tk.Frame):
 		self.c4 = channelMaster(self.tab1,'Channel 4: ',3)
 		self.Lc = [self.cs,self.c2,self.c3,self.c4]
 
+		#Loads saved files
 		self.loadB = tk.Button(self.tab1,text='Load saved file',command=self.load_status)
 		self.loadB.grid()
 
 	def createTab2(self):
-
-		##### Tab 2 #####
+		'''Tab 2 displays a list of files found in source directory
+		and has check boxes for selection'''
+		
+		#Generate file list button
 		self.filegenB = tk.Button(self.tab2,text='Generate file list',command=self.filegen)
 		self.filegenB.grid(row=0)
 
+		#Save button
 		self.saveB = tk.Button(self.tab2,text='Save',command=self.save_status)
 		self.saveB.grid(row=0,column=1)
 
+		#Go to next page button
 		self.nextB2 = tk.Button(self.tab2,text='Next',command=lambda:self.next_tab(self.tab3))
 		self.nextB2.grid(row=0,column=2)
 
 	def createTab25(self):
+		'''Text entry objects for all parameters with examples already entered'''
+
 		##### Tab 2.5 #####
 		r = 0
 		self.outdir = None
@@ -135,6 +132,7 @@ class Application(tk.Frame):
 			}
 		}
 
+		#Create text entry objects
 		for key in self.p.keys():
 			tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
 			self.p[key]['entry'] = tk.Entry(self.tab25)
