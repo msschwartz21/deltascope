@@ -8,11 +8,14 @@ import os
 import yaml
 import copy
 import cranium
+import numpy as np
+import time
 
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 class Application(tk.Frame):
 	def __init__(self,master=None):
@@ -81,7 +84,7 @@ class Application(tk.Frame):
 		self.saveB = tk.Button(self.tab2,text='Save',command=self.save_status)
 		self.saveB.grid(row=0,column=1)
 
-		self.nextB2 = tk.Button(self.tab2,text='Next',command=lambda:self.next_tab(self.tab3))
+		self.nextB2 = tk.Button(self.tab2,text='Next',command=lambda:self.next_tab(self.tab25))
 		self.nextB2.grid(row=0,column=2)
 
 	def createTab25(self):
@@ -90,6 +93,9 @@ class Application(tk.Frame):
 		self.outdir = None
 		self.outdirE = tk.Button(self.tab25,text='Final Output Folder: ',command=self.select_outdir)
 		self.outdirE.grid(row=r,column=0)
+
+		self.nextB25 = tk.Button(self.tab25,text='Next',command=lambda:self.next_tab(self.tab3))
+		self.nextB25.grid(row=0,column=2)
 
 		#Info in dict: row,title,example,help text
 		self.p = {
@@ -145,8 +151,12 @@ class Application(tk.Frame):
 	def createTab3(self):
 
 		##### Tab 3 #####
-		self.plotB = tk.Button(self.tab3,text='plot',command=lambda:self.plot_projection('06'))
-		self.plotB.grid(row=1)
+		# self.plotB = tk.Button(self.tab3,text='plot',command=lambda:self.plot_projection('06'))
+		# self.plotB.grid(row=1)
+
+		self.pBar = ttk.Progressbar(self.tab3)
+		self.pBar.grid(row=0,column=1)
+
 		
 	def activate(self,button,nb,ntab):
 		button['state'] = tk.NORMAL
@@ -159,49 +169,181 @@ class Application(tk.Frame):
 
 	def select_outdir(self):
 		self.outdir = filedialog.askdirectory()
-		tk.Label(self.tab3,text=self.outdir).grid(row=0,column=1)
+		tk.Label(self.tab25,text=self.outdir).grid(row=0,column=1)
 
-	def plot_projection(self,number):
+	def check_settings(self):
+
+		self.pc = {}
 
 		#Validate experiment name and outdir
-		self.expname = self.p['expname']['entry'].get()
-		if self.expname == '':
+		v = self.p['expname']['entry'].get()
+		if v == '':
 			messagebox.showerror('Error','Experiment name is not defined')
+			return
+		else:
+			self.pc['expname'] = v
+
 		if self.outdir == None:
 			messagebox.showerror('Error','Output directory has not been selected')
+			return
+
+		#Check median threshold value
+		s = self.p['medthresh']['entry'].get()
+		try:
+			v = float(s)
+			if v <= 1 and v >= 0:
+				self.pc['medthresh'] = v
+			else:
+				messagebox.showerror('Error','Median threshold input must be a number between 0 and 1')
+		except ValueError:
+			messagebox.showerror('Error','Median threshold input must be a number between 0 and 1')
+			return
+
+		#Check radius must be integer
+		s = self.p['radius']['entry'].get()
+		try:
+			self.pc['radius'] = int(s)
+		except ValueError:
+			messagebox.showerror('Error','Radius input must be an integer')
+			return
+
+		#Check genthresh float between 0 and 1
+		s = self.p['genthresh']['entry'].get()
+		try:
+			v = float(s)
+			if v <= 1 and v >= 0:
+				self.pc['genthresh'] = v
+			else:
+				messagebox.showerror('Error','General threshold input must be a number between 0 and 1')
+				return
+		except ValueError:
+			messagebox.showerror('Error','General threshold input must be a number between 0 and 1')
+			return
+
+		#Check microns
+		s = self.p['microns']['entry'].get()
+		ls = s.replace(' ','').split(',')
+		if len(ls) != 3:
+			messagebox.showerror('Error','Micron input must be a list of three numeric values seperated by commas')
+			return
+		else:
+			lv = []
+			for m in ls:
+				try:
+					v = float(m)
+					lv.append(v)
+				except ValueError:
+					messagebox.showerror('Error','Micron input must be a list of three numeric values seperated by commas')
+					return
+			self.pc['microns'] = lv
+
+		#Check degree
+		s = self.p['deg']['entry'].get()
+		try:
+			self.pc['deg'] = int(s)
+		except ValueError:
+			messagebox.showerror('Error','Degree input must be an integer')
+			return
+
+		#Check component order
+		s = self.p['comporder']['entry'].get()
+		ls = s.replace(' ','').split(',')
+		if len(ls) != 3:
+			messagebox.showerror('Error','Component order input must be a list of three integer values seperated by commas')
+			return
+		else:
+			lv = []
+			for m in ls:
+				try:
+					v = int(m)
+					lv.append(v)
+				except ValueError:
+					messagebox.showerror('Error','Component input must be a list of three integer values seperated by commas')
+					return
+			self.pc['comporder'] = lv
+
+		#Check fit dimensions
+		s = self.p['fitdim']['entry'].get()
+		ls = s.replace(' ','').split(',')
+		if len(ls) != 2:
+			messagebox.showerror('Error','Fit dimensions must be two of x,y or z seperated by a comma')
+			return
+		else:
+			lv = []
+			for m in ls:
+				if m in ['x','y','z']:
+					lv.append(m)
+				else:
+					messagebox.showerror('Error','Fit dimensions must be two of x,y or z seperated by a comma')
+					return
+			self.pc['fitdim'] = lv
+
+
+	def plot_projection(self,number):
+		tic = time.time()
+		self.pBar.start()
+
+		self.check_settings()
 
 		#Create embryo object and process channels through alignment
-		self.e = cranium.embryo(self.expname,number,self.outdir)
+		self.e = cranium.embryo(self.pc['expname'],number,self.outdir)
 		for i,c in enumerate(self.Lc):
 			if c.dir != None:
 				self.e.add_channel(os.path.join(c.dir,self.fnums[number][i]),c.name)
-				self.e.chnls[c.name].preprocess_data(self.p['genthresh']['entry'].get(),
-					[1,1,1],self.p['microns']['entry'].get())
-				self.e.chnls[c.name].calculate_pca_median(self.e.chnls[c.name].raw_data,
-					self.p['mthresh']['entry'].get(),self.p['radius']['entry'].get(),
-					self.p['microns']['entry'].get())
+				self.e.chnls[c.name].preprocess_data(self.pc['genthresh'],
+					[1,1,1],self.pc['microns'])
+				if i == 0:
+					self.e.chnls[c.name].calculate_pca_median(self.e.chnls[c.name].raw_data,
+						self.pc['medthresh'],self.pc['radius'],
+						self.pc['microns'])
+					pca = self.e.chnls[c.name].pcamed
+					self.e.chnls[c.name].align_data(self.e.chnls[c.name].df_thresh,
+						pca,self.pc['comporder'],self.pc['fitdim'],deg=self.pc['deg'])
+					mm = self.e.chnls[c.name].mm
+					vertex = self.e.chnls[c.name].vertex
 				#Implement better accomodation for secondary channels
 				self.e.chnls[c.name].align_data(self.e.chnls[c.name].df_thresh,
-					self.e.pca,self.p['comporder']['entry'].get(),
-					deg=self.p['deg']['entry'].get())
+					pca,self.pc['comporder'],self.pc['fitdim'],
+					deg=self.pc['deg'],mm=mm,vertex=vertex)
+
+		print('sample alignment complete',time.time()-tic)
 
 		df = self.e.chnls[self.cs.name].df_align.sample(frac=0.01)
+		dfraw = self.e.chnls[self.cs.name].df_thresh.sample(frac=0.01)
+		print(df.count())
 
 		fig = plt.figure(figsize=(12,6))
-		ax = fig.add_subplot(131)
-		ay = fig.add_subplot(132)
-		az = fig.add_subplot(133)
+		fig.set_title('Sample'+number)
+		ax = fig.add_subplot(231)
+		ay = fig.add_subplot(232)
+		az = fig.add_subplot(233)
+		ax1 = fig.add_subplot(234)
+		ay1 = fig.add_subplot(235)
+		az1 = fig.add_subplot(236)
+		print('make subplots')
+
+		# canvas = FigureCanvasTkAgg(fig,self.tab3)
+		# print('make canvas')
+		# canvas.get_tk_widget().pack()#.grid(row=1,column=0,rowspan=5,columnspan=5)
+		# print('pack')
 
 		#Create scatter plot for each projection
 		ax.scatter(df.x,df.z)
+		print('scatter x')
 		ay.scatter(df.x,df.y)
+		print('scatter y')
 		az.scatter(df.z,df.y)
+		print('scatter z')
+
+		ax1.scatter(dfraw.x,dfraw.z)
+		ay1.scatter(dfraw.x,dfraw.y)
+		az1.scatter(dfraw.z,dfraw.y)
 
 		#Plot model
 		xvalues = np.arange(np.min(df.x),np.max(df.x))
 		ax.plot(xvalues,self.e.chnls[self.cs.name].mm.p(xvalues),c='y')
 
-		#Add labels
+		# Add labels
 		ax.set_title('Y projection')
 		ay.set_title('Z projection')
 		az.set_title('X projection')
@@ -212,16 +354,20 @@ class Application(tk.Frame):
 		az.set_xlabel('Z')
 		az.set_ylabel('Y')
 
-		#Adjust spacing and show plot
+		# Adjust spacing and show plot
 		plt.subplots_adjust(wspace=0.4)
 
+		# canvas.show()
+
+		fig.show()
+		self.pBar.stop()
 
 	def filegen(self):
 		self.fnums = {}
 		self.Lnums = []
 		
 		for i,c in enumerate(self.Lc):
-			if c.dir != None:
+			if c.dir != None and c.dir != '':
 				files = os.listdir(c.dir)
 			else:
 				files = []
@@ -259,6 +405,12 @@ class Application(tk.Frame):
 			for j in range(4):
 				fl = ttk.Label(self.tab2, text=self.fnums[key][j])
 				fl.grid(row=i+2,column=j+1)
+
+			num = tk.Label(self.tab3,text=key)
+			num.grid(row=i+2,column=0)
+
+			plotB = tk.Button(self.tab3,text='plot',command=lambda:self.plot_projection(key))
+			plotB.grid(row=i+2,column=1)
 
 	def out_fnums(self):
 		for key in self.fnums.keys():
