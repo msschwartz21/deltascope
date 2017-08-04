@@ -51,6 +51,8 @@ class brain:
 		'''Creates a pandas dataframe containing the x,y,z and signal/probability value 
 		for each point in the :py:attr:`brain.raw_data` array'''
 
+		#NB: scale variable actually contains microns dimensions
+
 		dim = data.shape
 		xyz = np.zeros((dim[0],dim[1],dim[2],4))
 

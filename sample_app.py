@@ -10,6 +10,7 @@ import copy
 import cranium
 import numpy as np
 import time
+from appClass import *
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -22,26 +23,14 @@ class Application(tk.Frame):
 		tk.Frame.__init__(self,master)
 
 		self.grid(sticky=tk.N+tk.S+tk.E+tk.W)
-		# self.createWidgets()
 		self.createNotebook()
 		self.s = ttk.Style()
 
 		#Create none variables so that app can always be saved
 		self.fnums, self.Lnums = None,None
 
-
-	def createWidgets(self):
-		top = self.winfo_toplevel()
-		top.rowconfigure(0,weight=1)
-		top.columnconfigure(0,weight=1)
-		self.rowconfigure(0,weight=1)
-		self.columnconfigure(0,weight=1)
-
-		self.quitButton = tk.Button(self, text='Quit',command=self.quit)
-		self.quitButton.grid(row=0,column=0,sticky=tk.N+tk.S+tk.E+tk.W)
-
-
 	def createNotebook(self):
+		'''Create notebook to contain different tabs with data processing steps'''
 		self.note = ttk.Notebook(self)
 		self.note.grid()
 
@@ -60,11 +49,13 @@ class Application(tk.Frame):
 		self.createTab3()
 
 	def createTab1(self):
+		'''Create tab that allows user to define the source directory for data'''
 
-		##### Tab 1 #####
+		#Deactivated next button that turns on after user adds data to channel 1
 		self.nextB = tk.Button(self.tab1,text='Next',command=lambda:self.note.select(self.tab2),state=tk.DISABLED)
 		self.nextB.grid(row=4,column=2)
 
+		#Initialize channel objects to support selection of source directories
 		self.cs = channelMaster(self.tab1,'Structural channel: ',0)
 		self.cs.dButton.bind('<Button-1>',lambda e:self.activate(self.nextB,self.note,self.tab2))
 		self.c2 = channelMaster(self.tab1,'Channel 2: ',1)
@@ -72,22 +63,29 @@ class Application(tk.Frame):
 		self.c4 = channelMaster(self.tab1,'Channel 4: ',3)
 		self.Lc = [self.cs,self.c2,self.c3,self.c4]
 
+		#Loads saved files
 		self.loadB = tk.Button(self.tab1,text='Load saved file',command=self.load_status)
 		self.loadB.grid()
 
 	def createTab2(self):
-
-		##### Tab 2 #####
+		'''Tab 2 displays a list of files found in source directory
+		and has check boxes for selection'''
+		
+		#Generate file list button
 		self.filegenB = tk.Button(self.tab2,text='Generate file list',command=self.filegen)
 		self.filegenB.grid(row=0)
 
+		#Save button
 		self.saveB = tk.Button(self.tab2,text='Save',command=self.save_status)
 		self.saveB.grid(row=0,column=1)
 
+		#Go to next page button
 		self.nextB2 = tk.Button(self.tab2,text='Next',command=lambda:self.next_tab(self.tab25))
 		self.nextB2.grid(row=0,column=2)
 
 	def createTab25(self):
+		'''Text entry objects for all parameters with examples already entered'''
+
 		##### Tab 2.5 #####
 		r = 0
 		self.outdir = None
@@ -141,6 +139,7 @@ class Application(tk.Frame):
 			}
 		}
 
+		#Create text entry objects
 		for key in self.p.keys():
 			tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
 			self.p[key]['entry'] = tk.Entry(self.tab25)
@@ -156,6 +155,9 @@ class Application(tk.Frame):
 
 		self.pBar = ttk.Progressbar(self.tab3)
 		self.pBar.grid(row=0,column=1)
+
+		tk.Label(self.tab3,text='Rotate by ___ degrees:').grid(row=0,column=2)
+		tk.Label(self.tab3,text='around ___ axis:').grid(row=0,column=3)
 
 		
 	def activate(self,button,nb,ntab):
@@ -186,6 +188,8 @@ class Application(tk.Frame):
 		if self.outdir == None:
 			messagebox.showerror('Error','Output directory has not been selected')
 			return
+		else:
+			self.pc['outdir'] = self.outdir
 
 		#Check median threshold value
 		s = self.p['medthresh']['entry'].get()
@@ -278,18 +282,14 @@ class Application(tk.Frame):
 					return
 			self.pc['fitdim'] = lv
 
-
-	def plot_projection(self,number):
+	def first_alignment(self,number):
 		tic = time.time()
 		self.pBar.start()
-
-		self.check_settings()
-
 		#Create embryo object and process channels through alignment
 		self.e = cranium.embryo(self.pc['expname'],number,self.outdir)
 		for i,c in enumerate(self.Lc):
 			if c.dir != None:
-				self.e.add_channel(os.path.join(c.dir,self.fnums[number][i]),c.name)
+				self.e.add_channel(os.path.join(c.dir,self.fnums[number].fs[i]),c.name)
 				self.e.chnls[c.name].preprocess_data(self.pc['genthresh'],
 					[1,1,1],self.pc['microns'])
 				if i == 0:
@@ -305,15 +305,30 @@ class Application(tk.Frame):
 				self.e.chnls[c.name].align_data(self.e.chnls[c.name].df_thresh,
 					pca,self.pc['comporder'],self.pc['fitdim'],
 					deg=self.pc['deg'],mm=mm,vertex=vertex)
-
+		
 		print('sample alignment complete',time.time()-tic)
+
+		#Save data
+		for i,c in enumerate(self.Lc):
+			if c.dir != None:
+				cname = c.name.get()
+				for p in ':,./\\[]{};() ':
+					cname = cname.replace(p,'')
+
+				fpath = os.path.join(self.outdir,'_'.join([cname,self.pc['expname'],number])+'.psi')
+				cranium.write_data(fpath,self.e.chnls[c.name].df_align)
+
+	def plot_projection(self,File):
+
+		self.check_settings()
+
+		self.first_alignment(number)
 
 		df = self.e.chnls[self.cs.name].df_align.sample(frac=0.01)
 		dfraw = self.e.chnls[self.cs.name].df_thresh.sample(frac=0.01)
 		print(df.count())
 
-		fig = plt.figure(figsize=(12,6))
-		fig.set_title('Sample'+number)
+		fig = plt.figure(figsize=(12,6),num='Sample Number '+number)
 		ax = fig.add_subplot(231)
 		ay = fig.add_subplot(232)
 		az = fig.add_subplot(233)
@@ -321,11 +336,6 @@ class Application(tk.Frame):
 		ay1 = fig.add_subplot(235)
 		az1 = fig.add_subplot(236)
 		print('make subplots')
-
-		# canvas = FigureCanvasTkAgg(fig,self.tab3)
-		# print('make canvas')
-		# canvas.get_tk_widget().pack()#.grid(row=1,column=0,rowspan=5,columnspan=5)
-		# print('pack')
 
 		#Create scatter plot for each projection
 		ax.scatter(df.x,df.z)
@@ -375,11 +385,13 @@ class Application(tk.Frame):
 			c.files = []
 			for f in files:
 				if 'Probabilities' in f and 'h5' in f:
+					key = f.split('_')[1]
 					if i == 0:
-						self.fnums[f.split('_')[1]] = [f,'','','',tk.IntVar()]
-						self.Lnums.append(int(f.split('_')[1]))
+						self.fnums[key] = Sample(key)
+						self.fnums[key].fs[i] = f
+						self.Lnums.append(int(key))
 					else:
-						self.fnums[f.split('_')[1]][i] = f
+						self.fnums[key].fs[i] = f
 
 		self.Lnums.sort()
 		self.display_files()
@@ -398,19 +410,9 @@ class Application(tk.Frame):
 			key = str(n)
 			if len(key) == 1:
 				key = '0'+ key
-			cb = tk.Checkbutton(self.tab2, text=n, variable=self.fnums[key][-1])
-			#cb.bind('<Button-1>',lambda e: self.out_fnums)
-			cb.select()
-			cb.grid(row=i+2,column=0)
-			for j in range(4):
-				fl = ttk.Label(self.tab2, text=self.fnums[key][j])
-				fl.grid(row=i+2,column=j+1)
+			self.fnums[key].tab2row(self.tab2,i+2)
+			self.fnums[key].tab3row(self.tab3,i+2,self)
 
-			num = tk.Label(self.tab3,text=key)
-			num.grid(row=i+2,column=0)
-
-			plotB = tk.Button(self.tab3,text='plot',command=lambda:self.plot_projection(key))
-			plotB.grid(row=i+2,column=1)
 
 	def out_fnums(self):
 		for key in self.fnums.keys():
@@ -489,29 +491,7 @@ class Application(tk.Frame):
 		self.note.select(varbind['curtab'][d['curtab']])
 		print('load complete')
 
-class channelMaster:
-	def __init__(self,parent,text,n):
-		self.name = tk.Entry(parent)
-		self.name.grid(row=n,column=1)
-		self.name.insert(0,text)
-		self.dir = None
-		self.dButton = ttk.Button(parent,text='Select Folder',command=self.open_dir)
-		self.dButton.grid(row=n,column=2)
-		self.files = None
-
-	def open_dir(self):
-		self.dir = filedialog.askdirectory()
-		self.dButton['text'] = self.dir
-
-	def return_data_dict(self):
-		out = {}
-		#out['files'] = self.files
-		out['dir'] = self.dir
-		out['name'] = self.name
-		print(out)
-
-		return(out)
-
-app = Application()
-app.master.title('Sample Application')
-app.mainloop()
+if __name__=='__main__':
+	app = Application()
+	app.master.title('Sample Application')
+	app.mainloop()
