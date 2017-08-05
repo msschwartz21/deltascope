@@ -662,8 +662,12 @@ def read_psi(filepath):
 
 	df = pd.read_csv(filepath,
 		sep=' ',
-		header=19, #This value is now wrong
-		names=['x','y','z','ac','r','theta']) #may also be wrong
+		header=19)
+
+	if len(df.columns) == 4:
+		df.columns = ['i','x','y','z']
+	elif len(df.columns) == 6:
+		df.columns=['x','y','z','ac','r','theta']
 
 	return(df)
 
