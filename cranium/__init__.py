@@ -146,12 +146,27 @@ class brain:
 
 		self.pcamed = PCA()
 		self.pcamed.fit(self.median[['x','y','z']])
-	
-	def align_data(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
-		'''Apply PCA transformation matrix and align data so that 
-		the vertex is at the origin'''
 
-		#PCA transformation matrix
+	def calculate_pca_median_2d(self,data,threshold,radius,microns):
+
+		self.median = self.process_alignment_data(data,threshold,radius,microns)
+
+		self.pcamed = PCA()
+		self.pcamed.fit(self.median[['y','z']])
+
+	def pca_transform_2d(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
+
+		fit = pca.transform(df[['y','z']])
+		df_fit = pd.DataFrame({
+			'x':df.x,
+			'y':fit[:,comp_order[1]-1],
+			'z':fit[:,comp_order[2]-1]
+			})
+
+		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
+
+	def pca_transform_3d(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
+
 		fit = pca.transform(df[['x','y','z']])
 		df_fit = pd.DataFrame({
 			'x':fit[:,comp_order[0]],
@@ -159,6 +174,12 @@ class brain:
 			'z':fit[:,comp_order[2]]
 			})
 
+		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
+	
+	def align_data(self,df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None):
+		'''Apply PCA transformation matrix and align data so that 
+		the vertex is at the origin'''
+		
 		#If vertex for translation is not included
 		if vertex == None:
 			#Calculate model
@@ -498,6 +519,7 @@ class brain:
 		'''Add dataframe of aligned data'''
 
 		self.df_align = df
+		self.mm = self.fit_model(self.df_align,2,['x','z'])
 
 class embryo:
 	'''Class to managed multiple brain objects in a multichannel sample'''

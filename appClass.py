@@ -67,28 +67,31 @@ class Sample:
 		#Sample number label
 		tk.Label(tab,text=self.key).grid(row=r,column=0)
 
-		self.plotB = tk.Button(tab,text='Plot',command=lambda:self.first_alignment(app.p,app.Lc))
+		self.plotB = tk.Button(tab,text='PCA 2D',command=lambda:self.first_alignment(app.p,app.Lc,2))
 		self.plotB.grid(row=r,column=1)
+
+		self.plotB3 = tk.Button(tab,text='PCA 3D',command=lambda:self.first_alignment(app.p,app.Lc,3))
+		self.plotB3.grid(row=r,column=2)
 
 		rotDegrees = ('-180','-90','0','90','180')
 		rotDirection = ('X','Y','Z')
 
 		self.degVar.set(rotDegrees[2])
 		self.degM = tk.OptionMenu(tab,self.degVar,*rotDegrees)
-		self.degM.grid(row=r,column=2)
+		self.degM.grid(row=r,column=3)
 
 		self.directVar.set(rotDirection[0])
 		self.directM = tk.OptionMenu(tab,self.directVar,*rotDirection)
-		self.directM.grid(row=r,column=3)
+		self.directM.grid(row=r,column=4)
 
 		self.rotB = tk.Button(tab,text='Rotate',command=self.rotate_data)
-		self.rotB.grid(row=r,column=4)
+		self.rotB.grid(row=r,column=5)
 
 		self.doneVar = tk.IntVar()
 		self.doneCb = tk.Checkbutton(tab,variable=self.doneVar)
-		self.doneCb.grid(row=r,column=5)
+		self.doneCb.grid(row=r,column=6)
 
-	def first_alignment(self,p,Lc):
+	def first_alignment(self,p,Lc,D):
 		tic = time.time()
 
 		for i,c in enumerate(Lc):
@@ -106,18 +109,31 @@ class Sample:
 
 				#Processing for the structural channel
 				if i==0:
-					e.chnls[c.key].calculate_pca_median(e.chnls[c.key].raw_data,pc['medthresh'],
-						pc['radius'],pc['microns'])
-					pca = e.chnls[c.key].pcamed
-					e.chnls[c.key].align_data(e.chnls[c.key].df_thresh,pca,
-						pc['comporder'],pc['fitdim'],deg=pc['deg'])
+					if D == 3:
+						e.chnls[c.key].calculate_pca_median(e.chnls[c.key].raw_data,pc['medthresh'],
+							pc['radius'],pc['microns'])
+						pca = e.chnls[c.key].pcamed
+						e.chnls[c.key].pca_transform_3d(e.chnls[c.key].df_thresh,pca,
+							pc['comporder'],pc['fitdim'],deg=pc['deg'])
+					elif D == 2:
+						e.chnls[c.key].calculate_pca_median_2d(e.chnls[c.key].raw_data,pc['medthresh'],
+							pc['radius'],pc['microns'])
+						pca = e.chnls[c.key].pcamed
+						e.chnls[c.key].pca_transform_2d(e.chnls[c.key].df_thresh,pca,
+							pc['comporder'],pc['fitdim'],deg=pc['deg'])
+
 					mm = e.chnls[c.key].mm
 					vertex = e.chnls[c.key].vertex
 
 				#Secondary channel processing
-				e.chnls[c.key].align_data(e.chnls[c.key].df_thresh,pca,
-					pc['comporder'],pc['fitdim'],
-					deg=pc['deg'],mm=mm,vertex=vertex)
+				if D == 3:
+					e.chnls[c.key].pca_transform_3d(e.chnls[c.key].df_thresh,pca,
+						pc['comporder'],pc['fitdim'],
+						deg=pc['deg'],mm=mm,vertex=vertex)
+				if D == 2:
+					e.chnls[c.key].pca_transform_2d(e.chnls[c.key].df_thresh,pca,
+						pc['comporder'],pc['fitdim'],
+						deg=pc['deg'],mm=mm,vertex=vertex)
 
 			print('sample alignment complete',time.time()-tic)
 
