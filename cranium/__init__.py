@@ -181,7 +181,7 @@ class brain:
 		the vertex is at the origin'''
 		
 		#If vertex for translation is not included
-		if vertex == None:
+		if vertex == None and deg==2:
 			#Calculate model
 			model = np.polyfit(df_fit[fit_dim[0]],df_fit[fit_dim[1]],deg=deg)
 			p = np.poly1d(model)
@@ -211,6 +211,36 @@ class brain:
 					vy = df_fit.y.mean()
 				else:
 					vy = p(a)
+					vx = df_fit.x.mean()
+			self.vertex = [vx,vy,vz]
+		elif deg == 1:
+			#Calculate model
+			model = np.polyfit(df_fit[fit_dim[0]],df_fit[fit_dim[1]],deg=deg)
+			p = np.poly1d(model)
+
+			if fit_dim[0] == 'x':
+				vx = df_fit.x.mean()
+				if fit_dim[1] == 'y':
+					vy = p(vx)
+					vz = df_fit.z.mean()
+				else:
+					vz = p(vx)
+					vy = df_fit.y.mean()
+			elif fit_dim[0] == 'y':
+				vy = df_fit.y.mean()
+				if fit_dim[1] == 'x':
+					vx = p(vy)
+					vz = df_fit.z.mean()
+				else:
+					vz = p(vy)
+					vx = df_fit.x.mean()
+			elif fit_dim[0] == 'z':
+				vz = df_fit.z.mean()
+				if fit_dim[1] == 'x':
+					vx = p(vz)
+					vy = df_fit.y.mean()
+				else:
+					vy = p(vz)
 					vx = df_fit.x.mean()
 			self.vertex = [vx,vy,vz]
 		else:
@@ -673,7 +703,10 @@ def write_data(filepath,df):
 			'0 0 1\n')
 
 	#Write dataframe to file using pandas to_csv function to format
-	f.write(df.to_csv(sep=' ', index=True, header=False))
+	try:
+		f.write(df[['x','y','z','ac','theta','r']].to_csv(sep=' ', index=True, header=False))
+	except:
+		f.write(df[['x','y','z']].to_csv(sep=' ', index=True, header=False))
 
 	f.close()
 
@@ -686,10 +719,10 @@ def read_psi(filepath):
 		sep=' ',
 		header=19)
 
-	if len(df.columns) == 4:
+	if len(df.columns) <= 4:
 		df.columns = ['i','x','y','z']
-	elif len(df.columns) == 6:
-		df.columns=['x','y','z','ac','r','theta']
+	elif len(df.columns) >= 6:
+		df.columns=['i','x','y','z','ac','theta','r']
 
 	return(df)
 
@@ -1036,7 +1069,7 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[-2][:2]
+			num = f.split('_')[-1][:2]
 			dfs[num] = df
 
 	return(dfs)
@@ -1061,18 +1094,18 @@ def generate_kde(data,var,x,absv=False):
 	if type(data) ==  type({}):
 		for key in data.keys():
 			if absv == False:
-				y = data[key][var]
+				y = data[key][var].sample(frac=0.1)
 			elif absv == True:
-				y = np.abs(data[key][var])
+				y = np.abs(data[key][var].sample(frac=0.1))
 			kde = scipy.stats.gaussian_kde(y).evaluate(x)
 			L.append(kde)
 	#List workflow
 	elif type(data) == type([]):
 		for df in data:
 			if absv == False:
-				y = df[var]
+				y = df[var].sample(frac=0.1)
 			elif absv == True:
-				y = np.abs(df[var])
+				y = np.abs(df[var].sample(frac=0.1))
 			kde = scipy.stats.gaussian_kde(y).evaluate(x)
 			L.append(kde)
 

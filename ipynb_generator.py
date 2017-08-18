@@ -6,6 +6,7 @@ __author__ = 'Hans Petter Langtangen <hpl@simula.no>'
 
 #example
 #python .\ipynb_generator.py datareport.aipynb test.ipynb WTDIR="C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\Output69semifinal" MUTDIR="C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\Output92semifinal" DTYPE='AT' MYVAR=4 GRADE='excellent'
+# C:\Users\zfishlab\Desktop\zrf1wt13umyot21um\Correct_alignment
 
 import sys, os, re, logging
 

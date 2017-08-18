@@ -61,7 +61,8 @@ class Application(tk.Frame):
 		self.c2 = channelMaster(self.tab1,'Channel 2: ',1)
 		self.c3 = channelMaster(self.tab1,'Channel 3: ',2)
 		self.c4 = channelMaster(self.tab1,'Channel 4: ',3)
-		self.Lc = [self.cs,self.c2,self.c3,self.c4]
+		self.c5 = channelMaster(self.tab1,'Channel 5: ',4)
+		self.Lc = [self.cs,self.c2,self.c3,self.c4,self.c5]
 
 		#Loads saved files
 		self.loadB = tk.Button(self.tab1,text='Load saved file',command=self.load_status)
@@ -120,7 +121,7 @@ class Application(tk.Frame):
 			'microns': {
 				'row': 5,
 				'title': 'Micron dimensions of voxel: ',
-				'example': '0.16,0.16,0.21'
+				'example': ['0.16','0.16','0.21']
 			},
 			'deg': {
 				'row': 6,
@@ -130,7 +131,7 @@ class Application(tk.Frame):
 			'comporder': {
 				'row': 7,
 				'title': 'Assignment order of principle components: ',
-				'example': '0,2,1'
+				'example': ['0','2','1']
 			},
 			'fitdim': {
 				'row': 8,
@@ -141,10 +142,43 @@ class Application(tk.Frame):
 
 		#Create text entry objects
 		for key in self.p.keys():
-			tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
-			self.p[key]['entry'] = tk.Entry(self.tab25)
-			self.p[key]['entry'].grid(row=self.p[key]['row'],column=1)
-			self.p[key]['entry'].insert(0,self.p[key]['example'])
+			#Triple entry
+			if key in ['microns','comporder']:
+				tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
+
+				tk.Label(self.tab25,text='X:').grid(row=self.p[key]['row'],column=1)
+				self.p[key]['entry_x'] = tk.Entry(self.tab25)
+				self.p[key]['entry_x'].grid(row=self.p[key]['row'],column=2)
+				self.p[key]['entry_x'].insert(0,self.p[key]['example'][0])
+
+				tk.Label(self.tab25,text='Y:').grid(row=self.p[key]['row'],column=3)
+				self.p[key]['entry_y'] = tk.Entry(self.tab25)
+				self.p[key]['entry_y'].grid(row=self.p[key]['row'],column=4)
+				self.p[key]['entry_y'].insert(0,self.p[key]['example'][1])
+
+				tk.Label(self.tab25,text='Z:').grid(row=self.p[key]['row'],column=5)
+				self.p[key]['entry_z'] = tk.Entry(self.tab25)
+				self.p[key]['entry_z'].grid(row=self.p[key]['row'],column=6)
+				self.p[key]['entry_z'].insert(0,self.p[key]['example'][2])
+
+			#Drop down fit dim
+			elif key == 'fitdim':
+				tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
+
+				options = ('XZ Plane','XY Plane', 'YZ Plane')
+				self.p[key]['entry'] = tk.StringVa
+				r()
+				self.p[key]['entry'].set(options[0])
+
+				self.p[key]['menu'] = tk.OptionMenu(self.tab25,self.p[key]['entry'],*options)
+				self.p[key]['menu'].grid(row=self.p[key]['row'],column=1)
+
+			#Single entry
+			else:
+				tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
+				self.p[key]['entry'] = tk.Entry(self.tab25)
+				self.p[key]['entry'].grid(row=self.p[key]['row'],column=1)
+				self.p[key]['entry'].insert(0,self.p[key]['example'])
 
 		self.p['outdir'] = None
 
@@ -157,9 +191,9 @@ class Application(tk.Frame):
 		self.pBar = ttk.Progressbar(self.tab3)
 		self.pBar.grid(row=0,column=1)
 
-		tk.Label(self.tab3,text='Rotate by ___ degrees:').grid(row=0,column=2)
-		tk.Label(self.tab3,text='around ___ axis:').grid(row=0,column=3)
-		tk.Label(self.tab3,text='Done?').grid(row=0,column=5)
+		tk.Label(self.tab3,text='Rotate by ___ degrees:').grid(row=0,column=3)
+		tk.Label(self.tab3,text='around ___ axis:').grid(row=0,column=4)
+		tk.Label(self.tab3,text='Done?').grid(row=0,column=6)
 
 		
 	def activate(self,button,nb,ntab):
@@ -188,7 +222,7 @@ class Application(tk.Frame):
 			c.files = []
 			for f in files:
 				if 'Probabilities' in f and 'h5' in f:
-					key = f.split('_')[1]
+					key = f.split('_')[-2]
 					if i == 0:
 						self.fnums[key] = Sample(key)
 						self.fnums[key].fs[i] = f

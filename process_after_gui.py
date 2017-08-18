@@ -23,22 +23,26 @@ def transform_file(f):
 
 if __name__=='__main__':
 
-	outdir = "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\yot"
+	outdirs = ["C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\yot",
+	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\wt"]
+	#outdirs = "C:\\Users\\zfishlab\\Desktop\\spinalcord_cyclopamine\\Output"
 
-	files = os.listdir(outdir)
+	for outdir in outdirs:
 
-	os.chdir(outdir)
+		files = os.listdir(outdir)
 
-	n = len(files)
-	for i in range(0,n,5):
-		if i+5>n:
-			L = files[i:n]
-		else:
-			L = files[i:i+5]
+		os.chdir(outdir)
 
-		pool = mp.Pool()
-		pool.map(transform_file,L)
-		pool.close()
-		pool.join()
+		n = len(files)
+		for i in range(0,n,5):
+			if i+5>n:
+				L = files[i:n]
+			else:
+				L = files[i:i+5]
 
-	print('Processing complete')
+			pool = mp.Pool()
+			pool.map(transform_file,L)
+			pool.close()
+			pool.join()
+
+		print('Processing complete')

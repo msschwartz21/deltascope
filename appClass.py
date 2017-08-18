@@ -262,20 +262,16 @@ class Sample:
 			return
 
 		#Check microns
-		s = p['microns']['entry'].get()
-		ls = s.replace(' ','').split(',')
-		if len(ls) != 3:
-			messagebox.showerror('Error','Micron input must be a list of three numeric values seperated by commas')
-			return
-		else:
-			lv = []
-			for m in ls:
-				try:
-					v = float(m)
-					lv.append(v)
-				except ValueError:
-					messagebox.showerror('Error','Micron input must be a list of three numeric values seperated by commas')
-					return
+		lv = []
+		for key in ['entry_x','entry_y','entry_z']:
+			s = p['microns'][key].get()
+			try:
+				v = float(s)
+				lv.append(v)
+			except ValueError:
+				messagebox.showerror('Error','Micron inputs must be numeric values')
+				return
+				
 			pc['microns'] = lv
 
 		#Check degree
@@ -287,36 +283,24 @@ class Sample:
 			return
 
 		#Check component order
-		s = p['comporder']['entry'].get()
-		ls = s.replace(' ','').split(',')
-		if len(ls) != 3:
-			messagebox.showerror('Error','Component order input must be a list of three integer values seperated by commas')
-			return
-		else:
-			lv = []
-			for m in ls:
-				try:
-					v = int(m)
-					lv.append(v)
-				except ValueError:
-					messagebox.showerror('Error','Component input must be a list of three integer values seperated by commas')
-					return
+		lv = []
+		for key in ['entry_x','entry_y','entry_z']:
+			s = p['comporder'][key].get()
+			try:
+				v = float(s)
+				lv.append(v)
+			except ValueError:
+				messagebox.showerror('Error','Component order inputs must be numeric values')
+				return
 			pc['comporder'] = lv
 
-		#Check fit dimensions
+		#Get fit dimensions
 		s = p['fitdim']['entry'].get()
-		ls = s.replace(' ','').split(',')
-		if len(ls) != 2:
-			messagebox.showerror('Error','Fit dimensions must be two of x,y or z seperated by a comma')
-			return
-		else:
-			lv = []
-			for m in ls:
-				if m in ['x','y','z']:
-					lv.append(m)
-				else:
-					messagebox.showerror('Error','Fit dimensions must be two of x,y or z seperated by a comma')
-					return
-			pc['fitdim'] = lv
+		if s == 'XZ Plane':
+			pc['fitdim'] = ['x','z']
+		elif s == 'XY Plane':
+			pc['fitdim'] = ['x','y']
+		elif s == 'YZ Plane':
+			pc['fitdim'] = ['y','z']
 
 		return(pc)
