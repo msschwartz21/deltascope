@@ -515,7 +515,7 @@ class brain:
 	def find_theta(self,row,zc,yc):
 		'''Find theta value for a row describing angle between point and plane'''
 
-		theta = np.arctan2(row.y-yc,row.z-zc)
+		theta = np.arctan2(row.z-zc,row.y-yc)
 		return(theta)
 
 	def calc_coord(self,row):
