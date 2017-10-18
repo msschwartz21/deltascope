@@ -512,10 +512,8 @@ class brain:
 		ac,err = scipy.integrate.quad(self.integrand,xc,0)
 		return(ac)
 
-	def find_theta(self,row,zc,yc):
-		'''Find theta value for a row describing angle between point and plane'''
-
-		theta = np.arctan2(row.z-zc,row.y-yc)
+	def find_theta(self.row,zc,yc):
+		theta = np.arctan2(row.y-yc,row.z-zc)
 		return(theta)
 
 	def find_r(self,row,zc,yc):
@@ -531,7 +529,7 @@ class brain:
 		theta = self.find_theta(row,zc,yc)
 		r = self.find_r(row,zc,yc)
 
-		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
+		return(pd.Series({'x':row.x,'y':row.y,'z':row.z,'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
 
 	def transform_coordinates(self):

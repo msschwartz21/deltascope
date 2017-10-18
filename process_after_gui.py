@@ -13,7 +13,8 @@ def transform_file(f):
 	tic = time.time()
 
 	s = cranium.brain()
-	s.add_aligned_df(cranium.read_psi(f))
+	df = cranium.read_psi(f)
+	s.add_aligned_df(df[['x','y','z']])
 	s.transform_coordinates()
 
 	cranium.write_data(f,s.df_align)
