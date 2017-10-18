@@ -493,9 +493,9 @@ class brain:
 		x = result['x'][0]
 		y = 0
 		z = self.mm.p(x)
-		r = result['fun']
+		#r = result['fun']
 
-		return(x,y,z,r)
+		return(x,y,z)
 		#return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
 
 	def integrand(self,x):
@@ -518,12 +518,18 @@ class brain:
 		theta = np.arctan2(row.z-zc,row.y-yc)
 		return(theta)
 
+	def find_r(self,row,zc,yc):
+
+		r = np.sqrt((row.z-zc)**2 + (row.y-yc)**2)
+		return(r)
+
 	def calc_coord(self,row):
 		'''Calculate alpah, r, theta for a particular row'''
 
-		xc,yc,zc,r = self.find_min_distance(row)
+		xc,yc,zc = self.find_min_distance(row)
 		ac = self.find_arclength(xc)
 		theta = self.find_theta(row,zc,yc)
+		r = self.find_r(row,zc,yc)
 
 		return(pd.Series({'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))

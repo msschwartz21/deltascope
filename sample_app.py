@@ -53,7 +53,7 @@ class Application(tk.Frame):
 
 		#Deactivated next button that turns on after user adds data to channel 1
 		self.nextB = tk.Button(self.tab1,text='Next',command=lambda:self.note.select(self.tab2),state=tk.DISABLED)
-		self.nextB.grid(row=4,column=2)
+		self.nextB.grid(row=5,column=2)
 
 		#Initialize channel objects to support selection of source directories
 		self.cs = channelMaster(self.tab1,'Structural channel: ',0)
@@ -166,8 +166,8 @@ class Application(tk.Frame):
 				tk.Label(self.tab25,text=self.p[key]['title']).grid(row=self.p[key]['row'],column=0)
 
 				options = ('XZ Plane','XY Plane', 'YZ Plane')
-				self.p[key]['entry'] = tk.StringVa
-				r()
+				self.p[key]['entry'] = tk.StringVar()
+				
 				self.p[key]['entry'].set(options[0])
 
 				self.p[key]['menu'] = tk.OptionMenu(self.tab25,self.p[key]['entry'],*options)

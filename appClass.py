@@ -110,6 +110,7 @@ class Sample:
 				#Processing for the structural channel
 				if i==0:
 					if D == 3:
+						print('comporder',pc['comporder'])
 						e.chnls[c.key].calculate_pca_median(e.chnls[c.key].raw_data,pc['medthresh'],
 							pc['radius'],pc['microns'])
 						pca = e.chnls[c.key].pcamed
@@ -287,7 +288,7 @@ class Sample:
 		for key in ['entry_x','entry_y','entry_z']:
 			s = p['comporder'][key].get()
 			try:
-				v = float(s)
+				v = int(s)
 				lv.append(v)
 			except ValueError:
 				messagebox.showerror('Error','Component order inputs must be numeric values')
@@ -302,5 +303,8 @@ class Sample:
 			pc['fitdim'] = ['x','y']
 		elif s == 'YZ Plane':
 			pc['fitdim'] = ['y','z']
+
+		for key in pc.keys():
+			print(key,pc[key])
 
 		return(pc)

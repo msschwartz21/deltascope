@@ -23,9 +23,10 @@ def transform_file(f):
 
 if __name__=='__main__':
 
-	outdirs = ["C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\yot",
-	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\wt"]
-	#outdirs = "C:\\Users\\zfishlab\\Desktop\\spinalcord_cyclopamine\\Output"
+	outdirs = [ "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\PostThetaFix10_17",
+	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\PostThetaFix10_17"
+		
+	]
 
 	for outdir in outdirs:
 
