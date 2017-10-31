@@ -24,8 +24,8 @@ def transform_file(f):
 
 if __name__=='__main__':
 
-	outdirs = [ "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\PostThetaFix10_17",
-	"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\PostThetaFix10_17"
+	outdirs = [ "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\PostThetaFix10_17"
+	#"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\PostThetaFix10_17"
 		
 	]
 

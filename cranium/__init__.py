@@ -512,7 +512,7 @@ class brain:
 		ac,err = scipy.integrate.quad(self.integrand,xc,0)
 		return(ac)
 
-	def find_theta(self.row,zc,yc):
+	def find_theta(self,row,zc,yc):
 		theta = np.arctan2(row.y-yc,row.z-zc)
 		return(theta)
 
@@ -537,7 +537,7 @@ class brain:
 		math model by (alpha,theta,r) (only applied to df_align'''
 
 		#Calculate alpha, theta, r for each row in dataset
-		self.df_align = self.df_align.join(self.df_align.apply((lambda row: self.calc_coord(row)), axis=1))
+		self.df_align = self.df_align.merge(self.df_align.apply((lambda row: self.calc_coord(row)), axis=1))
 
 	def subset_data(self,sample_frac=0.5):
 		'''Subset data based on proportion set in sample_frac'''
@@ -638,6 +638,204 @@ class math_model:
 
 		self.cf = model
 		self.p = np.poly1d(model)
+
+
+class landmarks:
+
+	def __init__(self,percbins=[10,50,90],rnull=15):
+		self.lm_wt = self.new_dataframe()
+		self.lm_mt = self.new_dataframe()
+		self.std_wt = self.new_dataframe()
+		self.std_mt = self.new_dataframe()
+
+		self.rnull = rnull
+
+	def new_dataframe(self):
+		df = pd.DataFrame(columns=['sample','a_mn','a_mx','t_mn','t_mx','pt_perc','pt_r','pt_pts','perc_perc','perc_r','perc_pts'])
+		return(df)
+
+	def set_percentiles(self,Lperc):
+		'''Must be whole numbers between 0 and 100'''
+		self.percbins = Lperc
+
+	def calc_bins(self,Ldf,ac_num,tstep):
+
+		acmin,acmax = 0,0
+
+		for df in Ldf:
+			if df.ac.min() < acmin:
+				acmin = df.ac.min()
+			if df.ac.max() > acmax:
+				acmax = df.ac.max()
+
+		if abs(acmin) > acmax:
+			self.acbins = np.linspace(acmin,abs(acmin),ac_num)
+		else:
+			self.acbins = np.linspace(-acmax,acmax)
+
+		self.tbins = np.arange(-np.pi,np.pi+tstep,tstep)
+
+	def calc_wt_landmarks(self,df,snum):
+
+		for a in range(len(self.acbins)):
+			if a+1 < len(self.acbins):
+				arange = [self.acbins[a],self.acbins[a+1]]
+
+				for t in range(len(self.tbins)):
+					if t+1 < len(self.tbins):
+						trange = [self.tbins[t],self.tbins[t+1]]
+
+						for p in self.percbins:
+							d = df[(df.ac > arange[0]) & (df.ac < arange[1])]
+							d = d[(d.theta > trange[0]) & (d.theta < trange[1])]
+
+							try:
+								r = np.percentile(d.r,p)
+								pts = d[d.r < r].count()['i']
+							except:
+								r = self.rnull
+								pts = 0
+
+							self.lm_wt = self.lm_wt.append(pd.DataFrame({'sample':[snum],'a_mn':[arange[0]],'a_mx':[arange[1]],
+                                                     't_mn':[trange[0]], 't_mx':[trange[1]],
+                                                     'pt_perc':[p],'pt_r':[r],'pt_pts':[pts],
+                                                    'perc_perc':[p],'perc_r':[r],'perc_pts':[pts]}))
+
+	def calc_standard(self,lm):
+
+		std = self.new_dataframe()
+
+		for a in range(len(self.acbins)):
+			if a+1 < len(self.acbins):
+				arange = [self.acbins[a],self.acbins[a+1]]
+
+				for t in range(len(self.tbins)):
+					if t+1 < len(self.tbins):
+						trange = [self.tbins[t],self.tbins[t+1]]
+
+						for p in self.percbins:
+							d = lm[lm.a_mn == arange[0]]
+							d = d[d.t_mn == trange[0]]
+							d = d[d.perc_perc == p]
+
+							std = std.append(d.mean(),ignore_index=True)
+
+		return(std)
+
+	def calc_mt_landmarks(self,df,snum,std):
+
+		for i,row in std.iterrows():
+			#arclength slab
+			d = df[(df.ac > row.a_mn) & (df.ac < row.a_mx)]
+			#theta wedge
+			d = d[(d.theta > row.t_mn) & (d.theta < row.t_mx)]
+
+			try:
+				#Find the r value which holds perc_perc of the data
+				perc_r = np.perentile(d.r,row.perc_perc)
+				#Find the number of points taht falls within that r value
+				perc_pts = d[d.r < perc_r]
+			except:
+				perc_r = self.rnull
+				perc_pts = 0
+
+			#Calculate percent of points by dividing pt_pts by total pts 
+			p = row.pt_pts/d.count()['i']
+
+			try:
+				#Find the percentile of p
+				pt_r = np.percentile(d.r,p)
+			except:
+				pt_r = self.rnull
+
+			self.lm_mt = self.lm_mt.append(pd.DataFrame({'sample':[snum],'a_mn':[row.a_mn],'a_mx':[row.a_mx],
+                                        't_mn':[row.t_mn], 't_mx':[row.t_mx],
+                                        'pt_perc':[p],'pt_r':[pt_r],'pt_pts':[row.pt_pts],
+                                        'perc_perc':[row.perc_perc],'perc_r':[perc_r],'perc_pts':[perc_pts]}))
+
+	def lm_to_cartesian(self,std):
+
+		ct = pd.DataFrame({
+			'a_mn':std.a_mn,
+			'a_mx':std.a_mx,
+			't_mn':std.t_mn,
+			't_mx':std.t_mx,
+
+			'pt_perc':std.pt_perc,
+			'pt_r':std.pt_r,
+			'pt_x':std.a_mn,
+			'pt_y':np.cos(std.t_mn)*std.pt_r,
+			'pt_z':np.sin(std.t_mn)*std.pt_r,
+
+			'perc_perc':std.perc_perc,
+			'perc_r':std.pt_r,
+			'perc_x':std.a_mn,
+			'perc_y':np.cos(std.t_mn)*std.perc_r,
+			'perc_z':np.sin(std.t_mn)*std.perc_r
+			})
+
+		return(ct)
+
+	def write_header(self,f):
+
+		contents = [
+			'PSI Format 1.0',
+			'',
+			'column[0] = "Id"',
+			'column[1] = "x"',
+			'column[2] = "y"',
+			'column[3] = "z"',
+			'column[4] = "ac"',
+			'symbol[4] = "A"',
+			'type[4] = float',
+			'column[5] = "r"',
+			'symbol[5] = "R"',
+			'type[5] = float',
+			'column[6] = "theta"',
+			'symbol[6] = "T"',
+			'type[6] = float'
+		]
+
+		for line in contents:
+			f.write('# '+ line + '\n')
+
+	def write_psi(self,filepath,df):
+		'''Writes data in PSI format to file after writing header'''
+
+		#Open new file at given filepath
+		f = open(filepath,'w')
+
+		#Write header contents to file
+		self.write_header(f)
+
+		n = df.count()['a_mn']
+	    
+		#Write line with sample number
+		f.write(str(n)+' 0 0\n')
+
+		#Write translation matrix
+		f.write('1 0 0\n'+
+				'0 1 0\n'+
+				'0 0 1\n')
+
+		#Write dataframe to file using pandas to_csv function to format
+		try:
+			f.write(df[['perc_x','perc_y','perc_z','a_mn','perc_r','t_mn']].to_csv(sep=' ', index=True, header=False))
+		except:
+			f.write(df[['pt_x','pt_y','pt_z','a_mn','pt_r','t_mn']].to_csv(sep=' ', index=True, header=False))
+
+		f.close()
+
+		print('Write to',filepath,'complete')
+
+	def save_data(self,df,outdir,rname):
+
+		for p in self.percbins:
+			d = df[df.perc_perc == p]
+			name = '_'.join([rname,str(p),'percent'])+'.psi'
+			self.write_psi(os.path.join(outdir,name),d[['perc_x','perc_y','perc_z','a_mn','perc_r','t_mn']])
+			name = '_'.join([rname,str(p),'points'])+'.psi'
+			self.write_psi(os.path.join(outdir,name),d[['pt_x','pt_y','pt_z','a_mn','pt_r','t_mn']])
 
 def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
 	'''Process single sample through embryo class and 
