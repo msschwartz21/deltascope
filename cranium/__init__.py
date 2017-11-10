@@ -648,6 +648,9 @@ class landmarks:
 		self.std_wt = self.new_dataframe()
 		self.std_mt = self.new_dataframe()
 
+		self.lm_wt_rf = pd.DataFrame()
+		self.lm_mt_rf = pd.DataFrame()
+
 		self.rnull = rnull
 
 	def new_dataframe(self):
@@ -701,7 +704,43 @@ class landmarks:
                                                      'pt_perc':[p],'pt_r':[r],'pt_pts':[pts],
                                                     'perc_perc':[p],'perc_r':[r],'perc_pts':[pts]}))
 
-	def calc_standard(self,lm):
+	def calc_wt_reformat(self,df,snum):
+
+		D = {'stype':'wildtype'}
+
+		for a in range(len(self.acbins)):
+			if a+1 < len(self.acbins):
+				arange = [self.acbins[a],self.acbins[a+1]]
+
+				for t in range(len(self.tbins)):
+					if t+1 < len(self.tbins):
+						trange = [self.tbins[t],self.tbins[t+1]]
+
+						for p in self.percbins:
+							d = df[(df.ac > arange[0]) & (df.ac < arange[1])]
+							d = d[(d.theta > trange[0]) & (d.theta < trange[1])]
+
+							try:
+								r = np.percentile(d.r,p)
+								pts = d[d.r < r].count()['i']
+							except:
+								r = self.rnull
+								pts = 0
+
+							L = []
+							for s in [arange[0],arange[1],trange[0],trange[1]]:
+								L.append(str(np.around(s,decimals=2)))
+							name = '_'.join(L)
+
+							D[name+'_'+str(p)+'_pts-pts'] = pts
+							D[name+'_'+str(p)+'_perc-pts'] = pts
+							D[name+'_'+str(p)+'_pts-r'] = r
+							D[name+'_'+str(p)+'_perc-r'] = r
+
+		self.lm_wt_rf = self.lm_wt_rf.append(pd.Series(D,name=int(snum)))
+
+
+	def calc_standard_old(self,lm):
 
 		std = self.new_dataframe()
 
@@ -722,7 +761,49 @@ class landmarks:
 
 		return(std)
 
-	def calc_mt_landmarks(self,df,snum,std):
+	def calc_standard(self,lm):
+
+		std = self.new_dataframe()
+
+		for a in range(len(self.acbins)):
+			if a+1 < len(self.acbins):
+				arange = [self.acbins[a],self.acbins[a+1]]
+
+				for t in range(len(self.tbins)):
+					if t+1 < len(self.tbins):
+						trange = [self.tbins[t],self.tbins[t+1]]
+
+						for p in self.percbins:
+							d = lm[(lm.a_mn==arange[0])&(lm.a_mx==arange[1])]
+							d = d[(d.t_mn==trange[0])&(d.t_mx==trange[1])]
+							d = d[d.perc_perc==p]
+
+							std = std.append(d.mean(),ignore_index=True)
+
+		return(std)
+
+	def conv(self,mn,mx):
+	    r = {'t_mn':mn,'t_mx':mx}
+	    if (r.t_mn==0)&(r.t_mx==np.pi/4):
+	        out = 'A'
+	    elif (r.t_tm==np.pi/4)&(r.t_mx==np.pi/2):
+	        out = 'B'
+	    elif (r.t_tm==np.pi/2)&(r.t_mx==3*np.pi/4):
+	        out = 'C'
+	    elif (r.t_mn==3*np.pi/4)&(r.t_mx==np.pi):
+	        out = 'D'
+	    elif (r.t_mn==-np.pi/4)&(r.t_mx==0):
+	        out = 'Ap'
+	    elif (r.t_mn==-np.pi/2)&(r.t_mx==-np.pi/4):
+	        out = 'Bp'
+	    elif (r.t_mn==-3*np.pi/4)&(r.t_mx==-np.pi/2):
+	        out = 'Cp'
+	    elif (r.t_mn==-np.pi)&(r.t_mx==-3*np.pi/4):
+	        out = 'Dp'
+	        
+	    return(out)
+
+	def calc_mt_landmarks_old(self,df,snum,std):
 
 		for i,row in std.iterrows():
 			#arclength slab
@@ -752,6 +833,47 @@ class landmarks:
                                         't_mn':[row.t_mn], 't_mx':[row.t_mx],
                                         'pt_perc':[p],'pt_r':[pt_r],'pt_pts':[row.pt_pts],
                                         'perc_perc':[row.perc_perc],'perc_r':[perc_r],'perc_pts':[perc_pts]}))
+
+	def calc_mt_landmarks(self,df,snum,wt):
+
+		D = {'stype':'mutant'}
+
+		for c in wt.columns:
+			if len(c.split('_')) == 6:
+				amn,amx,tmn,tmx,p,dtype = c.split('_')
+				p = int(p)
+
+				d = df[(df.ac > float(amn))&(df.ac < float(amx))]
+				d = d[(d.theta < float(tmn))&(d.theta > float(tmx))]
+
+				if dtype.split('-')[0] == 'perc':
+					try:
+						perc_r = np.percentile(d.r,p)
+						perc_pts = d[d.r < perc_r]
+					except:
+						perc_r = self.rnull
+						perc_pts = 0
+
+					if dtype.split('-')[1] == 'r':
+						D[c] = perc_r
+					else:
+						D[c] = perc_pts
+
+				else:
+					#Calculate precent of points by dividing pts by total pts
+					p = wt[c].mean()/d.count()['i']
+					try:
+						pt_r = np.percentile(d.r,p)
+					except:
+						pt_r = self.rnull
+
+					if dtype.split('-')[1] == 'r':
+						D[c] = pt_r
+					else:
+						D[c] = wt[c].mean()
+
+		self.lm_mt_rf = self.lm_mt_rf.append(pd.Series(D,name=int(snum)))
+
 
 	def lm_to_cartesian(self,std):
 
@@ -1271,7 +1393,7 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[-1][:2]
+			num = f.split('_')[-1][:-4]
 			dfs[num] = df
 
 	return(dfs)
