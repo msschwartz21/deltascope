@@ -704,6 +704,40 @@ class landmarks:
                                                      'pt_perc':[p],'pt_r':[r],'pt_pts':[pts],
                                                     'perc_perc':[p],'perc_r':[r],'perc_pts':[pts]}))
 
+	def calc_perc(self,df,snum,dtype,out):
+
+		D = {'stype':dtype}
+
+		for a in range(len(self.acbins)):
+			if a+1 < len(self.acbins):
+				arange = [self.acbins[a],self.acbins[a+1]]
+
+				for t in range(len(self.tbins)):
+					if t+1 < len(self.tbins):
+						trange = [self.tbins[t],self.tbins[t+1]]
+
+						for p in self.percbins:
+							d = df[(df.ac > arange[0]) & (df.ac < arange[1])]
+							d = d[(d.theta > trange[0]) & (d.theta < trange[1])]
+
+							try:
+								r = np.percentile(d.r,p)
+								pts = d[d.r < r].count()['i']
+							except:
+								r = self.rnull
+								pts = 0
+
+							L = []
+							for s in [arange[0],arange[1],trange[0],trange[1]]:
+								L.append(str(np.around(s,decimals=2)))
+							name = '_'.join(L)
+
+							D[name+'_'+str(p)+'_pts'] = pts
+							D[name+'_'+str(p)+'_r'] = r
+
+		out = out.append(pd.Series(D,name=int(snum)))
+		return(out)
+
 	def calc_wt_reformat(self,df,snum):
 
 		D = {'stype':'wildtype'}
@@ -843,8 +877,12 @@ class landmarks:
 				amn,amx,tmn,tmx,p,dtype = c.split('_')
 				p = int(p)
 
+				# print(c)
+				# print(df.count()['i'])
 				d = df[(df.ac > float(amn))&(df.ac < float(amx))]
-				d = d[(d.theta < float(tmn))&(d.theta > float(tmx))]
+				# print(d.count()['i'])
+				d = d[(d.theta > float(tmn))&(d.theta < float(tmx))]
+				# print(d.count()['i'])
 
 				if dtype.split('-')[0] == 'perc':
 					try:
@@ -860,19 +898,39 @@ class landmarks:
 						D[c] = perc_pts
 
 				else:
-					#Calculate precent of points by dividing pts by total pts
-					p = wt[c].mean()/d.count()['i']
-					try:
-						pt_r = np.percentile(d.r,p)
-					except:
-						pt_r = self.rnull
-
-					if dtype.split('-')[1] == 'r':
+					if dtype.split('-')[1] == 'pts':
+						#Calculate precent of points by dividing pts by total pts
+						p = wt[c].mean()/d.count()['i']
+						try:
+							pt_r = np.percentile(d.r,p)
+						except:
+							pt_r = self.rnull
 						D[c] = pt_r
 					else:
-						D[c] = wt[c].mean()
+						D[c] = np.nan
 
 		self.lm_mt_rf = self.lm_mt_rf.append(pd.Series(D,name=int(snum)))
+
+	def reformat_to_cart(self,df):
+	    ndf = pd.DataFrame()
+	    for c in df.columns:
+	        if len(c.split('_')) == 6:
+	            amn,amx,tmn,tmx,p,dtype = c.split('_')
+	            x = np.mean([float(amn),float(amx)])
+	            t = np.mean([float(tmn),float(tmx)])
+	            
+	            if dtype == 'r':
+	                r = np.mean(df[c])
+	                y = np.sin(t)*r
+	                z = np.sin(t)*r
+	                
+	                pts = np.mean(df['_'.join([amn,amx,tmn,tmx,p,'pts'])])
+	                
+	                D = pd.Series({'x':x,'y':y,'z':z,'r':r,'t':t,'pts':pts})
+	                
+	                ndf = ndf.append(pd.Series(D),ignore_index=True)
+	            
+	    return(ndf)
 
 
 	def lm_to_cartesian(self,std):

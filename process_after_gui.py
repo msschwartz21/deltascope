@@ -6,7 +6,7 @@ import sys
 from functools import partial
 from random import randint
 
-def transform_file(f):
+def transform_file(f): 
 
 	print(f, 'starting')
 
