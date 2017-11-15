@@ -643,19 +643,11 @@ class math_model:
 class landmarks:
 
 	def __init__(self,percbins=[10,50,90],rnull=15):
-		self.lm_wt = self.new_dataframe()
-		self.lm_mt = self.new_dataframe()
-		self.std_wt = self.new_dataframe()
-		self.std_mt = self.new_dataframe()
 
 		self.lm_wt_rf = pd.DataFrame()
 		self.lm_mt_rf = pd.DataFrame()
 
 		self.rnull = rnull
-
-	def new_dataframe(self):
-		df = pd.DataFrame(columns=['sample','a_mn','a_mx','t_mn','t_mx','pt_perc','pt_r','pt_pts','perc_perc','perc_r','perc_pts'])
-		return(df)
 
 	def set_percentiles(self,Lperc):
 		'''Must be whole numbers between 0 and 100'''
@@ -677,32 +669,6 @@ class landmarks:
 			self.acbins = np.linspace(-acmax,acmax)
 
 		self.tbins = np.arange(-np.pi,np.pi+tstep,tstep)
-
-	def calc_wt_landmarks(self,df,snum):
-
-		for a in range(len(self.acbins)):
-			if a+1 < len(self.acbins):
-				arange = [self.acbins[a],self.acbins[a+1]]
-
-				for t in range(len(self.tbins)):
-					if t+1 < len(self.tbins):
-						trange = [self.tbins[t],self.tbins[t+1]]
-
-						for p in self.percbins:
-							d = df[(df.ac > arange[0]) & (df.ac < arange[1])]
-							d = d[(d.theta > trange[0]) & (d.theta < trange[1])]
-
-							try:
-								r = np.percentile(d.r,p)
-								pts = d[d.r < r].count()['i']
-							except:
-								r = self.rnull
-								pts = 0
-
-							self.lm_wt = self.lm_wt.append(pd.DataFrame({'sample':[snum],'a_mn':[arange[0]],'a_mx':[arange[1]],
-                                                     't_mn':[trange[0]], 't_mx':[trange[1]],
-                                                     'pt_perc':[p],'pt_r':[r],'pt_pts':[pts],
-                                                    'perc_perc':[p],'perc_r':[r],'perc_pts':[pts]}))
 
 	def calc_perc(self,df,snum,dtype,out):
 
@@ -773,101 +739,6 @@ class landmarks:
 
 		self.lm_wt_rf = self.lm_wt_rf.append(pd.Series(D,name=int(snum)))
 
-
-	def calc_standard_old(self,lm):
-
-		std = self.new_dataframe()
-
-		for a in range(len(self.acbins)):
-			if a+1 < len(self.acbins):
-				arange = [self.acbins[a],self.acbins[a+1]]
-
-				for t in range(len(self.tbins)):
-					if t+1 < len(self.tbins):
-						trange = [self.tbins[t],self.tbins[t+1]]
-
-						for p in self.percbins:
-							d = lm[lm.a_mn == arange[0]]
-							d = d[d.t_mn == trange[0]]
-							d = d[d.perc_perc == p]
-
-							std = std.append(d.mean(),ignore_index=True)
-
-		return(std)
-
-	def calc_standard(self,lm):
-
-		std = self.new_dataframe()
-
-		for a in range(len(self.acbins)):
-			if a+1 < len(self.acbins):
-				arange = [self.acbins[a],self.acbins[a+1]]
-
-				for t in range(len(self.tbins)):
-					if t+1 < len(self.tbins):
-						trange = [self.tbins[t],self.tbins[t+1]]
-
-						for p in self.percbins:
-							d = lm[(lm.a_mn==arange[0])&(lm.a_mx==arange[1])]
-							d = d[(d.t_mn==trange[0])&(d.t_mx==trange[1])]
-							d = d[d.perc_perc==p]
-
-							std = std.append(d.mean(),ignore_index=True)
-
-		return(std)
-
-	def conv(self,mn,mx):
-	    r = {'t_mn':mn,'t_mx':mx}
-	    if (r.t_mn==0)&(r.t_mx==np.pi/4):
-	        out = 'A'
-	    elif (r.t_tm==np.pi/4)&(r.t_mx==np.pi/2):
-	        out = 'B'
-	    elif (r.t_tm==np.pi/2)&(r.t_mx==3*np.pi/4):
-	        out = 'C'
-	    elif (r.t_mn==3*np.pi/4)&(r.t_mx==np.pi):
-	        out = 'D'
-	    elif (r.t_mn==-np.pi/4)&(r.t_mx==0):
-	        out = 'Ap'
-	    elif (r.t_mn==-np.pi/2)&(r.t_mx==-np.pi/4):
-	        out = 'Bp'
-	    elif (r.t_mn==-3*np.pi/4)&(r.t_mx==-np.pi/2):
-	        out = 'Cp'
-	    elif (r.t_mn==-np.pi)&(r.t_mx==-3*np.pi/4):
-	        out = 'Dp'
-	        
-	    return(out)
-
-	def calc_mt_landmarks_old(self,df,snum,std):
-
-		for i,row in std.iterrows():
-			#arclength slab
-			d = df[(df.ac > row.a_mn) & (df.ac < row.a_mx)]
-			#theta wedge
-			d = d[(d.theta > row.t_mn) & (d.theta < row.t_mx)]
-
-			try:
-				#Find the r value which holds perc_perc of the data
-				perc_r = np.perentile(d.r,row.perc_perc)
-				#Find the number of points taht falls within that r value
-				perc_pts = d[d.r < perc_r]
-			except:
-				perc_r = self.rnull
-				perc_pts = 0
-
-			#Calculate percent of points by dividing pt_pts by total pts 
-			p = row.pt_pts/d.count()['i']
-
-			try:
-				#Find the percentile of p
-				pt_r = np.percentile(d.r,p)
-			except:
-				pt_r = self.rnull
-
-			self.lm_mt = self.lm_mt.append(pd.DataFrame({'sample':[snum],'a_mn':[row.a_mn],'a_mx':[row.a_mx],
-                                        't_mn':[row.t_mn], 't_mx':[row.t_mx],
-                                        'pt_perc':[p],'pt_r':[pt_r],'pt_pts':[row.pt_pts],
-                                        'perc_perc':[row.perc_perc],'perc_r':[perc_r],'perc_pts':[perc_pts]}))
-
 	def calc_mt_landmarks(self,df,snum,wt):
 
 		D = {'stype':'mutant'}
@@ -910,51 +781,6 @@ class landmarks:
 						D[c] = np.nan
 
 		self.lm_mt_rf = self.lm_mt_rf.append(pd.Series(D,name=int(snum)))
-
-	def reformat_to_cart(self,df):
-	    ndf = pd.DataFrame()
-	    for c in df.columns:
-	        if len(c.split('_')) == 6:
-	            amn,amx,tmn,tmx,p,dtype = c.split('_')
-	            x = np.mean([float(amn),float(amx)])
-	            t = np.mean([float(tmn),float(tmx)])
-	            
-	            if dtype == 'r':
-	                r = np.mean(df[c])
-	                y = np.sin(t)*r
-	                z = np.sin(t)*r
-	                
-	                pts = np.mean(df['_'.join([amn,amx,tmn,tmx,p,'pts'])])
-	                
-	                D = pd.Series({'x':x,'y':y,'z':z,'r':r,'t':t,'pts':pts})
-	                
-	                ndf = ndf.append(pd.Series(D),ignore_index=True)
-	            
-	    return(ndf)
-
-
-	def lm_to_cartesian(self,std):
-
-		ct = pd.DataFrame({
-			'a_mn':std.a_mn,
-			'a_mx':std.a_mx,
-			't_mn':std.t_mn,
-			't_mx':std.t_mx,
-
-			'pt_perc':std.pt_perc,
-			'pt_r':std.pt_r,
-			'pt_x':std.a_mn,
-			'pt_y':np.cos(std.t_mn)*std.pt_r,
-			'pt_z':np.sin(std.t_mn)*std.pt_r,
-
-			'perc_perc':std.perc_perc,
-			'perc_r':std.pt_r,
-			'perc_x':std.a_mn,
-			'perc_y':np.cos(std.t_mn)*std.perc_r,
-			'perc_z':np.sin(std.t_mn)*std.perc_r
-			})
-
-		return(ct)
 
 	def write_header(self,f):
 
@@ -1016,6 +842,79 @@ class landmarks:
 			self.write_psi(os.path.join(outdir,name),d[['perc_x','perc_y','perc_z','a_mn','perc_r','t_mn']])
 			name = '_'.join([rname,str(p),'points'])+'.psi'
 			self.write_psi(os.path.join(outdir,name),d[['pt_x','pt_y','pt_z','a_mn','pt_r','t_mn']])
+
+def reformat_to_cart(df):
+    ndf = pd.DataFrame()
+    for c in df.columns:
+        if len(c.split('_')) == 6:
+            amn,amx,tmn,tmx,p,dtype = c.split('_')
+            x = np.mean([float(amn),float(amx)])
+            t = np.mean([float(tmn),float(tmx)])
+            
+            if dtype == 'r':
+                r = np.mean(df[c])
+                r_std = np.std(df[c])
+                y = np.sin(t)*r
+                z = np.sin(t)*r
+                
+                pts = np.mean(df['_'.join([amn,amx,tmn,tmx,p,'pts'])])
+                
+                D = pd.Series({'x':x,'y':y,'z':z,'r':r,'r_std':r_std,'t':t,'pts':pts})
+                
+                ndf = ndf.append(pd.Series(D),ignore_index=True)
+            
+    return(ndf)
+
+def convert_to_arr(xarr,tarr,wt,mt):
+	wtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
+	mtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
+
+	for c in mt.columns:
+		if len(c.split('_') == 6):
+			amn,amx,tmn,tmx,p,dtype = c.split('_')
+			x = np.mean([float(amn),float(amx)])
+			t = np.mean([float(tmn),float(tmx)])
+
+			if dtype=='r':
+				wtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = wt[c]
+				mtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mt[c]
+
+	return(wtarr,mtarr)
+
+P = {
+	'zln':2,'zpt':3,'zfb':1,
+	'wtc':'b','mtc':'r',
+	'alpha':0.3,
+	'cmap':'Greys_r',
+	'xarr':None,
+	'tarr':None
+}
+
+def subplot_lmk(ax,p,avg,sem,parr,dtype,Pn=P):
+
+	for k in Pn.keys():
+		P[k] = Pn[k]
+
+	if dtype=='wt':
+		c = P['wtc']
+	else:
+		c = P['mtc']
+
+	ti1 = np.where(P['tarr']==p[0])[0][0]
+	ti2 = np.where(P['tarr']==p[1])[0][0]
+
+	ax.fill_between(P['xarr'],avg[:,ti1]+sem[:,ti1],avg[:,ti1]-sem[:,ti1],alpha=P['alpha'],color=c,zorder=P['zfb'])
+	ax.fill_between(P['xarr'],-avg[:,ti2]+sem[:,ti2],-avg[:,ti2]-sem[:,ti2],alpha=P['alpha'],color=c,zorder=P['zfb'])
+
+	ax.plot(P['xarr'],avg[:,ti1],c=c,zorder=P['zln'])
+	ax.plot(P['xarr'],-avg[:,ti2],c=c,zorder=P['zln'])
+
+	if dtype=='mt':
+		ax.scatter(P['xarr'],avg[:,ti1],c=parr[:,ti1],cmap=P['cmap'],zorder=P['zpt'])
+		ax.scatter(P['xarr'],-avg[:,ti2],c=parr[:,ti2],cmap=P['cmap'],zorder=P['zpt'])
+
+###################### End landmark code ##############
+
 
 def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
 	'''Process single sample through embryo class and 
