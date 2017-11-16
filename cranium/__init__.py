@@ -35,7 +35,7 @@ class brain:
 		#Select either channe0/1 or exported_data
 		d = f.get('exported_data')
 		if d != None:
-			c1 = np.array(d[:,:,:,0])
+			c1 =   
 			c2 = np.array(d[:,:,:,1])
 		elif d == None:
 			c1 = np.array(f.get('channel0'))
