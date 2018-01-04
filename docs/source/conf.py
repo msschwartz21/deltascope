@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# craniumPy documentation build configuration file, created by
-# sphinx-quickstart on Wed Apr 12 13:43:11 2017.
+# cranium documentation build configuration file, created by
+# sphinx-quickstart on Thu Jan  4 13:33:50 2018.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -15,6 +15,9 @@
 
 import sys
 import os
+import shlex
+
+import cranium
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -30,11 +33,11 @@ import os
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.pngmath',
     'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,8 +55,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'craniumPy'
-copyright = '2017, Morgan Schwartz'
+project = 'cranium'
+copyright = '2018, Morgan Schwartz'
 author = 'Morgan Schwartz'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -108,6 +111,8 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+autodoc_member_order = 'bysource'
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -208,7 +213,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'craniumPydoc'
+htmlhelp_basename = 'craniumdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -230,8 +235,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'craniumPy.tex', 'craniumPy Documentation',
-     'Morgan Schwartz', 'manual'),
+  (master_doc, 'cranium.tex', 'cranium Documentation',
+   'Morgan Schwartz', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -260,7 +265,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'craniumpy', 'craniumPy Documentation',
+    (master_doc, 'cranium', 'cranium Documentation',
      [author], 1)
 ]
 
@@ -274,9 +279,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'craniumPy', 'craniumPy Documentation',
-     author, 'craniumPy', 'One line description of project.',
-     'Miscellaneous'),
+  (master_doc, 'cranium', 'cranium Documentation',
+   author, 'cranium', 'One line description of project.',
+   'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -290,7 +295,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}

@@ -1,3 +1,0 @@
-.. _introduction:
-Introduction
-=============

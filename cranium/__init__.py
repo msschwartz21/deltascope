@@ -23,12 +23,23 @@ from scipy.integrate import simps
 import scipy.stats as stats
 
 class brain:
+	''' Object to manage biological data and associated functions. '''
 
 	def __init__(self):
 		'''Initialize brain object'''
 
+
 	def read_data(self,filepath):
-		'''Reads 3D data from file and selects appropriate channel'''
+		'''
+		Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal
+
+		:param str filepath: Filepath to hdf5 probability file
+		:return: Creates the variable :attr:`brain.raw_data`
+
+		.. py:attribute:: brain.raw_data
+
+			Array of shape [z,y,x] containing raw probability data
+		'''
 
 		#Read h5 file and extract probability data
 		f = h5py.File(filepath,'r')
@@ -44,13 +55,20 @@ class brain:
 
 		#Figure out which channels has more zeros and therefore is background
 		if np.count_nonzero(c1<0.1) > np.count_nonzero(c1>0.9):
+			#: Array of shape [z,y,x] containing raw probability data
 			self.raw_data = c1
 		else:
+			#: Array of shape [z,y,x] containing raw probability data
 			self.raw_data = c2
 
 	def create_dataframe(self,data,scale):
-		'''Creates a pandas dataframe containing the x,y,z and signal/probability value 
-		for each point in the :py:attr:`brain.raw_data` array'''
+		'''
+		Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array
+
+		:param array data: Raw probability data in 3D array
+		:param array scale: Array of length three containing the micron values for [x,y,z]
+		:return: Pandas DataFrame with xyz and probability value for each point
+		'''
 
 		#NB: scale variable actually contains microns dimensions
 
@@ -77,7 +95,13 @@ class brain:
 		return(df)
 
 	def plot_projections(self,df,subset):
-		'''Plots x, y, and z projections from the dataframe'''
+		'''
+		Plots the x, y, and z projections of the input dataframe in a matplotlib plot
+
+		:param pd.DataFrame df: Dataframe with columns: 'x','y','z'
+		:param float subset: Value between 0 and 1 indicating what percentage of the df to subsample
+		:returns: Matplotlib figure with three labeled scatterplots
+		'''
 
 		df = df.sample(frac=subset)
     
@@ -113,8 +137,29 @@ class brain:
 		return(fig)
 
 	def preprocess_data(self,threshold,scale,microns):
-		'''Thresholds and scales data prior to PCA'''
+		'''
+		Thresholds and scales data prior to PCA
 
+		Creates :py:attr:`brain.threshold`, :py:attr:`brain.df_thresh`, and :py:attr:`brain.df_scl`
+
+		:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+		:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
+
+		.. py:attribute:: brain.threshold 
+			
+			Value used to threshold the data prior to calculating the model
+
+		.. py:attribute:: brain.df_thresh
+
+			Dataframe containing only points with values above the specified threshold
+
+		.. py:attribute:: brain.df_scl
+
+			Dataframe containing data from :py:attr:`brain.df_thresh` after a scaling value has been applied
+		'''
+
+		#: Dataframe with four columns: x,y,z,value with all points in :py:attr:`brain.raw_data`
 		self.df = self.create_dataframe(self.raw_data,microns)
 
 		#Create new dataframe with values above threshold
@@ -129,7 +174,17 @@ class brain:
 			'z':self.df_thresh.z * self.scale[2]})
 
 	def process_alignment_data(self,data,threshold,radius,microns):
-		'''Applies a double median filter to data to use for alignment'''
+		'''
+		Applies a median filter twice to the data which is used for alignment
+
+		Ensures than any noise in the structural data does not interfere with alignment
+
+		:param array data: Raw data imported by the function :py:func:`brain.read_data`
+		:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+		:param int radius: Integer that determines the radius of the circle used for the median filter
+		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
+		:returns: Dataframe containing data processed with the median filter and threshold
+		'''
 
 		#Iterate over each plane and apply median filter twice
 		out = np.zeros(data.shape)
@@ -141,7 +196,23 @@ class brain:
 		return(thresh)
 
 	def calculate_pca_median(self,data,threshold,radius,microns):
-		'''Transform data according to median filtered raw data'''
+		'''
+		Calculate PCA transformation matrix, :py:attr:`brain.pcamed`, based on data (:py:attr:`brain.pcamed`) after applying median filter and threshold
+
+		:param array data: 3D array containing raw probability data
+		:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal
+		:param int radius: Radius of neighborhood that should be considered for the median filter
+		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
+		
+		.. py:attribute:: brain.median
+
+			Pandas dataframe containing data that has been processed with a median filter twice and thresholded
+
+		.. py:attribute:: brain.pcamed
+
+			PCA object managing the transformation matrix and any resulting transformations
+
+		'''
 
 		self.median = self.process_alignment_data(data,threshold,radius,microns)
 
@@ -149,6 +220,16 @@ class brain:
 		self.pcamed.fit(self.median[['x','y','z']])
 
 	def calculate_pca_median_2d(self,data,threshold,radius,microns):
+		'''
+		Calculate PCA transformation matrix for 2 dimensions of data, :py:attr:`brain.pcamed`, based on data after applying median filter and threshold
+
+		.. warning:: `fit_dim` is not used to determine which dimensions to fit. Defaults to x and z
+
+		:param array data: 3D array containing raw probability data
+		:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal
+		:param int radius: Radius of neighborhood that should be considered for the median filter
+		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
+		'''
 
 		self.median = self.process_alignment_data(data,threshold,radius,microns)
 
@@ -156,6 +237,22 @@ class brain:
 		self.pcamed.fit(self.median[['y','z']])
 
 	def pca_transform_2d(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
+		'''
+		Transforms `df` in 2D based on the PCA object, `pca`, whose transformation matrix has already been calculated
+
+		Calling :py:func:`brain.align_data` creates :py:attr:`brain.df_align`
+
+		.. warning:: `fit_dim` is not used to determine which dimensions to fit. Defaults to x and z
+
+		:param pd.DataFrame df: Dataframe containing thresholded xyz data
+		:param pca_object pca: A pca object containing a transformation object, e.g. :py:attr:`brain.pcamed`
+		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default
+		:param mm: (:py:class:`math_model` or None) Math model for primary channel
+		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values
+		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees
+		'''
 
 		fit = pca.transform(df[['y','z']])
 		df_fit = pd.DataFrame({
@@ -167,6 +264,18 @@ class brain:
 		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
 
 	def pca_transform_3d(self,df,pca,comp_order,fit_dim,deg=2,mm=None,vertex=None,flip=None):
+		'''
+		Transforms `df` in 3D based on the PCA object, `pca`, whose transformation matrix has already been calculated
+
+		:param pd.DataFrame df: Dataframe containing thresholded xyz data
+		:param pca_object pca: A pca object containing a transformation object, e.g. :py:attr:`brain.pcamed`
+		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default
+		:param mm: (:py:class:`math_model` or None) Math model for primary channel
+		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values
+		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees
+		'''
 
 		fit = pca.transform(df[['x','y','z']])
 		df_fit = pd.DataFrame({
@@ -178,8 +287,27 @@ class brain:
 		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
 	
 	def align_data(self,df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None):
-		'''Apply PCA transformation matrix and align data so that 
-		the vertex is at the origin'''
+		'''
+		Apply PCA transformation matrix and align data so that the vertex is at the origin
+
+		Creates :py:attr:`brain.df_align` and :py:attr:`brain.mm`
+
+		:param pd.DataFrame df: dataframe containing thresholded xyz data
+		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default
+		:param mm: (:py:class:`math_model` or None) Math model for primary channel
+		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values
+		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees
+
+		.. py:attribute:: brain.df_align
+
+			Dataframe containing point data aligned using PCA
+
+		.. py:attribute:: brain.mm
+
+			Math model object fit to data in brain object
+		'''
 		
 		#If vertex for translation is not included
 		if vertex == None and deg==2:
@@ -273,7 +401,12 @@ class brain:
 			self.mm = mm
 
 	def flip_data(self,df):
-		'''Rotate data by 180 degrees'''
+		'''
+		Rotate data by 180 degrees
+
+		:param dataframe df: Pandas dataframe containing x,y,z data
+		:returns: Rotated dataframe
+		'''
 
 		r = np.array([[np.cos(np.pi),0,np.sin(np.pi)],
 			[0,1,0],
@@ -285,7 +418,14 @@ class brain:
 		return(dfr)
 
 	def fit_model(self,df,deg,fit_dim):
-		'''Fit model to dataframe'''
+		'''Fit model to dataframe
+
+		:param pd.DataFrame df: Dataframe containing at least x,y,z
+		:param int deg: Degree of the function that should be fit to the model
+		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+		:returns: math model
+		:rtype: :py:class:`math_model`
+		'''
 
 		mm = math_model(np.polyfit(df[fit_dim[0]], df[fit_dim[1]], deg=deg))
 		return(mm)
@@ -293,7 +433,14 @@ class brain:
 	###### Functions associated with alpha, r, theta coordinate system ######
 
 	def find_distance(self,t,point):
-		'''Find euclidean distance between math model(t) and data point in the xz plane'''
+		'''
+		Find euclidean distance between math model(t) and data point in the xy plane
+
+		:param float t: float value defining point on the line
+		:param array point: array [x,y] defining data point
+		:returns: distance between the two points
+		:rtype: float
+		'''
 
 		x = float(t)
 		z = self.mm.p(x)
@@ -304,7 +451,13 @@ class brain:
 		return(dist)
 
 	def find_min_distance(self,row):
-		'''Find the point on the curve that produces the minimum distance between the point and the data point'''
+		'''
+		Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(:py:func:`brain.find_distance`)
+
+		:param pd.Series row: row from dataframe in the form of a pandas Series
+		:returns: point in the curve (xc, yc, zc) and r
+		:rtype: floats
+		'''
 
 		dpoint = np.array([row.x,row.z])
 
@@ -321,7 +474,13 @@ class brain:
 		#return(pd.Series({'xc':x, 'yc':y, 'zc':z, 'r':r}))
 
 	def integrand(self,x):
-		'''Function to integrate to calculate arclength between vertex and x'''
+		'''
+		Function to integrate to calculate arclength
+
+		:param float x: integer value for x
+		:returns: arclength value for integrating
+		:rtype: float
+		'''
 
 		y_prime = self.mm.cf[0]*2*x + self.mm.cf[1]
 
@@ -329,22 +488,56 @@ class brain:
 		return(arclength)
 
 	def find_arclength(self,xc):
-		'''Calculate arclength for a row'''
+		'''
+		Calculate arclength by integrating the derivative of the math model in xy plane
+
+		.. math:: 
+
+			\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}
+
+		:param float row: Postion in the x axis along the curve
+		:returns: Length of the arc along the curve between the row and the vertex
+		:rtype: float
+		'''
 
 		ac,err = scipy.integrate.quad(self.integrand,xc,0)
 		return(ac)
 
 	def find_theta(self,row,zc,yc):
+		'''
+		Calculate theta for a row containing data point in relationship to the xz plane
+
+		:param pd.Series row: row from dataframe in the form of a pandas Series
+		:param float yc: Y position of the closest point in the curve to the data point
+		:param float zc: Z position of the closest point in the curve to the data point
+		:returns: theta, angle between point and the model plane
+		:rtype: float
+		'''
+
 		theta = np.arctan2(row.y-yc,row.z-zc)
 		return(theta)
 
 	def find_r(self,row,zc,yc):
+		'''
+		Calculate r using the Pythagorean theorem
+
+		:param pd.Series row: row from dataframe in the form of a pandas Series
+		:param float yc: Y position of the closest point in the curve to the data point
+		:param float zc: Z position of the closest point in the curve to the data point
+		:returns: r, distance between the point and the model
+		:rtype: float
+		'''
 
 		r = np.sqrt((row.z-zc)**2 + (row.y-yc)**2)
 		return(r)
 
 	def calc_coord(self,row):
-		'''Calculate alpah, r, theta for a particular row'''
+		'''
+		Calculate alpah, r, theta for a particular row
+
+		:param pd.Series row: row from dataframe in the form of a pandas Series
+		:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and ac (arclength)
+		'''
 
 		xc,yc,zc = self.find_min_distance(row)
 		ac = self.find_arclength(xc)
@@ -355,30 +548,78 @@ class brain:
 					'r':r, 'ac':ac, 'theta':theta}))
 
 	def transform_coordinates(self):
-		'''Transform coordinate system so that each point is defined relative to 
-		math model by (alpha,theta,r) (only applied to df_align'''
+		'''
+		Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to :py:attr:`brain.df_align`)
+
+		:returns: appends columns r, xc, yc, zc, ac, theta to :py:attr:`brain.df_align`
+		'''
 
 		#Calculate alpha, theta, r for each row in dataset
 		self.df_align = self.df_align.merge(self.df_align.apply((lambda row: self.calc_coord(row)), axis=1))
 
-	def subset_data(self,sample_frac=0.5):
-		'''Subset data based on proportion set in sample_frac'''
+	def subset_data(self,df,sample_frac=0.5):
+		'''
+		Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac
+		
+		Creates the variable :py:attr:`brain.subset`
 
-		self.subset = self.df_align.sample(frac=sample_frac)
+		:param pd.DataFrame: Dataframe which will be sampled
+		:param float sample_frac: (or None) Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
+		
+		.. py:attribute:: brain.subset
+
+			Random sample of the input dataframe
+		'''
+
+		self.subset = df.sample(frac=sample_frac)
 
 	def add_thresh_df(self,df):
-		'''Add dataframe of thresholded and transformed data to self.df_thresh'''
+		'''
+		Adds dataframe of thresholded and transformed data to :py:attr:`brain.df_thresh`
+
+		:param pd.DataFrame df: dataframe of thesholded and transformed data
+		:returns: :py:attr:`brain.df_thresh`
+		'''
 
 		self.df_thresh = df
 
 	def add_aligned_df(self,df):
-		'''Add dataframe of aligned data'''
+		'''
+		Adds dataframe of aligned data
+
+		.. warning:: Calculates model, but assumes that the dimensions of the fit are x and z
+
+		:param pd.DataFrame df: Dataframe of aligned data
+		:returns: :py:attr:`brain.df_align`
+		'''
 
 		self.df_align = df
 		self.mm = self.fit_model(self.df_align,2,['x','z'])
 
 class embryo:
-	'''Class to managed multiple brain objects in a multichannel sample'''
+	'''
+	Class to managed multiple brain objects in a multichannel sample
+
+	:param str name: Name of this sample set
+	:param str number: Sample number corresponding to this embryo
+	:param str outdir: Path to directory for output files
+
+	.. py:attribute:: embryo.chnls
+
+		Dictionary containing the :py:class:`brain` object for each channel
+
+	.. py:attribute:: embryo.outdir
+
+		Path to directory for output files
+
+	.. py:attribute:: embryo.name
+
+		Name of this sample set
+
+	.. py:attribute:: embryo.number
+
+		Sample number corresponding to this embryo
+	'''
 
 	def __init__(self,name,number,outdir):
 		'''Initialize embryo object'''
@@ -389,7 +630,12 @@ class embryo:
 		self.number = number
 
 	def add_channel(self,filepath,key):
-		'''Add channel to self.chnls dictionary'''
+		'''
+		Add channel to :py:attr:`embryo.chnls` dictionary
+
+		:param str filepath: Complete filepath to image
+		:param str key: Name of the channel
+		'''
 
 		s = brain()
 		s.read_data(filepath)
@@ -397,7 +643,19 @@ class embryo:
 		self.chnls[key] = s
 
 	def process_channels(self,mthresh,gthresh,radius,scale,microns,deg,primary_key,comp_order,fit_dim):
-		'''Process channels through alignment'''
+		'''
+		Process all channels through the production of the :py:attr:`brain.df_align` dataframe
+
+		:param float mthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for median data
+		:param float gthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for general data
+		:param int radius: Size of the neighborhood area to examine with median filter
+		:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
+		:param int deg: Degree of the function that should be fit to the model
+		:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
+		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]
+		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. ['x','z']
+		'''
 
 		#Process primary channel
 		self.chnls[primary_key].preprocess_data(gthresh,scale,microns)
@@ -427,7 +685,11 @@ class embryo:
 				print(ch,'processed')
 
 	def save_projections(self,subset):
-		'''Save projections of both channels into files'''
+		'''
+		Save projections of both channels into png files in :py:attr:`embryo.outdir` following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`]_MIP.png
+
+		:param float subset: Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting
+		'''
 
 		for ch in self.chnls.keys():
 			fig = self.chnls[ch].plot_projections(self.chnls[ch].df_align,subset)
@@ -437,7 +699,9 @@ class embryo:
 		print('Projections generated')
 
 	def save_psi(self):
-		'''Save all channels into psi files'''
+		'''
+		Save all channels into psi files following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`].psi
+		'''
 
 		columns = ['x','y','z','ac','r','theta']
 
@@ -449,12 +713,29 @@ class embryo:
 		print('PSIs generated')
 
 	def add_psi_data(self,filepath,key):
-		''''Read in previously processed psi data as a dataframe'''
+		'''
+		Read psi data into a channel dataframe
+
+		:param str filepath: Complete filepath to data
+		:param str key: Descriptive key for channel dataframe in dictionary
+		'''
 
 		self.chnls[key] = read_psi(filepath)
 
 class math_model:
-	'''Class to contain attributes and data associated with math model'''
+	'''
+	Object to contain attributes associated with the math model of a sample
+
+	:param array model: Array of coefficients calculated by np.polyfit
+
+	.. py:attribute:: math_model.cf
+
+		Array of coefficients for the math model
+
+	.. py:attribute:: math_model.p
+
+		Poly1d function for the math model to allow calculation and plotting of the model
+	'''
 
 	def __init__(self,model):
 
@@ -462,6 +743,28 @@ class math_model:
 		self.p = np.poly1d(model)
 
 class landmarks:
+	'''
+	Class to handle calculation of landmarks to describe structural data
+
+	:param list percbins: (or None) Must be a list of integers between 0 and 100 
+	:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
+	
+	.. py:attribute:: brain.lm_wt_rf
+
+		pd.DataFrame, which wildtype landmarks will be added to
+
+	.. py:attribute:: brain.lm_mt_rf
+
+		pd.DataFrame, which mutant landmarks will be added to
+
+	.. py:attribute:: brain.rnull
+
+		Integer specifying the value which null landmark calculations will be set to
+	
+	.. py:attribute:: brain.percbins
+
+		Integer specifying the percentiles which will be used to calculate landmarks
+	'''
 
 	def __init__(self,percbins=[10,50,90],rnull=15):
 
@@ -472,7 +775,25 @@ class landmarks:
 		self.percbins = percbins
 
 	def calc_bins(self,Ldf,ac_num,tstep):
-		'''Calculates alpha and theta bins based on ac_num and tstep'''
+		'''
+		Calculates alpha and theta bins based on ac_num and tstep
+
+		Creates :py:attr:`landmarks.acbins` and :py:attr:`landmarks.tbins`
+
+		.. warning:: `tstep` does not handle scenarios where 2pi is not evenly divisible by tstep
+
+		:param list Ldf: List of dataframes that are being used for the analysis typically accessed by `dict.values()`
+		:param int ac_num: Integer indicating the number of divisions that should be made along alpha
+		:param float tstep: The size of each bin used for alpha
+
+		.. py:attribute:: landmarks.acbins
+
+			List containing the boundaries of each bin along alpha based on `ac_num`
+
+		.. py:attribute:: landmarks.tbins
+
+			List containing the boundaries of each bin along theta based on `tstep`
+		'''
 
 		#Find the minimum and maximum values of alpha in the dataset
 		acmin,acmax = 0,0
@@ -492,7 +813,14 @@ class landmarks:
 		self.tbins = np.arange(-np.pi,np.pi+tstep,tstep)
 
 	def calc_perc(self,df,snum,dtype,out):
-		'''Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined'''
+		'''
+		Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined 
+
+		:param pd.DataFrame df: Dataframe containing columns x,y,z,alpha,r,theta
+		:param str snum: String containing a sample identifier that can be converted to an integer
+		:param str dtype: String describing the sample group to which the sample belongs, e.g. control or experimental
+		:returns: pd.DataFrame with new landmarks appended
+		'''
 
 		D = {'stype':dtype}
 
@@ -532,6 +860,9 @@ class landmarks:
 		return(out)
 
 	def calc_wt_reformat(self,df,snum):
+		'''
+		.. warning:: Deprecated function, but includes code pertaining to calculating point based data
+		'''
 
 		D = {'stype':'wildtype'}
 
@@ -567,6 +898,9 @@ class landmarks:
 		self.lm_wt_rf = self.lm_wt_rf.append(pd.Series(D,name=int(snum)))
 
 	def calc_mt_landmarks(self,df,snum,wt):
+		'''
+		.. warning:: Deprecated function, but attempted to calculate mutant landmarks based on the number of points found in the wildtype standard
+		'''
 
 		D = {'stype':'mutant'}
 
@@ -610,8 +944,12 @@ class landmarks:
 		self.lm_mt_rf = self.lm_mt_rf.append(pd.Series(D,name=int(snum)))
 
 def reformat_to_cart(df):
-	'''Take a dataframe in which columns contain the bin parameters and 
-	convert to a cartesian coordinate system'''
+	'''
+	Take a dataframe in which columns contain the bin parameters and convert to a cartesian coordinate system
+
+	:param pd.DataFrame df: Dataframe containing columns with string names that contain the bin parameter
+	:returns: pd.DataFrame with each landmark as a row and columns: x,y,z,r,r_std,t,pts
+	'''
 
 	ndf = pd.DataFrame()
 	for c in df.columns:
@@ -660,6 +998,18 @@ P = {
 }
 
 def subplot_lmk(ax,p,avg,sem,parr,xarr,tarr,dtype,Pn=P):
+	'''
+	Plot a ribbon of average and standard error of the mean onto the subplot, `ax`
+
+	:param plt.Subplot ax: Matplotlib subplot onto which the data should be plotted
+	:param list p: List of two theta values that should be plotted
+	:param np.array avg: Array of shape (xvalues,tvalues) containing the average values of the data
+	:param np.array sem: Array of shape (xvalues,tvalues) containing the standard error of the mean values of the data
+	:param np.array parr: Array of shape (xvalues,tvalues) containing the p values for the data
+	:param str dtype: String describing sample type
+	:param Pn: Dictionary containing the following values: 'zln':2,'zpt':3,'zfb':1,'wtc':'b','mtc':'r','alpha':0.3,'cmap':'Greys_r'
+	:type: dict or None
+	'''
 
 	for k in Pn.keys():
 		P[k] = Pn[k]
@@ -685,7 +1035,11 @@ def subplot_lmk(ax,p,avg,sem,parr,xarr,tarr,dtype,Pn=P):
 ##### PSI file processing ############
 
 def write_header(f):
-	'''Writes header for PSI file with columns Id,x,y,z,ac,r,theta'''
+	'''
+	Writes header for PSI file with columns Id,x,y,z,ac,r,theta
+
+	:param file f: file object created by 'open(filename,'w')`
+	'''
 
 	contents = [
 		'PSI Format 1.0',
@@ -709,7 +1063,12 @@ def write_header(f):
 		f.write('# '+ line + '\n')
 
 def write_data(filepath,df):
-	'''Writes data in PSI format to file after writing header'''
+	'''
+	Writes data in PSI format to file after writing header using :py:func:`write_header`. Closes file at the conclusion of writing data.
+
+	:param str filepath: Complete filepath to output file
+	:param pd.DataFrame df: dataframe containing columns x,y,z,ac,r,theta
+	'''
 
 	#Open new file at given filepath
 	f = open(filepath,'w')
@@ -738,7 +1097,12 @@ def write_data(filepath,df):
 	print('Write to',filepath,'complete')
 
 def read_psi(filepath):
-	'''Reads psi file and saves data into dataframe'''
+	'''
+	Reads psi file at the given filepath and returns data in a pandas DataFrame
+
+	:param str filepath: Complete filepath to file
+	:returns: pd.Dataframe containing data
+	'''
 
 	df = pd.read_csv(filepath,
 		sep=' ',
@@ -752,7 +1116,13 @@ def read_psi(filepath):
 	return(df)
 
 def read_psi_to_dict(directory,dtype):
-	'''Read psi in directory into dict of df'''
+	'''
+	Read psis from directory into dictionary of dfs with filtering based on dtype
+
+	:param str directory: Directory to get psis from 
+	:param str dtype: Usually 'AT' or 'ZRF1'
+	:returns: Dictionary of pd.DataFrame
+	'''
 
 	dfs = {}
 	for f in os.listdir(directory):
@@ -767,8 +1137,22 @@ def read_psi_to_dict(directory,dtype):
 ###### Stand alone functions
 
 def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary_key,comp_order,fit_dim,flip_dim):
-	'''Process single sample through embryo class and 
-	save df to csv'''
+	'''
+	Process single sample through :py:class:`brain` class and saves df to csv
+
+	.. warning:: Out of date and will probably fail
+
+	:param str num: Sample number
+	:param str root: Complete path to the root directory for this sample set
+	:param str name: Name describing this sample set
+	:param str outdir: Complete path to output directory
+	:param array chs: Array containing strings specifying the directories for each channel
+	:param array prefixes: Array containing strings specifying the file prefix for each channel
+	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value
+	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
+	:param int deg: Degree of the function that should be fit to the model
+	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too
+	'''
 
 	tic = time.time()
 
@@ -789,7 +1173,12 @@ def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary
 	print(name,'complete',toc-tic)
 
 def calculate_models(Ldf):
-	'''Calculate models for each sample based on a list of at dataframes that are already aligned'''
+	'''
+	Calculate model for each dataframe in list and add to new dataframe
+
+	:param list Ldf: List of dataframes containing aligned data
+	:returns: pd.Dataframe with a,b,c values for parabolic model
+	'''
 
 	modeldf = pd.DataFrame({'a':[],'b':[],'c':[]})
 
@@ -803,7 +1192,16 @@ def calculate_models(Ldf):
 	return(modeldf)
 
 def generate_kde(data,var,x,absv=False):
-	'''Generate list of kde from either dict or list'''
+	'''
+	Generate list of KDEs from either dictionary or list of data
+
+	:param data: pd.DataFrames to convert
+	:type: dict or list
+	:param str var: Name of column to select from df
+	:param array x: Array of datapoints to evaluate KDE on
+	:param bool absv: (or None) Set to True to use absolute value of selected data for KDE calculation
+	:returns: List of KDE arrays
+	'''
 
 	L = []
 
@@ -829,7 +1227,14 @@ def generate_kde(data,var,x,absv=False):
 	return(L)
 
 def calculate_area_error(pdf,Lkde,x):
-	'''Calculate area between pdf and each Lkde'''
+	'''
+	Calculate area between PDF and each kde in Lkde
+
+	:param array pdf: Array of probability distribution function that is the same shape as kdes in Lkde
+	:param list Lkde: List of arrays of Kdes 
+	:param array x: Array of datapoints used to generate pdf and kdes
+	:returns: List of error values for each kde in Lkde
+	'''
 
 	L = []
 
@@ -839,7 +1244,14 @@ def calculate_area_error(pdf,Lkde,x):
 	return(L)
 
 def rescale_variable(Ddfs,var,newvar):
-	'''Rescale variable from -1 to 1 and save in newvar in dict'''
+	'''
+	Rescale variable from -1 to 1 and save in newvar column on original dataframe
+
+	:param dict Ddfs: Dictionary of pd.DataFrames
+	:param str var: Name of column to select from dfs
+	:param str newvar: Name to use for new data in appended column
+	:returns: Dictionary of dataframes containing column of rescaled data
+	'''
 
 	Dout = {}
 
