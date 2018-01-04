@@ -20,6 +20,7 @@ from skimage.filters import median
 from skimage.morphology import disk
 from sklearn.metrics import mean_squared_error
 from scipy.integrate import simps
+import scipy.stats as stats
 
 class brain:
 
@@ -35,7 +36,7 @@ class brain:
 		#Select either channe0/1 or exported_data
 		d = f.get('exported_data')
 		if d != None:
-			c1 = np.array(d[:,:,:,9])
+			c1 = np.array(d[:,:,:,0])
 			c2 = np.array(d[:,:,:,1])
 		elif d == None:
 			c1 = np.array(f.get('channel0'))
@@ -485,7 +486,7 @@ class landmarks:
 		if abs(acmin) > acmax:
 			self.acbins = np.linspace(acmin,abs(acmin),ac_num)
 		else:
-			self.acbins = np.linspace(-acmax,acmax)
+			self.acbins = np.linspace(-acmax,acmax,ac_num)
 
 		#Calculate tbins divisions based on tstep
 		self.tbins = np.arange(-np.pi,np.pi+tstep,tstep)
@@ -612,33 +613,33 @@ def reformat_to_cart(df):
 	'''Take a dataframe in which columns contain the bin parameters and 
 	convert to a cartesian coordinate system'''
 
-    ndf = pd.DataFrame()
-    for c in df.columns:
-        if len(c.split('_')) == 6:
-            amn,amx,tmn,tmx,p,dtype = c.split('_')
-            x = np.mean([float(amn),float(amx)])
-            t = np.mean([float(tmn),float(tmx)])
-            
-            if dtype == 'r':
-                r = np.mean(df[c])
-                r_std = np.std(df[c])
-                y = np.sin(t)*r
-                z = np.sin(t)*r
-                
-                pts = np.mean(df['_'.join([amn,amx,tmn,tmx,p,'pts'])])
-                
-                D = pd.Series({'x':x,'y':y,'z':z,'r':r,'r_std':r_std,'t':t,'pts':pts})
-                
-                ndf = ndf.append(pd.Series(D),ignore_index=True)
-            
-    return(ndf)
+	ndf = pd.DataFrame()
+	for c in df.columns:
+		if len(c.split('_')) == 6:
+			amn,amx,tmn,tmx,p,dtype = c.split('_')
+			x = np.mean([float(amn),float(amx)])
+			t = np.mean([float(tmn),float(tmx)])
+
+			if dtype == 'r':
+				r = np.mean(df[c])
+				r_std = stats.sem(df[c])
+				y = np.sin(t)*r
+				z = np.cos(t)*r
+
+				pts = np.mean(df['_'.join([amn,amx,tmn,tmx,p,'pts'])])
+
+				D = pd.Series({'x':x,'y':y,'z':z,'r':r,'r_sem':r_std,'t':t,'pts':pts})
+
+				ndf = ndf.append(pd.Series(D),ignore_index=True)
+
+	return(ndf)
 
 def convert_to_arr(xarr,tarr,wt,mt):
 	wtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
-	mtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
+	mtarr = np.zeros((len(xarr),len(tarr),mt.count(axis=0)['Unnamed: 0']))
 
 	for c in mt.columns:
-		if len(c.split('_') == 6):
+		if len(c.split('_')) == 6:
 			amn,amx,tmn,tmx,p,dtype = c.split('_')
 			x = np.mean([float(amn),float(amx)])
 			t = np.mean([float(tmn),float(tmx)])
@@ -757,7 +758,8 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[-1][:-4]
+			num = f.split('_')[-1].split('.')[0]
+			print(num)
 			dfs[num] = df
 
 	return(dfs)
