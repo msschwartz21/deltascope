@@ -272,11 +272,11 @@ a21.set_xlabel('Distance (um)')
 
 plt.tight_layout()
 sns.despine()
-******* mako_kwargs: {'MUTDIR': 'D:\\\\zrfs\\\\ZRF4\\\\wt\\\\Output96zrf1v2', 'MYVAR': '4', 'WTDIR': 'C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\wt\\\\Output28zrf1v2', 'GRADE': 'excellent', 'DTYPE': ''}
+******* mako_kwargs: {'WTDIR': 'C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\wt', 'MYVAR': '4', 'GRADE': 'excellent', 'DTYPE': 'AT', 'MUTDIR': 'C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\yot'}
 ******* text after mako:
 -----
-**C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\Output28zrf1v2**
-**D:\\zrfs\\ZRF4\\wt\\Output96zrf1v2**
+**C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\wt**
+**C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\yot**
 -----py
 \%matplotlib notebook
 import numpy as np
@@ -287,11 +287,11 @@ import matplotlib.pyplot as plt
 import cranium
 import scipy.stats
 -----py
-wtdir = "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\Output28zrf1v2"
-mutdir = "D:\\zrfs\\ZRF4\\wt\\Output96zrf1v2"
+wtdir = "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\wt"
+mutdir = "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\Correct_alignment\\yot"
 -----py
-wtdf = cranium.read_psi_to_dict(wtdir,"")
-mdf = cranium.read_psi_to_dict(mutdir,"")
+wtdf = cranium.read_psi_to_dict(wtdir,"AT")
+mdf = cranium.read_psi_to_dict(mutdir,"AT")
 -----
 **Theta**
 -----py
@@ -598,8 +598,8 @@ sns.despine()
   'text',
   '\n'
   '\n'
-  '**C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\wt\\\\Output28zrf1v2**\n'
-  '**D:\\\\zrfs\\\\ZRF4\\\\wt\\\\Output96zrf1v2**'],
+  '**C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\wt**\n'
+  '**C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\yot**'],
  ['codecell',
   'Python',
   '\\%matplotlib notebook\n'
@@ -613,12 +613,13 @@ sns.despine()
  ['codecell',
   'Python',
   'wtdir = '
-  '"C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\wt\\\\Output28zrf1v2"\n'
-  'mutdir = "D:\\\\zrfs\\\\ZRF4\\\\wt\\\\Output96zrf1v2"'],
+  '"C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\wt"\n'
+  'mutdir = '
+  '"C:\\\\Users\\\\zfishlab\\\\Desktop\\\\zrf1wt13umyot21um\\\\Correct_alignment\\\\yot"'],
  ['codecell',
   'Python',
-  'wtdf = cranium.read_psi_to_dict(wtdir,"")\n'
-  'mdf = cranium.read_psi_to_dict(mutdir,"")'],
+  'wtdf = cranium.read_psi_to_dict(wtdir,"AT")\n'
+  'mdf = cranium.read_psi_to_dict(mutdir,"AT")'],
  ['markdown', 'text', '\n\n**Theta**'],
  ['codecell',
   'Python',
