@@ -11,9 +11,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: cranium
-   :members:
+.. currentmodule:: cranium
 
+
+.. automodule:: cranium
+	:members:
 
 Indices and tables
 ==================
