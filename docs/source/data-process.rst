@@ -99,9 +99,11 @@ Setting Parameters
 
 :envvar:`medthresh` is typically set to 0.25, in comparison to a value of 0.5 for :envvar:`genthresh`. If your data contains aberrant signal that does not contribute to the gross morphology of the structure, an even lower :envvar:`medthresh` may help limit the negative influence of noisy signal. Additionally, the :envvar:`radius` of the median filter can also be tuned to eliminate noisy signal. The typical value for :envvar:`radius` is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for :envvar:`radius` will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data.
 
-The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]. 
+The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`. 
 
-Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function; however, the ability to specify degrees other than 2 is still being developed. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
+Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function. 
+
+.. warning:: The ability to specify degrees other than 2 is still being developed. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
 
 
 .. _CIpca:
@@ -113,9 +115,55 @@ Code Instructions
 	
 	#Run PCA on the structural channel, in this case, c1
 	e.chnls['c1'].calculate_pca_median(e.chnls['c1'].raw_data,medthresh,radius,microns)
+
 	#Save the pca object that includes the transformation matrix
 	pca = e.chnls['c1'].pcamed
+
 	#Transform the structural channel using the saved pca object
 	e.chnls['c1'].pca_transform_3d(e.chnls['c1'].df_thresh,pca,comporder,fitdim,deg=2)
+
+	#Save the mathematical model and vertex (center point) of the structural channel
+	mm = e.chnls['AT'].mm
+	vertex = e.chnls['AT'].vertex
+
 	#Transform any additional channels using the pca object calculated based on the structural channel
-	e.chnls['c2'].pca_transform_3d(e.chnls['c2'].df_thresh,pca,comporder,fitdim,deg=2)
+	e.chnls['c2'].pca_transform_3d(e.chnls['c2'].df_thresh,pca,comporder,fitdim,deg=2,mm=mm,vertex=vertex)
+
+.. _cylcoord:
+
+Cylindrical Coordinates
++++++++++++++++++++++++
+
+.. _Gcylcoord: 
+
+Goal
+-----
+
+The ultimate goal with this workflow of data processing is to enable us to study small differences in biological structures when comparing a set of control samples to experimental samples. While our samples are now aligned to all fall in the same region of 3D space, our points are still defined by the xyz coordinates defined by the microscope. In order to detect changes in our structure, we will define the position of points relative to the structure using a cylindrical coordinate system. We will rely on the previously defined mathematical model, :attr:`brain.mm`, to represent the underlying shape of our structure. From there we will define the position of each point relative to the mathematical model (:numref:`coordsystem`). The first dimension, R, is defined as the shortest distance between the point and the model. Second, alpha is defined as the distance from the point's intersection with the model to the midline or center of the structure. Third, the position of the point around the model is defined in theta. Following the completion of the transformation, the final dataset is saved to a :file:`.psi` file.
+
+.. _coordsystem:
+.. figure:: ./images/cordsystem.jpg
+	:align: center
+	:figclass: align-center
+
+	To enable analysis of data point relative to a biological structure, points are transformed from a Cartesian coordinate system (x,y,z) into a cylindrical coordinate system ($\alpha$,$\theta$,R) defined relative to the structure.
+
+.. _CIcylcoord:
+
+Code Instructions
+------------------
+
+This transformation does not require defining any parameters; however, it assumes the data has already been thresholded and aligned using PCA.
+
+.. code::
+
+	#Transform each channel to cylindrical coordinates
+	e.chnls['c1'].transform_coordinates()
+	e.chnls['c2'].transform_coordinates()
+
+	#Save processed data to .psi file
+	e.save_psi()
+
+.. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required. 
+
+.. todo:: Add multiprocessing instructions

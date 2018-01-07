@@ -1,6 +1,9 @@
+.. _dataprep:
 
 Data Preparation
 ================
+
+.. _bioquestions:
 
 Biological Questions
 +++++++++++++++++++++
@@ -12,6 +15,8 @@ Cranium is designed to compare biological structures in three dimensions in orde
 2. The x, y, and z dimensions cannot have the same size/extent. For example, in the zebrafish spinal cord, the anterior-posterior axis is the longest and the medial-lateral axis is the smallest with the dorsal-ventral axis falling between these two dimensions. The different proportional sizes of these axes enables us to consistently align the structure in 3D space regardless of the sample's orientation during image collection.
 
 3. The gross morphology of the structure can be described with a simple polynomial equation. For example, the spinal cord can be described by a line that falls at the midline of the medial-lateral axis: y = mx + b
+
+.. _fileformat:
 
 File Format
 ++++++++++++

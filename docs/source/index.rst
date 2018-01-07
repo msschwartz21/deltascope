@@ -10,18 +10,24 @@ Contents:
 
 .. toctree::
 	:numbered:
-	
+
 	Data Preparation <data-prep>
     Data Processing <data-process>
     Checklist <checklist>
     Parameter Reference <param-ref>
     API
 
+Is cranium right for you?
+++++++++++++++++++++++++++
+
 Can dos:
 * Align single 3D microscopy collections to an orientation that is consistent between samples
 
 Cannot:
 * Align cryosections to create a 3D volume from 2D slices
+
+Issues
++++++++
 
 
 Indices and tables
