@@ -9,13 +9,20 @@ Welcome to cranium's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+	:numbered:
+	
+	Data Preparation <data-prep>
+    Data Processing <data-process>
+    Checklist <checklist>
+    Parameter Reference <param-ref>
+    API
 
-.. currentmodule:: cranium
+Can dos:
+* Align single 3D microscopy collections to an orientation that is consistent between samples
 
+Cannot:
+* Align cryosections to create a 3D volume from 2D slices
 
-.. automodule:: cranium
-	:members:
 
 Indices and tables
 ==================
