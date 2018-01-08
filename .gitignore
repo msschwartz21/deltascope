@@ -27,3 +27,5 @@
 
 Notebooks/
 dist/
+docs/build
+env-cranium

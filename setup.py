@@ -9,7 +9,7 @@ def requirements():
 		return f.read()
 
 setup(name='cranium',
-	version='0.1.1',
+	version='0.1.2',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',
