@@ -1,0 +1,1300 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API &mdash; cranium 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cranium 0.1.0 documentation" href="index.html"/>
+        <link rel="prev" title="Parameter Reference" href="param-ref.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> cranium
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data-prep.html">    Data Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-process.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checklist.html">Checklist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="param-ref.html">Parameter Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">cranium</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>API</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/API.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-cranium">
+<span id="api"></span><h1>API<a class="headerlink" href="#module-cranium" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="cranium.brain">
+<em class="property">class </em><code class="descclassname">cranium.</code><code class="descname">brain</code><a class="reference internal" href="_modules/cranium.html#brain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to manage biological data and associated functions.</p>
+<dl class="method">
+<dt id="cranium.brain.read_data">
+<code class="descname">read_data</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<em>str</em>) – Filepath to hdf5 probability file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Creates the variable <a class="reference internal" href="#cranium.brain.raw_data" title="cranium.brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.brain.raw_data">
+<code class="descname">raw_data</code><a class="headerlink" href="#cranium.brain.raw_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of shape [z,y,x] containing raw probability data</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.create_dataframe">
+<code class="descname">create_dataframe</code><span class="sig-paren">(</span><em>data</em>, <em>scale</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.create_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.create_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the <a class="reference internal" href="#cranium.brain.raw_data" title="cranium.brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a> array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>array</em>) – Raw probability data in 3D array</li>
+<li><strong>scale</strong> (<em>array</em>) – Array of length three containing the micron values for [x,y,z]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas DataFrame with xyz and probability value for each point</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.plot_projections">
+<code class="descname">plot_projections</code><span class="sig-paren">(</span><em>df</em>, <em>subset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.plot_projections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.plot_projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the x, y, and z projections of the input dataframe in a matplotlib plot</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe with columns: ‘x’,’y’,’z’</li>
+<li><strong>subset</strong> (<em>float</em>) – Value between 0 and 1 indicating what percentage of the df to subsample</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Matplotlib figure with three labeled scatterplots</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.preprocess_data">
+<code class="descname">preprocess_data</code><span class="sig-paren">(</span><em>threshold</em>, <em>scale</em>, <em>microns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.preprocess_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.preprocess_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thresholds and scales data prior to PCA</p>
+<p>Creates <a class="reference internal" href="#cranium.brain.threshold" title="cranium.brain.threshold"><code class="xref py py-attr docutils literal"><span class="pre">brain.threshold</span></code></a>, <a class="reference internal" href="#cranium.brain.df_thresh" title="cranium.brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a>, and <a class="reference internal" href="#cranium.brain.df_scl" title="cranium.brain.df_scl"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_scl</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>threshold</strong> (<em>float</em>) – Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>scale</strong> (<em>array</em>) – Array with three values representing the constant by which to multiply x,y,z respectively</li>
+<li><strong>microns</strong> (<em>array</em>) – Array with three values representing the x,y,z micron dimensions of the voxel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.brain.threshold">
+<code class="descname">threshold</code><a class="headerlink" href="#cranium.brain.threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value used to threshold the data prior to calculating the model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.brain.df_thresh">
+<code class="descname">df_thresh</code><a class="headerlink" href="#cranium.brain.df_thresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataframe containing only points with values above the specified threshold</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.brain.df_scl">
+<code class="descname">df_scl</code><a class="headerlink" href="#cranium.brain.df_scl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataframe containing data from <a class="reference internal" href="#cranium.brain.df_thresh" title="cranium.brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a> after a scaling value has been applied</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.process_alignment_data">
+<code class="descname">process_alignment_data</code><span class="sig-paren">(</span><em>data</em>, <em>threshold</em>, <em>radius</em>, <em>microns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.process_alignment_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.process_alignment_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a median filter twice to the data which is used for alignment</p>
+<p>Ensures than any noise in the structural data does not interfere with alignment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>array</em>) – Raw data imported by the function <a class="reference internal" href="#cranium.brain.read_data" title="cranium.brain.read_data"><code class="xref py py-func docutils literal"><span class="pre">brain.read_data()</span></code></a></li>
+<li><strong>threshold</strong> (<em>float</em>) – Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>radius</strong> (<em>int</em>) – Integer that determines the radius of the circle used for the median filter</li>
+<li><strong>microns</strong> (<em>array</em>) – Array with three values representing the x,y,z micron dimensions of the voxel</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dataframe containing data processed with the median filter and threshold</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.calculate_pca_median">
+<code class="descname">calculate_pca_median</code><span class="sig-paren">(</span><em>data</em>, <em>threshold</em>, <em>radius</em>, <em>microns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.calculate_pca_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.calculate_pca_median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate PCA transformation matrix, <a class="reference internal" href="#cranium.brain.pcamed" title="cranium.brain.pcamed"><code class="xref py py-attr docutils literal"><span class="pre">brain.pcamed</span></code></a>, based on data (<a class="reference internal" href="#cranium.brain.pcamed" title="cranium.brain.pcamed"><code class="xref py py-attr docutils literal"><span class="pre">brain.pcamed</span></code></a>) after applying median filter and threshold</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>array</em>) – 3D array containing raw probability data</li>
+<li><strong>threshold</strong> (<em>float</em>) – Value between 0 and 1 indicating the lower cutoff for positive signal</li>
+<li><strong>radius</strong> (<em>int</em>) – Radius of neighborhood that should be considered for the median filter</li>
+<li><strong>microns</strong> (<em>array</em>) – Array with three values representing the x,y,z micron dimensions of the voxel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.brain.median">
+<code class="descname">median</code><a class="headerlink" href="#cranium.brain.median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pandas dataframe containing data that has been processed with a median filter twice and thresholded</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.brain.pcamed">
+<code class="descname">pcamed</code><a class="headerlink" href="#cranium.brain.pcamed" title="Permalink to this definition">¶</a></dt>
+<dd><p>PCA object managing the transformation matrix and any resulting transformations</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.calculate_pca_median_2d">
+<code class="descname">calculate_pca_median_2d</code><span class="sig-paren">(</span><em>data</em>, <em>threshold</em>, <em>radius</em>, <em>microns</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.calculate_pca_median_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.calculate_pca_median_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate PCA transformation matrix for 2 dimensions of data, <a class="reference internal" href="#cranium.brain.pcamed" title="cranium.brain.pcamed"><code class="xref py py-attr docutils literal"><span class="pre">brain.pcamed</span></code></a>, based on data after applying median filter and threshold</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><cite>fit_dim</cite> is not used to determine which dimensions to fit. Defaults to x and z</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>array</em>) – 3D array containing raw probability data</li>
+<li><strong>threshold</strong> (<em>float</em>) – Value between 0 and 1 indicating the lower cutoff for positive signal</li>
+<li><strong>radius</strong> (<em>int</em>) – Radius of neighborhood that should be considered for the median filter</li>
+<li><strong>microns</strong> (<em>array</em>) – Array with three values representing the x,y,z micron dimensions of the voxel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.pca_transform_2d">
+<code class="descname">pca_transform_2d</code><span class="sig-paren">(</span><em>df</em>, <em>pca</em>, <em>comp_order</em>, <em>fit_dim</em>, <em>deg=2</em>, <em>mm=None</em>, <em>vertex=None</em>, <em>flip=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.pca_transform_2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.pca_transform_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <cite>df</cite> in 2D based on the PCA object, <cite>pca</cite>, whose transformation matrix has already been calculated</p>
+<p>Calling <a class="reference internal" href="#cranium.brain.align_data" title="cranium.brain.align_data"><code class="xref py py-func docutils literal"><span class="pre">brain.align_data()</span></code></a> creates <a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a></p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><cite>fit_dim</cite> is not used to determine which dimensions to fit. Defaults to x and z</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe containing thresholded xyz data</li>
+<li><strong>pca</strong> (<em>pca_object</em>) – A pca object containing a transformation object, e.g. <a class="reference internal" href="#cranium.brain.pcamed" title="cranium.brain.pcamed"><code class="xref py py-attr docutils literal"><span class="pre">brain.pcamed</span></code></a></li>
+<li><strong>comp_order</strong> (<em>array</em>) – Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</li>
+<li><strong>fit_dim</strong> (<em>array</em>) – Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [‘x’,’z’]</li>
+<li><strong>deg</strong> (<em>int</em>) – (or None) Degree of the function that should be fit to the model. deg=2 by default</li>
+<li><strong>mm</strong> – (<a class="reference internal" href="#cranium.math_model" title="cranium.math_model"><code class="xref py py-class docutils literal"><span class="pre">math_model</span></code></a> or None) Math model for primary channel</li>
+<li><strong>vertex</strong> (<em>array</em>) – (or None) Array of type [vx,vy,vz] (<code class="xref py py-attr docutils literal"><span class="pre">brain.vertex</span></code>) indicating the translation values</li>
+<li><strong>flip</strong> (<em>Bool</em>) – (or None) Boolean value to determine if the data should be rotated by 180 degrees</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.pca_transform_3d">
+<code class="descname">pca_transform_3d</code><span class="sig-paren">(</span><em>df</em>, <em>pca</em>, <em>comp_order</em>, <em>fit_dim</em>, <em>deg=2</em>, <em>mm=None</em>, <em>vertex=None</em>, <em>flip=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.pca_transform_3d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.pca_transform_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms <cite>df</cite> in 3D based on the PCA object, <cite>pca</cite>, whose transformation matrix has already been calculated</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe containing thresholded xyz data</li>
+<li><strong>pca</strong> (<em>pca_object</em>) – A pca object containing a transformation object, e.g. <a class="reference internal" href="#cranium.brain.pcamed" title="cranium.brain.pcamed"><code class="xref py py-attr docutils literal"><span class="pre">brain.pcamed</span></code></a></li>
+<li><strong>comp_order</strong> (<em>array</em>) – Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</li>
+<li><strong>fit_dim</strong> (<em>array</em>) – Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [‘x’,’z’]</li>
+<li><strong>deg</strong> (<em>int</em>) – (or None) Degree of the function that should be fit to the model. deg=2 by default</li>
+<li><strong>mm</strong> – (<a class="reference internal" href="#cranium.math_model" title="cranium.math_model"><code class="xref py py-class docutils literal"><span class="pre">math_model</span></code></a> or None) Math model for primary channel</li>
+<li><strong>vertex</strong> (<em>array</em>) – (or None) Array of type [vx,vy,vz] (<code class="xref py py-attr docutils literal"><span class="pre">brain.vertex</span></code>) indicating the translation values</li>
+<li><strong>flip</strong> (<em>Bool</em>) – (or None) Boolean value to determine if the data should be rotated by 180 degrees</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.align_data">
+<code class="descname">align_data</code><span class="sig-paren">(</span><em>df_fit</em>, <em>fit_dim</em>, <em>deg=2</em>, <em>mm=None</em>, <em>vertex=None</em>, <em>flip=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.align_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.align_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply PCA transformation matrix and align data so that the vertex is at the origin</p>
+<p>Creates <a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a> and <a class="reference internal" href="#cranium.brain.mm" title="cranium.brain.mm"><code class="xref py py-attr docutils literal"><span class="pre">brain.mm</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – dataframe containing thresholded xyz data</li>
+<li><strong>comp_order</strong> (<em>array</em>) – Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</li>
+<li><strong>fit_dim</strong> (<em>array</em>) – Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [‘x’,’z’]</li>
+<li><strong>deg</strong> (<em>int</em>) – (or None) Degree of the function that should be fit to the model. deg=2 by default</li>
+<li><strong>mm</strong> – (<a class="reference internal" href="#cranium.math_model" title="cranium.math_model"><code class="xref py py-class docutils literal"><span class="pre">math_model</span></code></a> or None) Math model for primary channel</li>
+<li><strong>vertex</strong> (<em>array</em>) – (or None) Array of type [vx,vy,vz] (<code class="xref py py-attr docutils literal"><span class="pre">brain.vertex</span></code>) indicating the translation values</li>
+<li><strong>flip</strong> (<em>Bool</em>) – (or None) Boolean value to determine if the data should be rotated by 180 degrees</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.brain.df_align">
+<code class="descname">df_align</code><a class="headerlink" href="#cranium.brain.df_align" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataframe containing point data aligned using PCA</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.brain.mm">
+<code class="descname">mm</code><a class="headerlink" href="#cranium.brain.mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Math model object fit to data in brain object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.flip_data">
+<code class="descname">flip_data</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.flip_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.flip_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate data by 180 degrees</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>dataframe</em>) – Pandas dataframe containing x,y,z data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Rotated dataframe</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.fit_model">
+<code class="descname">fit_model</code><span class="sig-paren">(</span><em>df</em>, <em>deg</em>, <em>fit_dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.fit_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.fit_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit model to dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe containing at least x,y,z</li>
+<li><strong>deg</strong> (<em>int</em>) – Degree of the function that should be fit to the model</li>
+<li><strong>fit_dim</strong> (<em>array</em>) – Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [‘x’,’z’]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">math model</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cranium.math_model" title="cranium.math_model"><code class="xref py py-class docutils literal"><span class="pre">math_model</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.find_distance">
+<code class="descname">find_distance</code><span class="sig-paren">(</span><em>t</em>, <em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.find_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.find_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find euclidean distance between math model(t) and data point in the xy plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>float</em>) – float value defining point on the line</li>
+<li><strong>point</strong> (<em>array</em>) – array [x,y] defining data point</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">distance between the two points</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.find_min_distance">
+<code class="descname">find_min_distance</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.find_min_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.find_min_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(<a class="reference internal" href="#cranium.brain.find_distance" title="cranium.brain.find_distance"><code class="xref py py-func docutils literal"><span class="pre">brain.find_distance()</span></code></a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>pd.Series</em>) – row from dataframe in the form of a pandas Series</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">point in the curve (xc, yc, zc) and r</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">floats</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.integrand">
+<code class="descname">integrand</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.integrand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.integrand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to integrate to calculate arclength</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>float</em>) – integer value for x</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">arclength value for integrating</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.find_arclength">
+<code class="descname">find_arclength</code><span class="sig-paren">(</span><em>xc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.find_arclength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.find_arclength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate arclength by integrating the derivative of the math model in xy plane</p>
+<div class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}</tt>)</p>
+latex exited with error
+[stderr]
+
+Unfortunately, the package anyfontsize could not be installed.Please check the log file:
+C:/Users/zfishlab/AppData/Local/MiKTeX/2.9/miktex/log/latex.log
+
+[stdout]
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit)
+entering extended mode
+(math.tex
+LaTeX2e &lt;2016/03/31&gt; patch level 1
+Babel &lt;3.9r&gt; and hyphenation patterns for 75 language(s) loaded.
+
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\article.cl
+s&quot;
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\size12.clo
+&quot;))
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\base\inputenc.s
+ty&quot;
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\ucs\utf8x.def&quot;)
+) (&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\ucs\ucs.sty&quot;
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\ucs\uni-global.
+def&quot;))
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsmath
+.sty&quot;
+For additional information on amsmath, use the `?' option.
+
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amstext
+.sty&quot;
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsgen.
+sty&quot;))
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsbsy.
+sty&quot;)
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsmath\amsopn.
+sty&quot;))
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amscls\amsthm.s
+ty&quot;)
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amssym
+b.sty&quot;
+(&quot;C:\Users\zfishlab\AppData\Local\Programs\MiKTeX 2.9\tex\latex\amsfonts\amsfon
+ts.sty&quot;))
+======================================================================
+======================================================================
+
+
+! LaTeX Error: File `anyfontsize.sty' not found.
+
+Type X to quit or &lt;RETURN&gt; to proceed,
+or enter new name. (Default extension: sty)
+
+Enter file name: 
+! Emergency stop.
+&lt;read *&gt; 
+         
+l.9 \usepackage
+               {bm}
+No pages of output.
+Transcript written on math.log.
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>float</em>) – Postion in the x axis along the curve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Length of the arc along the curve between the row and the vertex</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.find_theta">
+<code class="descname">find_theta</code><span class="sig-paren">(</span><em>row</em>, <em>zc</em>, <em>yc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.find_theta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.find_theta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate theta for a row containing data point in relationship to the xz plane</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>row</strong> (<em>pd.Series</em>) – row from dataframe in the form of a pandas Series</li>
+<li><strong>yc</strong> (<em>float</em>) – Y position of the closest point in the curve to the data point</li>
+<li><strong>zc</strong> (<em>float</em>) – Z position of the closest point in the curve to the data point</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">theta, angle between point and the model plane</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.find_r">
+<code class="descname">find_r</code><span class="sig-paren">(</span><em>row</em>, <em>zc</em>, <em>yc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.find_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.find_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate r using the Pythagorean theorem</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>row</strong> (<em>pd.Series</em>) – row from dataframe in the form of a pandas Series</li>
+<li><strong>yc</strong> (<em>float</em>) – Y position of the closest point in the curve to the data point</li>
+<li><strong>zc</strong> (<em>float</em>) – Z position of the closest point in the curve to the data point</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">r, distance between the point and the model</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.calc_coord">
+<code class="descname">calc_coord</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.calc_coord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.calc_coord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate alpah, r, theta for a particular row</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>row</strong> (<em>pd.Series</em>) – row from dataframe in the form of a pandas Series</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Series populated with coordinate of closest point on the math model, r, theta, and ac (arclength)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.transform_coordinates">
+<code class="descname">transform_coordinates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.transform_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.transform_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to <a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">appends columns r, xc, yc, zc, ac, theta to <a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.subset_data">
+<code class="descname">subset_data</code><span class="sig-paren">(</span><em>df</em>, <em>sample_frac=0.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.subset_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.subset_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac</p>
+<p>Creates the variable <a class="reference internal" href="#cranium.brain.subset" title="cranium.brain.subset"><code class="xref py py-attr docutils literal"><span class="pre">brain.subset</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pd.DataFrame</strong> – Dataframe which will be sampled</li>
+<li><strong>sample_frac</strong> (<em>float</em>) – (or None) Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.brain.subset">
+<code class="descname">subset</code><a class="headerlink" href="#cranium.brain.subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random sample of the input dataframe</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.add_thresh_df">
+<code class="descname">add_thresh_df</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.add_thresh_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.add_thresh_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds dataframe of thresholded and transformed data to <a class="reference internal" href="#cranium.brain.df_thresh" title="cranium.brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>pd.DataFrame</em>) – dataframe of thesholded and transformed data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#cranium.brain.df_thresh" title="cranium.brain.df_thresh"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_thresh</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.brain.add_aligned_df">
+<code class="descname">add_aligned_df</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#brain.add_aligned_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.brain.add_aligned_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds dataframe of aligned data</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Calculates model, but assumes that the dimensions of the fit are x and z</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe of aligned data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cranium.embryo">
+<em class="property">class </em><code class="descclassname">cranium.</code><code class="descname">embryo</code><span class="sig-paren">(</span><em>name</em>, <em>number</em>, <em>outdir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to managed multiple brain objects in a multichannel sample</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) – Name of this sample set</li>
+<li><strong>number</strong> (<em>str</em>) – Sample number corresponding to this embryo</li>
+<li><strong>outdir</strong> (<em>str</em>) – Path to directory for output files</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.embryo.chnls">
+<code class="descname">chnls</code><a class="headerlink" href="#cranium.embryo.chnls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing the <a class="reference internal" href="#cranium.brain" title="cranium.brain"><code class="xref py py-class docutils literal"><span class="pre">brain</span></code></a> object for each channel</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.embryo.outdir">
+<code class="descname">outdir</code><a class="headerlink" href="#cranium.embryo.outdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to directory for output files</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.embryo.name">
+<code class="descname">name</code><a class="headerlink" href="#cranium.embryo.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of this sample set</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.embryo.number">
+<code class="descname">number</code><a class="headerlink" href="#cranium.embryo.number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample number corresponding to this embryo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.embryo.add_channel">
+<code class="descname">add_channel</code><span class="sig-paren">(</span><em>filepath</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo.add_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo.add_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add channel to <a class="reference internal" href="#cranium.embryo.chnls" title="cranium.embryo.chnls"><code class="xref py py-attr docutils literal"><span class="pre">embryo.chnls</span></code></a> dictionary</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> (<em>str</em>) – Complete filepath to image</li>
+<li><strong>key</strong> (<em>str</em>) – Name of the channel</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.embryo.process_channels">
+<code class="descname">process_channels</code><span class="sig-paren">(</span><em>mthresh</em>, <em>gthresh</em>, <em>radius</em>, <em>scale</em>, <em>microns</em>, <em>deg</em>, <em>primary_key</em>, <em>comp_order</em>, <em>fit_dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo.process_channels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo.process_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all channels through the production of the <a class="reference internal" href="#cranium.brain.df_align" title="cranium.brain.df_align"><code class="xref py py-attr docutils literal"><span class="pre">brain.df_align</span></code></a> dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mthresh</strong> (<em>float</em>) – Value between 0 and 1 to use as a cutoff for minimum pixel value for median data</li>
+<li><strong>gthresh</strong> (<em>float</em>) – Value between 0 and 1 to use as a cutoff for minimum pixel value for general data</li>
+<li><strong>radius</strong> (<em>int</em>) – Size of the neighborhood area to examine with median filter</li>
+<li><strong>scale</strong> (<em>array</em>) – Array with three values representing the constant by which to multiply x,y,z respectively</li>
+<li><strong>microns</strong> (<em>array</em>) – Array with three values representing the x,y,z micron dimensions of the voxel</li>
+<li><strong>deg</strong> (<em>int</em>) – Degree of the function that should be fit to the model</li>
+<li><strong>primary_key</strong> (<em>str</em>) – Key for the primary structural channel which PCA and the model should be fit too</li>
+<li><strong>comp_order</strong> (<em>array</em>) – Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</li>
+<li><strong>fit_dim</strong> (<em>array</em>) – Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [‘x’,’z’]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.embryo.save_projections">
+<code class="descname">save_projections</code><span class="sig-paren">(</span><em>subset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo.save_projections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo.save_projections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save projections of both channels into png files in <a class="reference internal" href="#cranium.embryo.outdir" title="cranium.embryo.outdir"><code class="xref py py-attr docutils literal"><span class="pre">embryo.outdir</span></code></a> following the naming scheme [<a class="reference internal" href="#cranium.embryo.name" title="cranium.embryo.name"><code class="xref py py-attr docutils literal"><span class="pre">embryo.name</span></code></a>]_[<a class="reference internal" href="#cranium.embryo.number" title="cranium.embryo.number"><code class="xref py py-attr docutils literal"><span class="pre">embryo.number</span></code></a>]_[<cite>channel name</cite>]_MIP.png</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subset</strong> (<em>float</em>) – Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.embryo.save_psi">
+<code class="descname">save_psi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo.save_psi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo.save_psi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save all channels into psi files following the naming scheme [<a class="reference internal" href="#cranium.embryo.name" title="cranium.embryo.name"><code class="xref py py-attr docutils literal"><span class="pre">embryo.name</span></code></a>]_[<a class="reference internal" href="#cranium.embryo.number" title="cranium.embryo.number"><code class="xref py py-attr docutils literal"><span class="pre">embryo.number</span></code></a>]_[<cite>channel name</cite>].psi</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.embryo.add_psi_data">
+<code class="descname">add_psi_data</code><span class="sig-paren">(</span><em>filepath</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#embryo.add_psi_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.embryo.add_psi_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read psi data into a channel dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> (<em>str</em>) – Complete filepath to data</li>
+<li><strong>key</strong> (<em>str</em>) – Descriptive key for channel dataframe in dictionary</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cranium.math_model">
+<em class="property">class </em><code class="descclassname">cranium.</code><code class="descname">math_model</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#math_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.math_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to contain attributes associated with the math model of a sample</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> (<em>array</em>) – Array of coefficients calculated by np.polyfit</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.math_model.cf">
+<code class="descname">cf</code><a class="headerlink" href="#cranium.math_model.cf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of coefficients for the math model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.math_model.p">
+<code class="descname">p</code><a class="headerlink" href="#cranium.math_model.p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Poly1d function for the math model to allow calculation and plotting of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cranium.landmarks">
+<em class="property">class </em><code class="descclassname">cranium.</code><code class="descname">landmarks</code><span class="sig-paren">(</span><em>percbins=[10, 50, 90], rnull=15</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#landmarks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.landmarks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to handle calculation of landmarks to describe structural data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>percbins</strong> (<em>list</em>) – (or None) Must be a list of integers between 0 and 100</li>
+<li><strong>rnull</strong> (<em>int</em>) – (or None) When the r value cannot be calculated it will be set to this value</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.landmarks.brain.lm_wt_rf">
+<code class="descclassname">brain.</code><code class="descname">lm_wt_rf</code><a class="headerlink" href="#cranium.landmarks.brain.lm_wt_rf" title="Permalink to this definition">¶</a></dt>
+<dd><p>pd.DataFrame, which wildtype landmarks will be added to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.landmarks.brain.lm_mt_rf">
+<code class="descclassname">brain.</code><code class="descname">lm_mt_rf</code><a class="headerlink" href="#cranium.landmarks.brain.lm_mt_rf" title="Permalink to this definition">¶</a></dt>
+<dd><p>pd.DataFrame, which mutant landmarks will be added to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.landmarks.brain.rnull">
+<code class="descclassname">brain.</code><code class="descname">rnull</code><a class="headerlink" href="#cranium.landmarks.brain.rnull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer specifying the value which null landmark calculations will be set to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.landmarks.brain.percbins">
+<code class="descclassname">brain.</code><code class="descname">percbins</code><a class="headerlink" href="#cranium.landmarks.brain.percbins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer specifying the percentiles which will be used to calculate landmarks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.landmarks.calc_bins">
+<code class="descname">calc_bins</code><span class="sig-paren">(</span><em>Ldf</em>, <em>ac_num</em>, <em>tstep</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#landmarks.calc_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.landmarks.calc_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates alpha and theta bins based on ac_num and tstep</p>
+<p>Creates <a class="reference internal" href="#cranium.landmarks.acbins" title="cranium.landmarks.acbins"><code class="xref py py-attr docutils literal"><span class="pre">landmarks.acbins</span></code></a> and <a class="reference internal" href="#cranium.landmarks.tbins" title="cranium.landmarks.tbins"><code class="xref py py-attr docutils literal"><span class="pre">landmarks.tbins</span></code></a></p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><cite>tstep</cite> does not handle scenarios where 2pi is not evenly divisible by tstep</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Ldf</strong> (<em>list</em>) – List of dataframes that are being used for the analysis typically accessed by <cite>dict.values()</cite></li>
+<li><strong>ac_num</strong> (<em>int</em>) – Integer indicating the number of divisions that should be made along alpha</li>
+<li><strong>tstep</strong> (<em>float</em>) – The size of each bin used for alpha</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cranium.landmarks.acbins">
+<code class="descname">acbins</code><a class="headerlink" href="#cranium.landmarks.acbins" title="Permalink to this definition">¶</a></dt>
+<dd><p>List containing the boundaries of each bin along alpha based on <cite>ac_num</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cranium.landmarks.tbins">
+<code class="descname">tbins</code><a class="headerlink" href="#cranium.landmarks.tbins" title="Permalink to this definition">¶</a></dt>
+<dd><p>List containing the boundaries of each bin along theta based on <cite>tstep</cite></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.landmarks.calc_perc">
+<code class="descname">calc_perc</code><span class="sig-paren">(</span><em>df</em>, <em>snum</em>, <em>dtype</em>, <em>out</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#landmarks.calc_perc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.landmarks.calc_perc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe containing columns x,y,z,alpha,r,theta</li>
+<li><strong>snum</strong> (<em>str</em>) – String containing a sample identifier that can be converted to an integer</li>
+<li><strong>dtype</strong> (<em>str</em>) – String describing the sample group to which the sample belongs, e.g. control or experimental</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">pd.DataFrame with new landmarks appended</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.landmarks.calc_wt_reformat">
+<code class="descname">calc_wt_reformat</code><span class="sig-paren">(</span><em>df</em>, <em>snum</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#landmarks.calc_wt_reformat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.landmarks.calc_wt_reformat" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deprecated function, but includes code pertaining to calculating point based data</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="cranium.landmarks.calc_mt_landmarks">
+<code class="descname">calc_mt_landmarks</code><span class="sig-paren">(</span><em>df</em>, <em>snum</em>, <em>wt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#landmarks.calc_mt_landmarks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.landmarks.calc_mt_landmarks" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deprecated function, but attempted to calculate mutant landmarks based on the number of points found in the wildtype standard</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.reformat_to_cart">
+<code class="descclassname">cranium.</code><code class="descname">reformat_to_cart</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#reformat_to_cart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.reformat_to_cart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a dataframe in which columns contain the bin parameters and convert to a cartesian coordinate system</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe containing columns with string names that contain the bin parameter</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.DataFrame with each landmark as a row and columns: x,y,z,r,r_std,t,pts</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.subplot_lmk">
+<code class="descclassname">cranium.</code><code class="descname">subplot_lmk</code><span class="sig-paren">(</span><em>ax</em>, <em>p</em>, <em>avg</em>, <em>sem</em>, <em>parr</em>, <em>xarr</em>, <em>tarr</em>, <em>dtype</em>, <em>Pn={'alpha': 0.3</em>, <em>'cmap': 'Greys_r'</em>, <em>'mtc': 'r'</em>, <em>'tarr': None</em>, <em>'wtc': 'b'</em>, <em>'xarr': None</em>, <em>'zfb': 1</em>, <em>'zln': 2</em>, <em>'zpt': 3}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#subplot_lmk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.subplot_lmk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a ribbon of average and standard error of the mean onto the subplot, <cite>ax</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ax</strong> (<em>plt.Subplot</em>) – Matplotlib subplot onto which the data should be plotted</li>
+<li><strong>p</strong> (<em>list</em>) – List of two theta values that should be plotted</li>
+<li><strong>avg</strong> (<em>np.array</em>) – Array of shape (xvalues,tvalues) containing the average values of the data</li>
+<li><strong>sem</strong> (<em>np.array</em>) – Array of shape (xvalues,tvalues) containing the standard error of the mean values of the data</li>
+<li><strong>parr</strong> (<em>np.array</em>) – Array of shape (xvalues,tvalues) containing the p values for the data</li>
+<li><strong>dtype</strong> (<em>str</em>) – String describing sample type</li>
+<li><strong>Pn</strong> – Dictionary containing the following values: ‘zln’:2,’zpt’:3,’zfb’:1,’wtc’:’b’,’mtc’:’r’,’alpha’:0.3,’cmap’:’Greys_r’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">dict or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.write_header">
+<code class="descclassname">cranium.</code><code class="descname">write_header</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#write_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.write_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes header for PSI file with columns Id,x,y,z,ac,r,theta</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>file</em>) – file object created by ‘open(filename,’w’)`</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.write_data">
+<code class="descclassname">cranium.</code><code class="descname">write_data</code><span class="sig-paren">(</span><em>filepath</em>, <em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#write_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.write_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes data in PSI format to file after writing header using <a class="reference internal" href="#cranium.write_header" title="cranium.write_header"><code class="xref py py-func docutils literal"><span class="pre">write_header()</span></code></a>. Closes file at the conclusion of writing data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> (<em>str</em>) – Complete filepath to output file</li>
+<li><strong>df</strong> (<em>pd.DataFrame</em>) – dataframe containing columns x,y,z,ac,r,theta</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.read_psi">
+<code class="descclassname">cranium.</code><code class="descname">read_psi</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#read_psi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.read_psi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads psi file at the given filepath and returns data in a pandas DataFrame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<em>str</em>) – Complete filepath to file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Dataframe containing data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.read_psi_to_dict">
+<code class="descclassname">cranium.</code><code class="descname">read_psi_to_dict</code><span class="sig-paren">(</span><em>directory</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#read_psi_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.read_psi_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read psis from directory into dictionary of dfs with filtering based on dtype</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>directory</strong> (<em>str</em>) – Directory to get psis from</li>
+<li><strong>dtype</strong> (<em>str</em>) – Usually ‘AT’ or ‘ZRF1’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary of pd.DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.process_sample">
+<code class="descclassname">cranium.</code><code class="descname">process_sample</code><span class="sig-paren">(</span><em>num</em>, <em>root</em>, <em>outdir</em>, <em>name</em>, <em>chs</em>, <em>prefixes</em>, <em>threshold</em>, <em>scale</em>, <em>deg</em>, <em>primary_key</em>, <em>comp_order</em>, <em>fit_dim</em>, <em>flip_dim</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#process_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.process_sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process single sample through <a class="reference internal" href="#cranium.brain" title="cranium.brain"><code class="xref py py-class docutils literal"><span class="pre">brain</span></code></a> class and saves df to csv</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Out of date and will probably fail</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>num</strong> (<em>str</em>) – Sample number</li>
+<li><strong>root</strong> (<em>str</em>) – Complete path to the root directory for this sample set</li>
+<li><strong>name</strong> (<em>str</em>) – Name describing this sample set</li>
+<li><strong>outdir</strong> (<em>str</em>) – Complete path to output directory</li>
+<li><strong>chs</strong> (<em>array</em>) – Array containing strings specifying the directories for each channel</li>
+<li><strong>prefixes</strong> (<em>array</em>) – Array containing strings specifying the file prefix for each channel</li>
+<li><strong>threshold</strong> (<em>float</em>) – Value between 0 and 1 to use as a cutoff for minimum pixel value</li>
+<li><strong>scale</strong> (<em>array</em>) – Array with three values representing the constant by which to multiply x,y,z respectively</li>
+<li><strong>deg</strong> (<em>int</em>) – Degree of the function that should be fit to the model</li>
+<li><strong>primary_key</strong> (<em>str</em>) – Key for the primary structural channel which PCA and the model should be fit too</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.calculate_models">
+<code class="descclassname">cranium.</code><code class="descname">calculate_models</code><span class="sig-paren">(</span><em>Ldf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#calculate_models"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.calculate_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate model for each dataframe in list and add to new dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Ldf</strong> (<em>list</em>) – List of dataframes containing aligned data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pd.Dataframe with a,b,c values for parabolic model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.generate_kde">
+<code class="descclassname">cranium.</code><code class="descname">generate_kde</code><span class="sig-paren">(</span><em>data</em>, <em>var</em>, <em>x</em>, <em>absv=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#generate_kde"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.generate_kde" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of KDEs from either dictionary or list of data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> – pd.DataFrames to convert</li>
+<li><strong>var</strong> (<em>str</em>) – Name of column to select from df</li>
+<li><strong>x</strong> (<em>array</em>) – Array of datapoints to evaluate KDE on</li>
+<li><strong>absv</strong> (<em>bool</em>) – (or None) Set to True to use absolute value of selected data for KDE calculation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first">dict or list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of KDE arrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.calculate_area_error">
+<code class="descclassname">cranium.</code><code class="descname">calculate_area_error</code><span class="sig-paren">(</span><em>pdf</em>, <em>Lkde</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#calculate_area_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.calculate_area_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate area between PDF and each kde in Lkde</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pdf</strong> (<em>array</em>) – Array of probability distribution function that is the same shape as kdes in Lkde</li>
+<li><strong>Lkde</strong> (<em>list</em>) – List of arrays of Kdes</li>
+<li><strong>x</strong> (<em>array</em>) – Array of datapoints used to generate pdf and kdes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">List of error values for each kde in Lkde</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cranium.rescale_variable">
+<code class="descclassname">cranium.</code><code class="descname">rescale_variable</code><span class="sig-paren">(</span><em>Ddfs</em>, <em>var</em>, <em>newvar</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cranium.html#rescale_variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cranium.rescale_variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescale variable from -1 to 1 and save in newvar column on original dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Ddfs</strong> (<em>dict</em>) – Dictionary of pd.DataFrames</li>
+<li><strong>var</strong> (<em>str</em>) – Name of column to select from dfs</li>
+<li><strong>newvar</strong> (<em>str</em>) – Name to use for new data in appended column</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dictionary of dataframes containing column of rescaled data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="param-ref.html" class="btn btn-neutral" title="Parameter Reference" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Morgan Schwartz.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Cranium Data Processing &mdash; cranium 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cranium 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Checklist" href="checklist.html"/>
+        <link rel="prev" title="Data Preparation" href="data-prep.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> cranium
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data-prep.html">    Data Preparation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#intensity-thresholding">Intensity Thresholding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#goal">Goal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-parameters">Setting Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-instructions">Code Instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sample-alignment-using-principle-component-analysis-pca">Sample alignment using principle component analysis (PCA)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gpca">Goal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#principle-component-analysis">Principle Component Analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#structural-channel-processing">Structural Channel Processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-fitting">Model Fitting</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sppca">Setting Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cipca">Code Instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cylindrical-coordinates">Cylindrical Coordinates</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gcylcoord">Goal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cicylcoord">Code Instructions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="checklist.html">Checklist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="param-ref.html">Parameter Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">cranium</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Cranium Data Processing</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/data-process.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cranium-data-processing">
+<h1>Cranium Data Processing<a class="headerlink" href="#cranium-data-processing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="intensity-thresholding">
+<span id="thresh"></span><h2>Intensity Thresholding<a class="headerlink" href="#intensity-thresholding" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="goal">
+<span id="gthresh"></span><h3>Goal<a class="headerlink" href="#goal" title="Permalink to this headline">¶</a></h3>
+<p>At this point, each sample/channel should have been processed by Ilastik to create a new <code class="file docutils literal"><em><span class="pre">c1_10</span></em><span class="pre">_Probabilities.h5</span></code> file. If you open this file in Fiji, it should contain three dimensions and two channels (signal and background, but for our purposes the two are interchangeable). Each pixel should have a value ranging between 0 and 1. If we are inspecting the signal channel, pixels with a value close to 0 are highly likely to be true signal. Correspondingly, pixels with a value close to 1 are likely to be background. The <code class="file docutils literal"><em><span class="pre">c1_10</span></em><span class="pre">_Probabilities.h5</span></code> file by Ilastik contains two channels (signal and background), which contain pixel values that are direct opposites. For a given pixel, the background intensity value is 1 minus the signal intensity value. In order to simplify our data, we will apply a threshold that will divide the data into two sets of pixels: signal and background. In the steps that follow, we will only use the set of pixels that correspond to true signal. This set of pixels may be also referred to as a set of points or a point cloud. In order to avoid keeping track of which channel is the signal channel, we assume that after applying a threshold there will be more points will fall in the background group than in the signal group.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If your data contains more points of signal than background, cranium will select your background channel as the signal channel. In order to correct this assumption, the inequality in <a class="reference internal" href="API.html#cranium.brain.read_data" title="cranium.brain.read_data"><code class="xref py py-func docutils literal"><span class="pre">brain.read_data()</span></code></a> will need to be changed to equate a large number of points with signal instead of background.</p>
+</div>
+</div>
+<div class="section" id="setting-parameters">
+<span id="sithresh"></span><h3>Setting Parameters<a class="headerlink" href="#setting-parameters" title="Permalink to this headline">¶</a></h3>
+<p>In order to divide the image into two sets of pixels (signal and background), we use a parameter, <span class="target" id="index-0"></span><a class="reference internal" href="param-ref.html#envvar-genthresh"><code class="xref std std-envvar docutils literal"><span class="pre">genthresh</span></code></a>, to determine which group the pixels fall into. We have found that a value of 0.5 is sufficient to divide the data and have not found that the results vary greatly if it is changed; however, if your data contains a lot of intermediate background values (0.4-0.7), you may benefit from a smaller threshold, e.g. 0.3.</p>
+<p>The following code requires a parameter <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal"><span class="pre">micron</span></code>, which specifies the dimensions of the image voxel in microns. It is a list of the form <code class="samp docutils literal"><span class="pre">[</span><em><span class="pre">x</span></em><span class="pre">,</span><em><span class="pre">y</span></em><span class="pre">,</span><em><span class="pre">z</span></em><span class="pre">]</span></code>. This information can typically be found in the metadata of a microscope collection file.</p>
+<p>This section of the code also includes a deprecated parameter <span class="target" id="index-2"></span><a class="reference internal" href="param-ref.html#envvar-scale"><code class="xref std std-envvar docutils literal"><span class="pre">scale</span></code></a>, which must be set to <code class="samp docutils literal"><span class="pre">[1,1,1]</span></code>.</p>
+</div>
+<div class="section" id="code-instructions">
+<span id="cithresh"></span><h3>Code Instructions<a class="headerlink" href="#code-instructions" title="Permalink to this headline">¶</a></h3>
+<p>The following instructions apply to processing a single sample. Details regarding function parameters can be found under <a class="reference internal" href="API.html#cranium.embryo" title="cranium.embryo"><code class="xref py py-class docutils literal"><span class="pre">embryo</span></code></a> and <a class="reference internal" href="API.html#cranium.brain.preprocess_data" title="cranium.brain.preprocess_data"><code class="xref py py-func docutils literal"><span class="pre">brain.preprocess_data()</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#Create an embryo object that facilitates data processing</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">cranium</span><span class="o">.</span><span class="n">embryo</span><span class="p">(</span><span class="n">experiment</span><span class="o">-</span><span class="n">name</span><span class="p">,</span><span class="n">sample</span><span class="o">-</span><span class="n">number</span><span class="p">,</span><span class="n">directory</span><span class="p">)</span>
+
+<span class="c1">#For each channel in your sample, add a channel with a unique name, e.g. &#39;c1&#39; or &#39;c2&#39;</span>
+<span class="n">e</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">c1</span><span class="o">-</span><span class="n">filepath</span><span class="p">,</span><span class="n">c1</span><span class="o">-</span><span class="n">name</span><span class="p">)</span>
+<span class="n">e</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">c2</span><span class="o">-</span><span class="n">filepath</span><span class="p">,</span><span class="n">c2</span><span class="o">-</span><span class="n">name</span><span class="p">)</span>
+
+<span class="c1">#Threshold each channel and scale points according to voxel dimension in microns</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">c1</span><span class="o">-</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">genthresh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">c2</span><span class="o">-</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">genthresh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="sample-alignment-using-principle-component-analysis-pca">
+<span id="pca"></span><h2>Sample alignment using principle component analysis (PCA)<a class="headerlink" href="#sample-alignment-using-principle-component-analysis-pca" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gpca">
+<span id="id1"></span><h3>Goal<a class="headerlink" href="#gpca" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="principle-component-analysis">
+<h4>Principle Component Analysis<a class="headerlink" href="#principle-component-analysis" title="Permalink to this headline">¶</a></h4>
+<p>During typical collections of biological samples, each sample will be oriented slightly differently in relation to the microscope due to variations in the shape and size of the sample as well as human error during the mounting process. As a result of this variation, we cannot directly compare samples in 3D space without realigning them. We have implemented principle component analysis in order to automate the process of alignment without a need for human supervision. <a class="reference internal" href="#figpca"><span class="std std-numref">Fig. 1</span></a> shown below illustrates how PCA can be used to align a set of points in 2D. Cranium uses the same process in 3D to identify biologically meaningful axes present in biological structures.</p>
+<div class="align-center figure" id="id6">
+<span id="figpca"></span><img alt="./images/pca.jpg" src="./images/pca.jpg" />
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">Principle component analysis (PCA) can be used to identify and align samples along consistent axes. (1) In 2D, PCA first selects the axis that captures the most variability in the data (1st PC). The 2nd PC is selected in a position orthogonal to the 1st PC that captures the remaining variation in the data. (2) The data are then rotated so that the 1st and 2nd PCs correspond with x and y axes respectively. (3) Finally, we have added a step of identifying the center of the data and shifting it to the origin.</span></p>
+</div>
+</div>
+<div class="section" id="structural-channel-processing">
+<h4>Structural Channel Processing<a class="headerlink" href="#structural-channel-processing" title="Permalink to this headline">¶</a></h4>
+<p>We designate one channel, the <code class="docutils literal"><span class="pre">structural</span> <span class="pre">channel</span></code>, which we will use for PCA to align samples. Since we are interested in the gross morphology of this channel, we apply two data preprocessing steps to reduce the data down to only essential points. First, we return to <a class="reference internal" href="API.html#cranium.brain.raw_data" title="cranium.brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a> and apply a new threshold, <span class="target" id="index-3"></span><a class="reference internal" href="param-ref.html#envvar-medthresh"><code class="xref std std-envvar docutils literal"><span class="pre">medthresh</span></code></a>, which is typically more stringent than <span class="target" id="index-4"></span><a class="reference internal" href="param-ref.html#envvar-genthresh"><code class="xref std std-envvar docutils literal"><span class="pre">genthresh</span></code></a>. This step ensures we are only considering points of signal with extremely high likelihood of being real. Second, we apply a median filter to the data twice, which smooths out the structure and eliminates small points of variation that may interfere with the alignment process of the gross structure.</p>
+<p>PCA outputs three new dimensions, the 1st, 2nd, and 3rd PCs. These components will be reassigned to the X, Y, and Z axes to help the user maintain orientation in regards to their data. In the case of the zebrafish post-optic commissure shown below (<a class="reference internal" href="#pcafix"><span class="std std-numref">Fig. 2</span></a>), the 1st PC is reassigned to the X axis and the 2nd and 3rd PCs are assigned to Z and Y respectively. These assignments honor the user’s expectation of the sample’s alignment in 3D space. The assignment of components to axes can be modified using the parameter <span class="target" id="index-5"></span><a class="reference internal" href="param-ref.html#envvar-comporder"><code class="xref std std-envvar docutils literal"><span class="pre">comporder</span></code></a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">In order for PCA to consistently align your samples in the same orientation, we are assuming that the three dimensions of your data are of different relative sizes. Since PCA looks for the axes that capture the most variation in your data, a sample that has axes of the same relative size will not have any distinguishing characteristics that PCA can use to identify and separate different axes.</p>
+</div>
+<div class="align-center figure" id="id7">
+<span id="pcafix"></span><img alt="./images/pcafix.jpg" src="./images/pcafix.jpg" />
+<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">This example illustrates the efficacy of PCA at changing the orientation of the zebrafish post optic commissure. In this case, the 1st PC is significantly longer than the 2nd and 3rd. While these two remaining components are similar in size, the typically longer depth of the 2nd PC distinguishes it from the 3rd PC.</span></p>
+</div>
+</div>
+<div class="section" id="model-fitting">
+<h4>Model Fitting<a class="headerlink" href="#model-fitting" title="Permalink to this headline">¶</a></h4>
+<p>In addition to rotating the orientation of the data in 3D space, we also want to align the center of all samples at the origin. In order to determine the center of the data, we fit a simple mathematical model to the data that will also be used later in the analysis. The zebrafish post optic commissure shown above forms a parabolic structure, which can be described by y = ax^2 + bx + c. For simplicity, we fit the model in two dimensions, while holding one dimension constant. In the case of the POC, the parabolic structure lies flat in the XZ plane, which means that the structure can be described using exclusively the X and Z dimensions. The dimensions, which will be used to fit the 2D model, are specified in the parameter <span class="target" id="index-6"></span><a class="reference internal" href="param-ref.html#envvar-fitdim"><code class="xref std std-envvar docutils literal"><span class="pre">fitdim</span></code></a>. Additionally the <span class="target" id="index-7"></span><a class="reference internal" href="param-ref.html#envvar-deg"><code class="xref std std-envvar docutils literal"><span class="pre">deg</span></code></a> parameter specifies the degree of the function that fits to the data.</p>
+</div>
+</div>
+<div class="section" id="sppca">
+<span id="id2"></span><h3>Setting Parameters<a class="headerlink" href="#sppca" title="Permalink to this headline">¶</a></h3>
+<p><span class="target" id="index-8"></span><a class="reference internal" href="param-ref.html#envvar-medthresh"><code class="xref std std-envvar docutils literal"><span class="pre">medthresh</span></code></a> is typically set to 0.25, in comparison to a value of 0.5 for <span class="target" id="index-9"></span><a class="reference internal" href="param-ref.html#envvar-genthresh"><code class="xref std std-envvar docutils literal"><span class="pre">genthresh</span></code></a>. If your data contains aberrant signal that does not contribute to the gross morphology of the structure, an even lower <span class="target" id="index-10"></span><a class="reference internal" href="param-ref.html#envvar-medthresh"><code class="xref std std-envvar docutils literal"><span class="pre">medthresh</span></code></a> may help limit the negative influence of noisy signal. Additionally, the <span class="target" id="index-11"></span><a class="reference internal" href="param-ref.html#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> of the median filter can also be tuned to eliminate noisy signal. The typical value for <span class="target" id="index-12"></span><a class="reference internal" href="param-ref.html#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for <span class="target" id="index-13"></span><a class="reference internal" href="param-ref.html#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data.</p>
+<p>The <span class="target" id="index-14"></span><a class="reference internal" href="param-ref.html#envvar-comporder"><code class="xref std std-envvar docutils literal"><span class="pre">comporder</span></code></a> parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: <code class="samp docutils literal"><span class="pre">[</span><em><span class="pre">x</span> <span class="pre">index</span></em><span class="pre">,</span><em><span class="pre">y</span> <span class="pre">index</span></em><span class="pre">,</span><em><span class="pre">z</span> <span class="pre">index</span></em><span class="pre">]</span></code>. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the <span class="target" id="index-15"></span><a class="reference internal" href="param-ref.html#envvar-comporder"><code class="xref std std-envvar docutils literal"><span class="pre">comporder</span></code></a> parameter would be <code class="samp docutils literal"><span class="pre">[0,2,1]</span></code>.</p>
+<p>Finally, the remaining two parameters determines how the model will be fit to the data. <span class="target" id="index-16"></span><a class="reference internal" href="param-ref.html#envvar-fitdim"><code class="xref std std-envvar docutils literal"><span class="pre">fitdim</span></code></a> determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. <code class="docutils literal"><span class="pre">'x','y','z'</span></code>. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the <span class="target" id="index-17"></span><a class="reference internal" href="param-ref.html#envvar-fitdim"><code class="xref std std-envvar docutils literal"><span class="pre">fitdim</span></code></a> parameter would be <code class="docutils literal"><span class="pre">['x','z']</span></code>. <span class="target" id="index-18"></span><a class="reference internal" href="param-ref.html#envvar-deg"><code class="xref std std-envvar docutils literal"><span class="pre">deg</span></code></a> specifies the degree of the function that will be fit to the data. The default is <code class="docutils literal"><span class="pre">2</span></code>, which specifies a parabolic function. A deg of <code class="docutils literal"><span class="pre">1</span></code> would fit a linear function.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The ability to specify degrees other than 2 is still being developed. Check <a class="reference external" href="https://github.com/msschwartz21/craniumPy/issues/23">here</a> for updates.</p>
+</div>
+</div>
+<div class="section" id="cipca">
+<span id="id3"></span><h3>Code Instructions<a class="headerlink" href="#cipca" title="Permalink to this headline">¶</a></h3>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Run PCA on the structural channel, in this case, c1</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">calculate_pca_median</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span><span class="n">medthresh</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+
+<span class="c1">#Save the pca object that includes the transformation matrix</span>
+<span class="n">pca</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pcamed</span>
+
+<span class="c1">#Transform the structural channel using the saved pca object</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pca_transform_3d</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">df_thresh</span><span class="p">,</span><span class="n">pca</span><span class="p">,</span><span class="n">comporder</span><span class="p">,</span><span class="n">fitdim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1">#Save the mathematical model and vertex (center point) of the structural channel</span>
+<span class="n">mm</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;AT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mm</span>
+<span class="n">vertex</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;AT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vertex</span>
+
+<span class="c1">#Transform any additional channels using the pca object calculated based on the structural channel</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pca_transform_3d</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">df_thresh</span><span class="p">,</span><span class="n">pca</span><span class="p">,</span><span class="n">comporder</span><span class="p">,</span><span class="n">fitdim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="n">mm</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="n">vertex</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="cylindrical-coordinates">
+<span id="cylcoord"></span><h2>Cylindrical Coordinates<a class="headerlink" href="#cylindrical-coordinates" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gcylcoord">
+<span id="id4"></span><h3>Goal<a class="headerlink" href="#gcylcoord" title="Permalink to this headline">¶</a></h3>
+<p>The ultimate goal with this workflow of data processing is to enable us to study small differences in biological structures when comparing a set of control samples to experimental samples. While our samples are now aligned to all fall in the same region of 3D space, our points are still defined by the xyz coordinates defined by the microscope. In order to detect changes in our structure, we will define the position of points relative to the structure using a cylindrical coordinate system. We will rely on the previously defined mathematical model, <a class="reference internal" href="API.html#cranium.brain.mm" title="cranium.brain.mm"><code class="xref py py-attr docutils literal"><span class="pre">brain.mm</span></code></a>, to represent the underlying shape of our structure. From there we will define the position of each point relative to the mathematical model (<a class="reference internal" href="#coordsystem"><span class="std std-numref">Fig. 3</span></a>). The first dimension, R, is defined as the shortest distance between the point and the model. Second, alpha is defined as the distance from the point’s intersection with the model to the midline or center of the structure. Third, the position of the point around the model is defined in theta. Following the completion of the transformation, the final dataset is saved to a <code class="file docutils literal"><span class="pre">.psi</span></code> file.</p>
+<div class="align-center figure" id="id8">
+<span id="coordsystem"></span><img alt="./images/cordsystem.jpg" src="./images/cordsystem.jpg" />
+<p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">To enable analysis of data point relative to a biological structure, points are transformed from a Cartesian coordinate system (x,y,z) into a cylindrical coordinate system ($alpha$,$theta$,R) defined relative to the structure.</span></p>
+</div>
+</div>
+<div class="section" id="cicylcoord">
+<span id="id5"></span><h3>Code Instructions<a class="headerlink" href="#cicylcoord" title="Permalink to this headline">¶</a></h3>
+<p>This transformation does not require defining any parameters; however, it assumes the data has already been thresholded and aligned using PCA.</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="c1">#Transform each channel to cylindrical coordinates</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform_coordinates</span><span class="p">()</span>
+<span class="n">e</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="s1">&#39;c2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform_coordinates</span><span class="p">()</span>
+
+<span class="c1">#Save processed data to .psi file</span>
+<span class="n">e</span><span class="o">.</span><span class="n">save_psi</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required.</p>
+</div>
+<div class="admonition-todo admonition" id="index-19">
+<p class="first admonition-title">Todo</p>
+<p class="last">Add multiprocessing instructions</p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="checklist.html" class="btn btn-neutral float-right" title="Checklist" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="data-prep.html" class="btn btn-neutral" title="Data Preparation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Morgan Schwartz.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
