@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.1] - 2018-01-08
+### Changed
+- Removed `import cranium` from conf.py because it was causing error with read the docs builds
+
 ## [0.1.0] - 2018-01-08
 ### Added
 - Apply double median filter to primary channel to calculate PCA fit; Removes noise to create a cleaner dataset which fits the POC into the xz plane
