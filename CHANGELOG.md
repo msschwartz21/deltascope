@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.3] - 2018-01-08
+### Changes
+- Manually added package requirements to setup.py install-requires
+
 ## [0.1.2] - 2018-01-08
 ### Changes
 - Implemented mock shielding for c dependent modules (numpy,scipy,pandas) in conf.py
