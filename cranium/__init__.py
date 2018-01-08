@@ -1,15 +1,15 @@
 import os
 import numpy as np
 import h5py
-import skimage.io as io
+#import skimage.io as io
 import matplotlib.pyplot as plt
 import time
 import itertools as it
 import matplotlib as mpl
 import multiprocessing as mp
 from functools import partial
-import statsmodels.formula.api as smf
-from mpl_toolkits.mplot3d import Axes3D
+#import statsmodels.formula.api as smf
+#from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 #import plotly.plotly as py
 #import plotly.graph_objs as go
