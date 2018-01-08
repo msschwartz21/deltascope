@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.2] - 2018-01-08
+### Changes
+- Implemented mock shielding for c dependent modules (numpy,scipy,pandas) in conf.py
+
 ## [0.1.1] - 2018-01-08
 ### Changed
 - Removed `import cranium` from conf.py because it was causing error with read the docs builds
