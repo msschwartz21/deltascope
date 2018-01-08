@@ -1,0 +1,232 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Preparation &mdash; cranium 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cranium 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Cranium Data Processing" href="data-process.html"/>
+        <link rel="prev" title="Welcome to cranium’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> cranium
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">    Data Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#biological-questions">Biological Questions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-format">File Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#signal-normalization">Signal Normalization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-process.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checklist.html">Checklist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="param-ref.html">Parameter Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">cranium</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Data Preparation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/data-prep.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-preparation">
+<span id="dataprep"></span><h1>Data Preparation<a class="headerlink" href="#data-preparation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="biological-questions">
+<span id="bioquestions"></span><h2>Biological Questions<a class="headerlink" href="#biological-questions" title="Permalink to this headline">¶</a></h2>
+<p>Cranium is designed to compare biological structures in three dimensions in order to cultivate sensitivity that is typically lost in maximum intensity projections (MIPs). In order to apply Cranium to a new biological structure, certain conditions must be satisfied:</p>
+<ol class="arabic simple">
+<li>The gross morphology of the structure must be roughly consistent between samples.</li>
+<li>The x, y, and z dimensions cannot have the same size/extent. For example, in the zebrafish spinal cord, the anterior-posterior axis is the longest and the medial-lateral axis is the smallest with the dorsal-ventral axis falling between these two dimensions. The different proportional sizes of these axes enables us to consistently align the structure in 3D space regardless of the sample’s orientation during image collection.</li>
+<li>The gross morphology of the structure can be described with a simple polynomial equation. For example, the spinal cord can be described by a line that falls at the midline of the medial-lateral axis: y = mx + b</li>
+</ol>
+</div>
+<div class="section" id="file-format">
+<span id="fileformat"></span><h2>File Format<a class="headerlink" href="#file-format" title="Permalink to this headline">¶</a></h2>
+<p>Most microscopes save data in their own data format: for example, Zeiss, <code class="file docutils literal"><span class="pre">.czi</span></code>; Leica, <code class="file docutils literal"><span class="pre">.lif</span></code>. In order to ensure that image data is legible to all components of the workflow, files need to be converted to the <a class="reference external" href="https://support.hdfgroup.org/HDF5/">HDF5</a> (<code class="file docutils literal"><span class="pre">.h5</span></code>) format. This conversion can be easily executed in <a class="reference external" href="https://fiji.sc/">Fiji</a> using the <a class="reference external" href="https://www.openmicroscopy.org/bio-formats/">BioFormats</a> and <a class="reference external" href="https://imagej.net/HDF5_Vibez">HDF5 plugin</a>. At this point, individual channels need to be split and saved in their own files.</p>
+</div>
+<div class="section" id="signal-normalization">
+<span id="id1"></span><h2>Signal Normalization<a class="headerlink" href="#signal-normalization" title="Permalink to this headline">¶</a></h2>
+<p>Biological fluorescence microscopy data contains variation in signal intensity due to both biological and technical error. For example, the top of the sample is frequently brighter than the bottom because it is closer to the objective and has not been bleached by collecting previous optical sections. If we were to try to select the set of points that represent ‘true signal’ by applying a single intensity threshold, points that represent background at the top of the stack may have the same intensity as points of true signal at the bottom of the stack.</p>
+<p>In order to implement an adaptive thresholding protocol that avoids this challenges, we are using the open-source software, <a class="reference external" href="http://ilastik.org/">Ilastik</a>. This software uses machine learning principles in order to predict the likelihood that a particular pixel contains true signal. The probability is calculated based on user annotation of images, in which regions of true signal and background are labeled. This protocol allows the user to apply their domain knowledge of the sample in order to best distinguish signal from background. Tutorials describing how to install and implement <a class="reference external" href="IlastikPC">Ilastik’s pixel classification workflows</a> are available on <a class="reference external" href="Ilastikdocs">Ilastik’s website</a>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="data-process.html" class="btn btn-neutral float-right" title="Cranium Data Processing" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to cranium’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Morgan Schwartz.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

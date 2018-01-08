@@ -1,0 +1,1473 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cranium &mdash; cranium 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="cranium 0.1.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> cranium
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../data-prep.html">    Data Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../data-process.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../checklist.html">Checklist</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../param-ref.html">Parameter Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">cranium</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>cranium</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cranium</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="c1">#import skimage.io as io</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">itertools</span> <span class="k">as</span> <span class="nn">it</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="c1">#import statsmodels.formula.api as smf</span>
+<span class="c1">#from mpl_toolkits.mplot3d import Axes3D</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="c1">#import plotly.plotly as py</span>
+<span class="c1">#import plotly.graph_objs as go</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="k">import</span> <span class="n">PCA</span>
+<span class="kn">from</span> <span class="nn">skimage.filters</span> <span class="k">import</span> <span class="n">median</span>
+<span class="kn">from</span> <span class="nn">skimage.morphology</span> <span class="k">import</span> <span class="n">disk</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="k">import</span> <span class="n">simps</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+
+<div class="viewcode-block" id="brain"><a class="viewcode-back" href="../API.html#cranium.brain">[docs]</a><span class="k">class</span> <span class="nc">brain</span><span class="p">:</span>
+	<span class="sd">&#39;&#39;&#39; Object to manage biological data and associated functions. &#39;&#39;&#39;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Initialize brain object&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="brain.read_data"><a class="viewcode-back" href="../API.html#cranium.brain.read_data">[docs]</a>	<span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal</span>
+
+<span class="sd">		:param str filepath: Filepath to hdf5 probability file</span>
+<span class="sd">		:return: Creates the variable :attr:`brain.raw_data`</span>
+
+<span class="sd">		.. py:attribute:: brain.raw_data</span>
+
+<span class="sd">			Array of shape [z,y,x] containing raw probability data</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#Read h5 file and extract probability data</span>
+		<span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+		<span class="c1">#Select either channe0/1 or exported_data</span>
+		<span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;exported_data&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">c1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">c2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="n">d</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">c1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;channel0&#39;</span><span class="p">))</span>
+			<span class="n">c2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;channel1&#39;</span><span class="p">))</span>
+
+		<span class="c1">#Figure out which channels has more zeros and therefore is background</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">c1</span><span class="o">&lt;</span><span class="mf">0.1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">c1</span><span class="o">&gt;</span><span class="mf">0.9</span><span class="p">):</span>
+			<span class="c1">#: Array of shape [z,y,x] containing raw probability data</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">c1</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1">#: Array of shape [z,y,x] containing raw probability data</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">c2</span></div>
+
+<div class="viewcode-block" id="brain.create_dataframe"><a class="viewcode-back" href="../API.html#cranium.brain.create_dataframe">[docs]</a>	<span class="k">def</span> <span class="nf">create_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">scale</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Creates a pandas dataframe containing the x,y,z and signal/probability value for each point in the :py:attr:`brain.raw_data` array</span>
+
+<span class="sd">		:param array data: Raw probability data in 3D array</span>
+<span class="sd">		:param array scale: Array of length three containing the micron values for [x,y,z]</span>
+<span class="sd">		:return: Pandas DataFrame with xyz and probability value for each point</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#NB: scale variable actually contains microns dimensions</span>
+
+		<span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+		<span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">dim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dim</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="mi">4</span><span class="p">))</span>
+
+		<span class="c1">#Generate array with xyz values for each point</span>
+		<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+
+			<span class="n">xyz</span><span class="p">[:,:,</span><span class="n">x</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+			<span class="n">xyz</span><span class="p">[:,:,</span><span class="n">x</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,:,</span><span class="n">x</span><span class="p">]</span>
+
+			<span class="n">zindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">dim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">yindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">gy</span><span class="p">,</span><span class="n">gz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">yindex</span><span class="p">,</span><span class="n">zindex</span><span class="p">)</span>
+
+			<span class="n">xyz</span><span class="p">[:,:,</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">gz</span>
+			<span class="n">xyz</span><span class="p">[:,:,</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">gy</span>
+
+		<span class="n">flat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xyz</span><span class="p">,(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+		<span class="c1">#Create dataframe of points and scale to microns</span>
+		<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">flat</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">flat</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">flat</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="n">flat</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]})</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.plot_projections"><a class="viewcode-back" href="../API.html#cranium.brain.plot_projections">[docs]</a>	<span class="k">def</span> <span class="nf">plot_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">subset</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Plots the x, y, and z projections of the input dataframe in a matplotlib plot</span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe with columns: &#39;x&#39;,&#39;y&#39;,&#39;z&#39;</span>
+<span class="sd">		:param float subset: Value between 0 and 1 indicating what percentage of the df to subsample</span>
+<span class="sd">		:returns: Matplotlib figure with three labeled scatterplots</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="n">subset</span><span class="p">)</span>
+    
+    	<span class="c1">#Create figure and subplots</span>
+		<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+		<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
+		<span class="n">ay</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">)</span>
+		<span class="n">az</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">)</span>
+
+		<span class="c1">#Create scatter plot for each projection</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">df</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+		<span class="n">ay</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+		<span class="n">az</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">z</span><span class="p">,</span><span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+		<span class="c1">#Plot model</span>
+		<span class="n">xvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="n">xvalues</span><span class="p">),</span><span class="n">c</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+		<span class="c1">#Add labels</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Y projection&#39;</span><span class="p">)</span>
+		<span class="n">ay</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Z projection&#39;</span><span class="p">)</span>
+		<span class="n">az</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;X projection&#39;</span><span class="p">)</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+		<span class="n">ay</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+		<span class="n">ay</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+		<span class="n">az</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+		<span class="n">az</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+
+		<span class="c1">#Adjust spacing and show plot</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+		
+		<span class="k">return</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.preprocess_data"><a class="viewcode-back" href="../API.html#cranium.brain.preprocess_data">[docs]</a>	<span class="k">def</span> <span class="nf">preprocess_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Thresholds and scales data prior to PCA</span>
+
+<span class="sd">		Creates :py:attr:`brain.threshold`, :py:attr:`brain.df_thresh`, and :py:attr:`brain.df_scl`</span>
+
+<span class="sd">		:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value</span>
+<span class="sd">		:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively</span>
+<span class="sd">		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel</span>
+
+<span class="sd">		.. py:attribute:: brain.threshold </span>
+<span class="sd">			</span>
+<span class="sd">			Value used to threshold the data prior to calculating the model</span>
+
+<span class="sd">		.. py:attribute:: brain.df_thresh</span>
+
+<span class="sd">			Dataframe containing only points with values above the specified threshold</span>
+
+<span class="sd">		.. py:attribute:: brain.df_scl</span>
+
+<span class="sd">			Dataframe containing data from :py:attr:`brain.df_thresh` after a scaling value has been applied</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#: Dataframe with four columns: x,y,z,value with all points in :py:attr:`brain.raw_data`</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+
+		<span class="c1">#Create new dataframe with values above threshold</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_thresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span>
+
+		<span class="c1">#Scale xyz by value in scale array to force PCA axis selection</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">scale</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_scl</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+			<span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">df_thresh</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+			<span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">df_thresh</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+			<span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">df_thresh</span><span class="o">.</span><span class="n">z</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">[</span><span class="mi">2</span><span class="p">]})</span></div>
+
+<div class="viewcode-block" id="brain.process_alignment_data"><a class="viewcode-back" href="../API.html#cranium.brain.process_alignment_data">[docs]</a>	<span class="k">def</span> <span class="nf">process_alignment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Applies a median filter twice to the data which is used for alignment</span>
+
+<span class="sd">		Ensures than any noise in the structural data does not interfere with alignment</span>
+
+<span class="sd">		:param array data: Raw data imported by the function :py:func:`brain.read_data`</span>
+<span class="sd">		:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value</span>
+<span class="sd">		:param int radius: Integer that determines the radius of the circle used for the median filter</span>
+<span class="sd">		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel</span>
+<span class="sd">		:returns: Dataframe containing data processed with the median filter and threshold</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#Iterate over each plane and apply median filter twice</span>
+		<span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">out</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">median</span><span class="p">(</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">z</span><span class="p">],</span><span class="n">disk</span><span class="p">(</span><span class="n">radius</span><span class="p">)),</span><span class="n">disk</span><span class="p">(</span><span class="n">radius</span><span class="p">))</span>
+
+		<span class="n">outdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_dataframe</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+		<span class="n">thresh</span> <span class="o">=</span> <span class="n">outdf</span><span class="p">[</span><span class="n">outdf</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">thresh</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.calculate_pca_median"><a class="viewcode-back" href="../API.html#cranium.brain.calculate_pca_median">[docs]</a>	<span class="k">def</span> <span class="nf">calculate_pca_median</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate PCA transformation matrix, :py:attr:`brain.pcamed`, based on data (:py:attr:`brain.pcamed`) after applying median filter and threshold</span>
+
+<span class="sd">		:param array data: 3D array containing raw probability data</span>
+<span class="sd">		:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal</span>
+<span class="sd">		:param int radius: Radius of neighborhood that should be considered for the median filter</span>
+<span class="sd">		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel</span>
+<span class="sd">		</span>
+<span class="sd">		.. py:attribute:: brain.median</span>
+
+<span class="sd">			Pandas dataframe containing data that has been processed with a median filter twice and thresholded</span>
+
+<span class="sd">		.. py:attribute:: brain.pcamed</span>
+
+<span class="sd">			PCA object managing the transformation matrix and any resulting transformations</span>
+
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">median</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_alignment_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">pcamed</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pcamed</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">median</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="brain.calculate_pca_median_2d"><a class="viewcode-back" href="../API.html#cranium.brain.calculate_pca_median_2d">[docs]</a>	<span class="k">def</span> <span class="nf">calculate_pca_median_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate PCA transformation matrix for 2 dimensions of data, :py:attr:`brain.pcamed`, based on data after applying median filter and threshold</span>
+
+<span class="sd">		.. warning:: `fit_dim` is not used to determine which dimensions to fit. Defaults to x and z</span>
+
+<span class="sd">		:param array data: 3D array containing raw probability data</span>
+<span class="sd">		:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal</span>
+<span class="sd">		:param int radius: Radius of neighborhood that should be considered for the median filter</span>
+<span class="sd">		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">median</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_alignment_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">pcamed</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pcamed</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">median</span><span class="p">[[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span></div>
+
+<div class="viewcode-block" id="brain.pca_transform_2d"><a class="viewcode-back" href="../API.html#cranium.brain.pca_transform_2d">[docs]</a>	<span class="k">def</span> <span class="nf">pca_transform_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">pca</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Transforms `df` in 2D based on the PCA object, `pca`, whose transformation matrix has already been calculated</span>
+
+<span class="sd">		Calling :py:func:`brain.align_data` creates :py:attr:`brain.df_align`</span>
+
+<span class="sd">		.. warning:: `fit_dim` is not used to determine which dimensions to fit. Defaults to x and z</span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe containing thresholded xyz data</span>
+<span class="sd">		:param pca_object pca: A pca object containing a transformation object, e.g. :py:attr:`brain.pcamed`</span>
+<span class="sd">		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</span>
+<span class="sd">		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [&#39;x&#39;,&#39;z&#39;]</span>
+<span class="sd">		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default</span>
+<span class="sd">		:param mm: (:py:class:`math_model` or None) Math model for primary channel</span>
+<span class="sd">		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values</span>
+<span class="sd">		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">fit</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span>
+		<span class="n">df_fit</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+			<span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+			<span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">fit</span><span class="p">[:,</span><span class="n">comp_order</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+			<span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">fit</span><span class="p">[:,</span><span class="n">comp_order</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="p">})</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">align_data</span><span class="p">(</span><span class="n">df_fit</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.pca_transform_3d"><a class="viewcode-back" href="../API.html#cranium.brain.pca_transform_3d">[docs]</a>	<span class="k">def</span> <span class="nf">pca_transform_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">pca</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Transforms `df` in 3D based on the PCA object, `pca`, whose transformation matrix has already been calculated</span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe containing thresholded xyz data</span>
+<span class="sd">		:param pca_object pca: A pca object containing a transformation object, e.g. :py:attr:`brain.pcamed`</span>
+<span class="sd">		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</span>
+<span class="sd">		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [&#39;x&#39;,&#39;z&#39;]</span>
+<span class="sd">		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default</span>
+<span class="sd">		:param mm: (:py:class:`math_model` or None) Math model for primary channel</span>
+<span class="sd">		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values</span>
+<span class="sd">		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">fit</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span>
+		<span class="n">df_fit</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+			<span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">fit</span><span class="p">[:,</span><span class="n">comp_order</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+			<span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">fit</span><span class="p">[:,</span><span class="n">comp_order</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+			<span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">fit</span><span class="p">[:,</span><span class="n">comp_order</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+			<span class="p">})</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">align_data</span><span class="p">(</span><span class="n">df_fit</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+	
+<div class="viewcode-block" id="brain.align_data"><a class="viewcode-back" href="../API.html#cranium.brain.align_data">[docs]</a>	<span class="k">def</span> <span class="nf">align_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df_fit</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">mm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">vertex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">flip</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Apply PCA transformation matrix and align data so that the vertex is at the origin</span>
+
+<span class="sd">		Creates :py:attr:`brain.df_align` and :py:attr:`brain.mm`</span>
+
+<span class="sd">		:param pd.DataFrame df: dataframe containing thresholded xyz data</span>
+<span class="sd">		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</span>
+<span class="sd">		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [&#39;x&#39;,&#39;z&#39;]</span>
+<span class="sd">		:param int deg: (or None) Degree of the function that should be fit to the model. deg=2 by default</span>
+<span class="sd">		:param mm: (:py:class:`math_model` or None) Math model for primary channel</span>
+<span class="sd">		:param array vertex: (or None) Array of type [vx,vy,vz] (:py:attr:`brain.vertex`) indicating the translation values</span>
+<span class="sd">		:param Bool flip: (or None) Boolean value to determine if the data should be rotated by 180 degrees</span>
+
+<span class="sd">		.. py:attribute:: brain.df_align</span>
+
+<span class="sd">			Dataframe containing point data aligned using PCA</span>
+
+<span class="sd">		.. py:attribute:: brain.mm</span>
+
+<span class="sd">			Math model object fit to data in brain object</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+		
+		<span class="c1">#If vertex for translation is not included</span>
+		<span class="k">if</span> <span class="n">vertex</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">deg</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="c1">#Calculate model</span>
+			<span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+			<span class="c1">#Find vertex</span>
+			<span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="n">model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+				<span class="n">vx</span> <span class="o">=</span> <span class="n">a</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="k">elif</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+				<span class="n">vy</span> <span class="o">=</span> <span class="n">a</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="k">elif</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
+				<span class="n">vz</span> <span class="o">=</span> <span class="n">a</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="p">[</span><span class="n">vx</span><span class="p">,</span><span class="n">vy</span><span class="p">,</span><span class="n">vz</span><span class="p">]</span>
+		<span class="k">elif</span> <span class="n">deg</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="c1">#Calculate model</span>
+			<span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+			<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+				<span class="n">vx</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="k">elif</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+				<span class="n">vy</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vy</span><span class="p">)</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vz</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vy</span><span class="p">)</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="k">elif</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
+				<span class="n">vz</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">if</span> <span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vz</span><span class="p">)</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">vy</span> <span class="o">=</span> <span class="n">p</span><span class="p">(</span><span class="n">vz</span><span class="p">)</span>
+					<span class="n">vx</span> <span class="o">=</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="p">[</span><span class="n">vx</span><span class="p">,</span><span class="n">vy</span><span class="p">,</span><span class="n">vz</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="n">vertex</span>
+
+		<span class="c1">#Translate data so that the vertex is at the origin</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_align</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+			<span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+			<span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+			<span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">df_fit</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+			<span class="p">})</span>
+
+		<span class="c1">#Rotate data by 180 degrees if necessary</span>
+		<span class="k">if</span> <span class="n">flip</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">flip</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+			<span class="c1">#Calculate model</span>
+			<span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="n">df_fit</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+			<span class="c1">#If a is less than 0, rotate data</span>
+			<span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">df_align</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">flip</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">df_align</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="p">)</span>
+
+		<span class="c1">#Calculate final math model</span>
+		<span class="k">if</span> <span class="n">mm</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="n">mm</span></div>
+
+<div class="viewcode-block" id="brain.flip_data"><a class="viewcode-back" href="../API.html#cranium.brain.flip_data">[docs]</a>	<span class="k">def</span> <span class="nf">flip_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Rotate data by 180 degrees</span>
+
+<span class="sd">		:param dataframe df: Pandas dataframe containing x,y,z data</span>
+<span class="sd">		:returns: Rotated dataframe</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)],</span>
+			<span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+			<span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)]])</span>
+
+		<span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">),</span><span class="n">r</span><span class="p">)</span>
+
+		<span class="n">dfr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">rot</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">rot</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">rot</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]})</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">dfr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.fit_model"><a class="viewcode-back" href="../API.html#cranium.brain.fit_model">[docs]</a>	<span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Fit model to dataframe</span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe containing at least x,y,z</span>
+<span class="sd">		:param int deg: Degree of the function that should be fit to the model</span>
+<span class="sd">		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [&#39;x&#39;,&#39;z&#39;]</span>
+<span class="sd">		:returns: math model</span>
+<span class="sd">		:rtype: :py:class:`math_model`</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">mm</span> <span class="o">=</span> <span class="n">math_model</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="n">fit_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">))</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">mm</span><span class="p">)</span></div>
+
+	<span class="c1">###### Functions associated with alpha, r, theta coordinate system ######</span>
+
+<div class="viewcode-block" id="brain.find_distance"><a class="viewcode-back" href="../API.html#cranium.brain.find_distance">[docs]</a>	<span class="k">def</span> <span class="nf">find_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">point</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Find euclidean distance between math model(t) and data point in the xy plane</span>
+
+<span class="sd">		:param float t: float value defining point on the line</span>
+<span class="sd">		:param array point: array [x,y] defining data point</span>
+<span class="sd">		:returns: distance between the two points</span>
+<span class="sd">		:rtype: float</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+		<span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+		<span class="c1">#Calculate distance between two points passed as array</span>
+		<span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">point</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">z</span><span class="p">]))</span>
+
+		<span class="k">return</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.find_min_distance"><a class="viewcode-back" href="../API.html#cranium.brain.find_min_distance">[docs]</a>	<span class="k">def</span> <span class="nf">find_min_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Find the point on the curve that produces the minimum distance between the point and the data point using scipy.optimize.minimize(:py:func:`brain.find_distance`)</span>
+
+<span class="sd">		:param pd.Series row: row from dataframe in the form of a pandas Series</span>
+<span class="sd">		:returns: point in the curve (xc, yc, zc) and r</span>
+<span class="sd">		:rtype: floats</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">dpoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">z</span><span class="p">])</span>
+
+		<span class="c1">#Use scipy.optimize.minimize to find minimum solution of brain.find_distance, </span>
+		<span class="c1">#dpoint[0] is starting guess for x value</span>
+		<span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">find_distance</span><span class="p">,</span> <span class="n">dpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">dpoint</span><span class="p">))</span>
+
+		<span class="n">x</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="c1">#r = result[&#39;fun&#39;]</span>
+
+		<span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)</span></div>
+		<span class="c1">#return(pd.Series({&#39;xc&#39;:x, &#39;yc&#39;:y, &#39;zc&#39;:z, &#39;r&#39;:r}))</span>
+
+<div class="viewcode-block" id="brain.integrand"><a class="viewcode-back" href="../API.html#cranium.brain.integrand">[docs]</a>	<span class="k">def</span> <span class="nf">integrand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Function to integrate to calculate arclength</span>
+
+<span class="sd">		:param float x: integer value for x</span>
+<span class="sd">		:returns: arclength value for integrating</span>
+<span class="sd">		:rtype: float</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">y_prime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">cf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">cf</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+		<span class="n">arclength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">y_prime</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">arclength</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.find_arclength"><a class="viewcode-back" href="../API.html#cranium.brain.find_arclength">[docs]</a>	<span class="k">def</span> <span class="nf">find_arclength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xc</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate arclength by integrating the derivative of the math model in xy plane</span>
+
+<span class="sd">		.. math:: </span>
+
+<span class="sd">			\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}</span>
+
+<span class="sd">		:param float row: Postion in the x axis along the curve</span>
+<span class="sd">		:returns: Length of the arc along the curve between the row and the vertex</span>
+<span class="sd">		:rtype: float</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">ac</span><span class="p">,</span><span class="n">err</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integrand</span><span class="p">,</span><span class="n">xc</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">ac</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.find_theta"><a class="viewcode-back" href="../API.html#cranium.brain.find_theta">[docs]</a>	<span class="k">def</span> <span class="nf">find_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">zc</span><span class="p">,</span><span class="n">yc</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate theta for a row containing data point in relationship to the xz plane</span>
+
+<span class="sd">		:param pd.Series row: row from dataframe in the form of a pandas Series</span>
+<span class="sd">		:param float yc: Y position of the closest point in the curve to the data point</span>
+<span class="sd">		:param float zc: Z position of the closest point in the curve to the data point</span>
+<span class="sd">		:returns: theta, angle between point and the model plane</span>
+<span class="sd">		:rtype: float</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">y</span><span class="o">-</span><span class="n">yc</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">zc</span><span class="p">)</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.find_r"><a class="viewcode-back" href="../API.html#cranium.brain.find_r">[docs]</a>	<span class="k">def</span> <span class="nf">find_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">zc</span><span class="p">,</span><span class="n">yc</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate r using the Pythagorean theorem</span>
+
+<span class="sd">		:param pd.Series row: row from dataframe in the form of a pandas Series</span>
+<span class="sd">		:param float yc: Y position of the closest point in the curve to the data point</span>
+<span class="sd">		:param float zc: Z position of the closest point in the curve to the data point</span>
+<span class="sd">		:returns: r, distance between the point and the model</span>
+<span class="sd">		:rtype: float</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">z</span><span class="o">-</span><span class="n">zc</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">y</span><span class="o">-</span><span class="n">yc</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.calc_coord"><a class="viewcode-back" href="../API.html#cranium.brain.calc_coord">[docs]</a>	<span class="k">def</span> <span class="nf">calc_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate alpah, r, theta for a particular row</span>
+
+<span class="sd">		:param pd.Series row: row from dataframe in the form of a pandas Series</span>
+<span class="sd">		:returns: pd.Series populated with coordinate of closest point on the math model, r, theta, and ac (arclength)</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">xc</span><span class="p">,</span><span class="n">yc</span><span class="p">,</span><span class="n">zc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_min_distance</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+		<span class="n">ac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_arclength</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span>
+		<span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_theta</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">zc</span><span class="p">,</span><span class="n">yc</span><span class="p">)</span>
+		<span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_r</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">zc</span><span class="p">,</span><span class="n">yc</span><span class="p">)</span>
+
+		<span class="k">return</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">row</span><span class="o">.</span><span class="n">z</span><span class="p">,</span><span class="s1">&#39;xc&#39;</span><span class="p">:</span><span class="n">xc</span><span class="p">,</span> <span class="s1">&#39;yc&#39;</span><span class="p">:</span><span class="n">yc</span><span class="p">,</span> <span class="s1">&#39;zc&#39;</span><span class="p">:</span><span class="n">zc</span><span class="p">,</span>
+					<span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">r</span><span class="p">,</span> <span class="s1">&#39;ac&#39;</span><span class="p">:</span><span class="n">ac</span><span class="p">,</span> <span class="s1">&#39;theta&#39;</span><span class="p">:</span><span class="n">theta</span><span class="p">}))</span></div>
+
+<div class="viewcode-block" id="brain.transform_coordinates"><a class="viewcode-back" href="../API.html#cranium.brain.transform_coordinates">[docs]</a>	<span class="k">def</span> <span class="nf">transform_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Transform coordinate system so that each point is defined relative to math model by (alpha,theta,r) (only applied to :py:attr:`brain.df_align`)</span>
+
+<span class="sd">		:returns: appends columns r, xc, yc, zc, ac, theta to :py:attr:`brain.df_align`</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#Calculate alpha, theta, r for each row in dataset</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_align</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="o">.</span><span class="n">apply</span><span class="p">((</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_coord</span><span class="p">(</span><span class="n">row</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="brain.subset_data"><a class="viewcode-back" href="../API.html#cranium.brain.subset_data">[docs]</a>	<span class="k">def</span> <span class="nf">subset_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">sample_frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac</span>
+<span class="sd">		</span>
+<span class="sd">		Creates the variable :py:attr:`brain.subset`</span>
+
+<span class="sd">		:param pd.DataFrame: Dataframe which will be sampled</span>
+<span class="sd">		:param float sample_frac: (or None) Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting</span>
+<span class="sd">		</span>
+<span class="sd">		.. py:attribute:: brain.subset</span>
+
+<span class="sd">			Random sample of the input dataframe</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">subset</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="n">sample_frac</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="brain.add_thresh_df"><a class="viewcode-back" href="../API.html#cranium.brain.add_thresh_df">[docs]</a>	<span class="k">def</span> <span class="nf">add_thresh_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Adds dataframe of thresholded and transformed data to :py:attr:`brain.df_thresh`</span>
+
+<span class="sd">		:param pd.DataFrame df: dataframe of thesholded and transformed data</span>
+<span class="sd">		:returns: :py:attr:`brain.df_thresh`</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_thresh</span> <span class="o">=</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="brain.add_aligned_df"><a class="viewcode-back" href="../API.html#cranium.brain.add_aligned_df">[docs]</a>	<span class="k">def</span> <span class="nf">add_aligned_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Adds dataframe of aligned data</span>
+
+<span class="sd">		.. warning:: Calculates model, but assumes that the dimensions of the fit are x and z</span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe of aligned data</span>
+<span class="sd">		:returns: :py:attr:`brain.df_align`</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">df_align</span> <span class="o">=</span> <span class="n">df</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_align</span><span class="p">,</span><span class="mi">2</span><span class="p">,[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">])</span></div></div>
+
+<div class="viewcode-block" id="embryo"><a class="viewcode-back" href="../API.html#cranium.embryo">[docs]</a><span class="k">class</span> <span class="nc">embryo</span><span class="p">:</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Class to managed multiple brain objects in a multichannel sample</span>
+
+<span class="sd">	:param str name: Name of this sample set</span>
+<span class="sd">	:param str number: Sample number corresponding to this embryo</span>
+<span class="sd">	:param str outdir: Path to directory for output files</span>
+
+<span class="sd">	.. py:attribute:: embryo.chnls</span>
+
+<span class="sd">		Dictionary containing the :py:class:`brain` object for each channel</span>
+
+<span class="sd">	.. py:attribute:: embryo.outdir</span>
+
+<span class="sd">		Path to directory for output files</span>
+
+<span class="sd">	.. py:attribute:: embryo.name</span>
+
+<span class="sd">		Name of this sample set</span>
+
+<span class="sd">	.. py:attribute:: embryo.number</span>
+
+<span class="sd">		Sample number corresponding to this embryo</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">number</span><span class="p">,</span><span class="n">outdir</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;Initialize embryo object&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">outdir</span> <span class="o">=</span> <span class="n">outdir</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">number</span>
+
+<div class="viewcode-block" id="embryo.add_channel"><a class="viewcode-back" href="../API.html#cranium.embryo.add_channel">[docs]</a>	<span class="k">def</span> <span class="nf">add_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Add channel to :py:attr:`embryo.chnls` dictionary</span>
+
+<span class="sd">		:param str filepath: Complete filepath to image</span>
+<span class="sd">		:param str key: Name of the channel</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">s</span> <span class="o">=</span> <span class="n">brain</span><span class="p">()</span>
+		<span class="n">s</span><span class="o">.</span><span class="n">read_data</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="embryo.process_channels"><a class="viewcode-back" href="../API.html#cranium.embryo.process_channels">[docs]</a>	<span class="k">def</span> <span class="nf">process_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mthresh</span><span class="p">,</span><span class="n">gthresh</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">primary_key</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Process all channels through the production of the :py:attr:`brain.df_align` dataframe</span>
+
+<span class="sd">		:param float mthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for median data</span>
+<span class="sd">		:param float gthresh: Value between 0 and 1 to use as a cutoff for minimum pixel value for general data</span>
+<span class="sd">		:param int radius: Size of the neighborhood area to examine with median filter</span>
+<span class="sd">		:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively</span>
+<span class="sd">		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel</span>
+<span class="sd">		:param int deg: Degree of the function that should be fit to the model</span>
+<span class="sd">		:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too</span>
+<span class="sd">		:param array comp_order: Array specifies the assignment of components to x,y,z. Form [x component index, y component index, z component index], e.g. [0,2,1]</span>
+<span class="sd">		:param array fit_dim: Array of length two containing two strings describing the first and second axis for fitting the model, e.g. [&#39;x&#39;,&#39;z&#39;]</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#Process primary channel</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">gthresh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">calculate_pca_median</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span>
+			<span class="n">mthresh</span><span class="p">,</span><span class="n">radius</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">pcamed</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">align_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">df_thresh</span><span class="p">,</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">pca</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">mm</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">vertex</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span><span class="o">.</span><span class="n">transform_coordinates</span><span class="p">()</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Primary channel&#39;</span><span class="p">,</span><span class="n">primary_key</span><span class="p">,</span><span class="s1">&#39;processing complete&#39;</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">ch</span> <span class="o">!=</span> <span class="n">primary_key</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">preprocess_data</span><span class="p">(</span><span class="n">gthresh</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">microns</span><span class="p">)</span>
+				
+				<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">align_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">df_thresh</span><span class="p">,</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">pca</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+					<span class="n">mm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span><span class="p">,</span> <span class="n">vertex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">)</span>
+
+				<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">transform_coordinates</span><span class="p">()</span>
+				<span class="nb">print</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span><span class="s1">&#39;processed&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="embryo.save_projections"><a class="viewcode-back" href="../API.html#cranium.embryo.save_projections">[docs]</a>	<span class="k">def</span> <span class="nf">save_projections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">subset</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Save projections of both channels into png files in :py:attr:`embryo.outdir` following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`]_MIP.png</span>
+
+<span class="sd">		:param float subset: Value between 0 and 1 to specify the fraction of the data to randomly sample for plotting</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+			<span class="n">fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">plot_projections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">df_align</span><span class="p">,</span><span class="n">subset</span><span class="p">)</span>
+			<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">ch</span><span class="o">+</span><span class="s1">&#39;_MIP.png&#39;</span><span class="p">))</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Projections generated&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="embryo.save_psi"><a class="viewcode-back" href="../API.html#cranium.embryo.save_psi">[docs]</a>	<span class="k">def</span> <span class="nf">save_psi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Save all channels into psi files following the naming scheme [:py:attr:`embryo.name`]_[:py:attr:`embryo.number`]_[`channel name`].psi</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;ac&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span>
+
+		<span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+			<span class="n">write_data</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outdir</span><span class="p">,</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">ch</span><span class="o">+</span><span class="s1">&#39;.psi&#39;</span><span class="p">),</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">df_align</span><span class="p">[</span><span class="n">columns</span><span class="p">])</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;PSIs generated&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="embryo.add_psi_data"><a class="viewcode-back" href="../API.html#cranium.embryo.add_psi_data">[docs]</a>	<span class="k">def</span> <span class="nf">add_psi_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filepath</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Read psi data into a channel dataframe</span>
+
+<span class="sd">		:param str filepath: Complete filepath to data</span>
+<span class="sd">		:param str key: Descriptive key for channel dataframe in dictionary</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">chnls</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_psi</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="math_model"><a class="viewcode-back" href="../API.html#cranium.math_model">[docs]</a><span class="k">class</span> <span class="nc">math_model</span><span class="p">:</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Object to contain attributes associated with the math model of a sample</span>
+
+<span class="sd">	:param array model: Array of coefficients calculated by np.polyfit</span>
+
+<span class="sd">	.. py:attribute:: math_model.cf</span>
+
+<span class="sd">		Array of coefficients for the math model</span>
+
+<span class="sd">	.. py:attribute:: math_model.p</span>
+
+<span class="sd">		Poly1d function for the math model to allow calculation and plotting of the model</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">cf</span> <span class="o">=</span> <span class="n">model</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">poly1d</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="landmarks"><a class="viewcode-back" href="../API.html#cranium.landmarks">[docs]</a><span class="k">class</span> <span class="nc">landmarks</span><span class="p">:</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Class to handle calculation of landmarks to describe structural data</span>
+
+<span class="sd">	:param list percbins: (or None) Must be a list of integers between 0 and 100 </span>
+<span class="sd">	:param int rnull: (or None) When the r value cannot be calculated it will be set to this value</span>
+<span class="sd">	</span>
+<span class="sd">	.. py:attribute:: brain.lm_wt_rf</span>
+
+<span class="sd">		pd.DataFrame, which wildtype landmarks will be added to</span>
+
+<span class="sd">	.. py:attribute:: brain.lm_mt_rf</span>
+
+<span class="sd">		pd.DataFrame, which mutant landmarks will be added to</span>
+
+<span class="sd">	.. py:attribute:: brain.rnull</span>
+
+<span class="sd">		Integer specifying the value which null landmark calculations will be set to</span>
+<span class="sd">	</span>
+<span class="sd">	.. py:attribute:: brain.percbins</span>
+
+<span class="sd">		Integer specifying the percentiles which will be used to calculate landmarks</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">percbins</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">90</span><span class="p">],</span><span class="n">rnull</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">lm_wt_rf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">lm_mt_rf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">rnull</span> <span class="o">=</span> <span class="n">rnull</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">percbins</span> <span class="o">=</span> <span class="n">percbins</span>
+
+<div class="viewcode-block" id="landmarks.calc_bins"><a class="viewcode-back" href="../API.html#cranium.landmarks.calc_bins">[docs]</a>	<span class="k">def</span> <span class="nf">calc_bins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Ldf</span><span class="p">,</span><span class="n">ac_num</span><span class="p">,</span><span class="n">tstep</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculates alpha and theta bins based on ac_num and tstep</span>
+
+<span class="sd">		Creates :py:attr:`landmarks.acbins` and :py:attr:`landmarks.tbins`</span>
+
+<span class="sd">		.. warning:: `tstep` does not handle scenarios where 2pi is not evenly divisible by tstep</span>
+
+<span class="sd">		:param list Ldf: List of dataframes that are being used for the analysis typically accessed by `dict.values()`</span>
+<span class="sd">		:param int ac_num: Integer indicating the number of divisions that should be made along alpha</span>
+<span class="sd">		:param float tstep: The size of each bin used for alpha</span>
+
+<span class="sd">		.. py:attribute:: landmarks.acbins</span>
+
+<span class="sd">			List containing the boundaries of each bin along alpha based on `ac_num`</span>
+
+<span class="sd">		.. py:attribute:: landmarks.tbins</span>
+
+<span class="sd">			List containing the boundaries of each bin along theta based on `tstep`</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="c1">#Find the minimum and maximum values of alpha in the dataset</span>
+		<span class="n">acmin</span><span class="p">,</span><span class="n">acmax</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+		<span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">Ldf</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">ac</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">acmin</span><span class="p">:</span>
+				<span class="n">acmin</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ac</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+			<span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">ac</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">acmax</span><span class="p">:</span>
+				<span class="n">acmax</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">ac</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+		<span class="c1">#Correct min and max values so that arclength is equal on each side</span>
+		<span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">acmin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">acmax</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">acbins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">acmin</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">acmin</span><span class="p">),</span><span class="n">ac_num</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">acbins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">acmax</span><span class="p">,</span><span class="n">acmax</span><span class="p">,</span><span class="n">ac_num</span><span class="p">)</span>
+
+		<span class="c1">#Calculate tbins divisions based on tstep</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tbins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">+</span><span class="n">tstep</span><span class="p">,</span><span class="n">tstep</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="landmarks.calc_perc"><a class="viewcode-back" href="../API.html#cranium.landmarks.calc_perc">[docs]</a>	<span class="k">def</span> <span class="nf">calc_perc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">snum</span><span class="p">,</span><span class="n">dtype</span><span class="p">,</span><span class="n">out</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined </span>
+
+<span class="sd">		:param pd.DataFrame df: Dataframe containing columns x,y,z,alpha,r,theta</span>
+<span class="sd">		:param str snum: String containing a sample identifier that can be converted to an integer</span>
+<span class="sd">		:param str dtype: String describing the sample group to which the sample belongs, e.g. control or experimental</span>
+<span class="sd">		:returns: pd.DataFrame with new landmarks appended</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">D</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stype&#39;</span><span class="p">:</span><span class="n">dtype</span><span class="p">}</span>
+
+		<span class="c1">#Go through each arclength bins</span>
+		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">a</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">):</span>
+				<span class="n">arange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">[</span><span class="n">a</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">[</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+
+				<span class="c1">#Go through each theta bin</span>
+				<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">)):</span>
+					<span class="k">if</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">):</span>
+						<span class="n">trange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+
+						<span class="c1">#Go through each percentile</span>
+						<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">percbins</span><span class="p">:</span>
+							<span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&gt;</span> <span class="n">arange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&lt;</span> <span class="n">arange</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+							<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">trange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="n">trange</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+							<span class="c1">#Try to calculate percentile, but set to null if it fails</span>
+							<span class="k">try</span><span class="p">:</span>
+								<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+								<span class="n">pts</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
+							<span class="k">except</span><span class="p">:</span>
+								<span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnull</span>
+								<span class="n">pts</span> <span class="o">=</span> <span class="mi">0</span>
+
+							<span class="c1">#Create name of column based on bins</span>
+							<span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+							<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">arange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">arange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">trange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">trange</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
+								<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
+							<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_pts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pts</span>
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+
+		<span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">snum</span><span class="p">)))</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="landmarks.calc_wt_reformat"><a class="viewcode-back" href="../API.html#cranium.landmarks.calc_wt_reformat">[docs]</a>	<span class="k">def</span> <span class="nf">calc_wt_reformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">snum</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		.. warning:: Deprecated function, but includes code pertaining to calculating point based data</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">D</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stype&#39;</span><span class="p">:</span><span class="s1">&#39;wildtype&#39;</span><span class="p">}</span>
+
+		<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">a</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">):</span>
+				<span class="n">arange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">[</span><span class="n">a</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">acbins</span><span class="p">[</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+
+				<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">)):</span>
+					<span class="k">if</span> <span class="n">t</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">):</span>
+						<span class="n">trange</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">[</span><span class="n">t</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">tbins</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+
+						<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">percbins</span><span class="p">:</span>
+							<span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&gt;</span> <span class="n">arange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&lt;</span> <span class="n">arange</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+							<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="n">trange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="n">trange</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+							<span class="k">try</span><span class="p">:</span>
+								<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+								<span class="n">pts</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
+							<span class="k">except</span><span class="p">:</span>
+								<span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnull</span>
+								<span class="n">pts</span> <span class="o">=</span> <span class="mi">0</span>
+
+							<span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+							<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="n">arange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">arange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">trange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">trange</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
+								<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
+							<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_pts-pts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pts</span>
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_perc-pts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pts</span>
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_pts-r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+							<span class="n">D</span><span class="p">[</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_perc-r&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">lm_wt_rf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lm_wt_rf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">snum</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="landmarks.calc_mt_landmarks"><a class="viewcode-back" href="../API.html#cranium.landmarks.calc_mt_landmarks">[docs]</a>	<span class="k">def</span> <span class="nf">calc_mt_landmarks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">df</span><span class="p">,</span><span class="n">snum</span><span class="p">,</span><span class="n">wt</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">		.. warning:: Deprecated function, but attempted to calculate mutant landmarks based on the number of points found in the wildtype standard</span>
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="n">D</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;stype&#39;</span><span class="p">:</span><span class="s1">&#39;mutant&#39;</span><span class="p">}</span>
+
+		<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">wt</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+				<span class="n">amn</span><span class="p">,</span><span class="n">amx</span><span class="p">,</span><span class="n">tmn</span><span class="p">,</span><span class="n">tmx</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+				<span class="n">p</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+				<span class="c1"># print(c)</span>
+				<span class="c1"># print(df.count()[&#39;i&#39;])</span>
+				<span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">amn</span><span class="p">))</span><span class="o">&amp;</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ac</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">amx</span><span class="p">))]</span>
+				<span class="c1"># print(d.count()[&#39;i&#39;])</span>
+				<span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmn</span><span class="p">))</span><span class="o">&amp;</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">theta</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">tmx</span><span class="p">))]</span>
+				<span class="c1"># print(d.count()[&#39;i&#39;])</span>
+
+				<span class="k">if</span> <span class="n">dtype</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;perc&#39;</span><span class="p">:</span>
+					<span class="k">try</span><span class="p">:</span>
+						<span class="n">perc_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+						<span class="n">perc_pts</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">r</span> <span class="o">&lt;</span> <span class="n">perc_r</span><span class="p">]</span>
+					<span class="k">except</span><span class="p">:</span>
+						<span class="n">perc_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnull</span>
+						<span class="n">perc_pts</span> <span class="o">=</span> <span class="mi">0</span>
+
+					<span class="k">if</span> <span class="n">dtype</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+						<span class="n">D</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">perc_r</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">D</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">perc_pts</span>
+
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">dtype</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;pts&#39;</span><span class="p">:</span>
+						<span class="c1">#Calculate precent of points by dividing pts by total pts</span>
+						<span class="n">p</span> <span class="o">=</span> <span class="n">wt</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">/</span><span class="n">d</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="n">pt_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">r</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="n">pt_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnull</span>
+						<span class="n">D</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt_r</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">D</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">lm_mt_rf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lm_mt_rf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">snum</span><span class="p">)))</span></div></div>
+
+<div class="viewcode-block" id="reformat_to_cart"><a class="viewcode-back" href="../API.html#cranium.reformat_to_cart">[docs]</a><span class="k">def</span> <span class="nf">reformat_to_cart</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Take a dataframe in which columns contain the bin parameters and convert to a cartesian coordinate system</span>
+
+<span class="sd">	:param pd.DataFrame df: Dataframe containing columns with string names that contain the bin parameter</span>
+<span class="sd">	:returns: pd.DataFrame with each landmark as a row and columns: x,y,z,r,r_std,t,pts</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">ndf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+			<span class="n">amn</span><span class="p">,</span><span class="n">amx</span><span class="p">,</span><span class="n">tmn</span><span class="p">,</span><span class="n">tmx</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+			<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">amn</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">amx</span><span class="p">)])</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">tmn</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">tmx</span><span class="p">)])</span>
+
+			<span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+				<span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+				<span class="n">r_std</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">sem</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">r</span>
+				<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">*</span><span class="n">r</span>
+
+				<span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">amn</span><span class="p">,</span><span class="n">amx</span><span class="p">,</span><span class="n">tmn</span><span class="p">,</span><span class="n">tmx</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="s1">&#39;pts&#39;</span><span class="p">])])</span>
+
+				<span class="n">D</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">z</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">:</span><span class="n">r</span><span class="p">,</span><span class="s1">&#39;r_sem&#39;</span><span class="p">:</span><span class="n">r_std</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="n">t</span><span class="p">,</span><span class="s1">&#39;pts&#39;</span><span class="p">:</span><span class="n">pts</span><span class="p">})</span>
+
+				<span class="n">ndf</span> <span class="o">=</span> <span class="n">ndf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">D</span><span class="p">),</span><span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">ndf</span><span class="p">)</span></div>
+
+<span class="k">def</span> <span class="nf">convert_to_arr</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="n">tarr</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">mt</span><span class="p">):</span>
+	<span class="n">wtarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">xarr</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">tarr</span><span class="p">),</span><span class="n">wt</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">]))</span>
+	<span class="n">mtarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">xarr</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">tarr</span><span class="p">),</span><span class="n">mt</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="s1">&#39;Unnamed: 0&#39;</span><span class="p">]))</span>
+
+	<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mt</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+			<span class="n">amn</span><span class="p">,</span><span class="n">amx</span><span class="p">,</span><span class="n">tmn</span><span class="p">,</span><span class="n">tmx</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+			<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">amn</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">amx</span><span class="p">)])</span>
+			<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">tmn</span><span class="p">),</span><span class="nb">float</span><span class="p">(</span><span class="n">tmx</span><span class="p">)])</span>
+
+			<span class="k">if</span> <span class="n">dtype</span><span class="o">==</span><span class="s1">&#39;r&#39;</span><span class="p">:</span>
+				<span class="n">wtarr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">xarr</span><span class="o">==</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tarr</span><span class="o">==</span><span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">wt</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+				<span class="n">mtarr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">xarr</span><span class="o">==</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tarr</span><span class="o">==</span><span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mt</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">wtarr</span><span class="p">,</span><span class="n">mtarr</span><span class="p">)</span>
+
+<span class="n">P</span> <span class="o">=</span> <span class="p">{</span>
+	<span class="s1">&#39;zln&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;zpt&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;zfb&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+	<span class="s1">&#39;wtc&#39;</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="s1">&#39;mtc&#39;</span><span class="p">:</span><span class="s1">&#39;r&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;alpha&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span>
+	<span class="s1">&#39;cmap&#39;</span><span class="p">:</span><span class="s1">&#39;Greys_r&#39;</span><span class="p">,</span>
+	<span class="s1">&#39;xarr&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+	<span class="s1">&#39;tarr&#39;</span><span class="p">:</span><span class="kc">None</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="subplot_lmk"><a class="viewcode-back" href="../API.html#cranium.subplot_lmk">[docs]</a><span class="k">def</span> <span class="nf">subplot_lmk</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">avg</span><span class="p">,</span><span class="n">sem</span><span class="p">,</span><span class="n">parr</span><span class="p">,</span><span class="n">xarr</span><span class="p">,</span><span class="n">tarr</span><span class="p">,</span><span class="n">dtype</span><span class="p">,</span><span class="n">Pn</span><span class="o">=</span><span class="n">P</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Plot a ribbon of average and standard error of the mean onto the subplot, `ax`</span>
+
+<span class="sd">	:param plt.Subplot ax: Matplotlib subplot onto which the data should be plotted</span>
+<span class="sd">	:param list p: List of two theta values that should be plotted</span>
+<span class="sd">	:param np.array avg: Array of shape (xvalues,tvalues) containing the average values of the data</span>
+<span class="sd">	:param np.array sem: Array of shape (xvalues,tvalues) containing the standard error of the mean values of the data</span>
+<span class="sd">	:param np.array parr: Array of shape (xvalues,tvalues) containing the p values for the data</span>
+<span class="sd">	:param str dtype: String describing sample type</span>
+<span class="sd">	:param Pn: Dictionary containing the following values: &#39;zln&#39;:2,&#39;zpt&#39;:3,&#39;zfb&#39;:1,&#39;wtc&#39;:&#39;b&#39;,&#39;mtc&#39;:&#39;r&#39;,&#39;alpha&#39;:0.3,&#39;cmap&#39;:&#39;Greys_r&#39;</span>
+<span class="sd">	:type: dict or None</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">Pn</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+		<span class="n">P</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">Pn</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+	<span class="k">if</span> <span class="n">dtype</span><span class="o">==</span><span class="s1">&#39;wt&#39;</span><span class="p">:</span>
+		<span class="n">c</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="s1">&#39;wtc&#39;</span><span class="p">]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">c</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="s1">&#39;mtc&#39;</span><span class="p">]</span>
+
+	<span class="n">ti1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tarr</span><span class="o">==</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">ti2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tarr</span><span class="o">==</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">]</span><span class="o">+</span><span class="n">sem</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">],</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">]</span><span class="o">-</span><span class="n">sem</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">],</span><span class="n">alpha</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zfb&#39;</span><span class="p">])</span>
+	<span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="o">-</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">]</span><span class="o">+</span><span class="n">sem</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">],</span><span class="o">-</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">]</span><span class="o">-</span><span class="n">sem</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">],</span><span class="n">alpha</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span><span class="n">color</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zfb&#39;</span><span class="p">])</span>
+
+	<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zln&#39;</span><span class="p">])</span>
+	<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="o">-</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zln&#39;</span><span class="p">])</span>
+
+	<span class="k">if</span> <span class="n">dtype</span><span class="o">==</span><span class="s1">&#39;mt&#39;</span><span class="p">:</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">parr</span><span class="p">[:,</span><span class="n">ti1</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">],</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zpt&#39;</span><span class="p">])</span>
+		<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span><span class="o">-</span><span class="n">avg</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">],</span><span class="n">c</span><span class="o">=</span><span class="n">parr</span><span class="p">[:,</span><span class="n">ti2</span><span class="p">],</span><span class="n">cmap</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">],</span><span class="n">zorder</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="s1">&#39;zpt&#39;</span><span class="p">])</span></div>
+
+<span class="c1">##### PSI file processing ############</span>
+
+<div class="viewcode-block" id="write_header"><a class="viewcode-back" href="../API.html#cranium.write_header">[docs]</a><span class="k">def</span> <span class="nf">write_header</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Writes header for PSI file with columns Id,x,y,z,ac,r,theta</span>
+
+<span class="sd">	:param file f: file object created by &#39;open(filename,&#39;w&#39;)`</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">contents</span> <span class="o">=</span> <span class="p">[</span>
+		<span class="s1">&#39;PSI Format 1.0&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[0] = &quot;Id&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[1] = &quot;x&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[2] = &quot;y&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[3] = &quot;z&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[4] = &quot;ac&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;symbol[4] = &quot;A&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;type[4] = float&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[5] = &quot;r&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;symbol[5] = &quot;R&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;type[5] = float&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;column[6] = &quot;theta&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;symbol[6] = &quot;T&quot;&#39;</span><span class="p">,</span>
+		<span class="s1">&#39;type[6] = float&#39;</span>
+	<span class="p">]</span>
+
+	<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">:</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# &#39;</span><span class="o">+</span> <span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="write_data"><a class="viewcode-back" href="../API.html#cranium.write_data">[docs]</a><span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span><span class="n">df</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Writes data in PSI format to file after writing header using :py:func:`write_header`. Closes file at the conclusion of writing data.</span>
+
+<span class="sd">	:param str filepath: Complete filepath to output file</span>
+<span class="sd">	:param pd.DataFrame df: dataframe containing columns x,y,z,ac,r,theta</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="c1">#Open new file at given filepath</span>
+	<span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+	<span class="c1">#Write header contents to file</span>
+	<span class="n">write_header</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+	<span class="n">n</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+    
+	<span class="c1">#Write line with sample number</span>
+	<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; 0 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+	<span class="c1">#Write translation matrix</span>
+	<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;1 0 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span>
+			<span class="s1">&#39;0 1 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span>
+			<span class="s1">&#39;0 0 1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+	<span class="c1">#Write dataframe to file using pandas to_csv function to format</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;ac&#39;</span><span class="p">,</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+	<span class="k">except</span><span class="p">:</span>
+		<span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+	<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Write to&#39;</span><span class="p">,</span><span class="n">filepath</span><span class="p">,</span><span class="s1">&#39;complete&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_psi"><a class="viewcode-back" href="../API.html#cranium.read_psi">[docs]</a><span class="k">def</span> <span class="nf">read_psi</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Reads psi file at the given filepath and returns data in a pandas DataFrame</span>
+
+<span class="sd">	:param str filepath: Complete filepath to file</span>
+<span class="sd">	:returns: pd.Dataframe containing data</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span>
+		<span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span>
+		<span class="n">header</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">:</span>
+		<span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
+	<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">:</span>
+		<span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;ac&#39;</span><span class="p">,</span><span class="s1">&#39;theta&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="read_psi_to_dict"><a class="viewcode-back" href="../API.html#cranium.read_psi_to_dict">[docs]</a><span class="k">def</span> <span class="nf">read_psi_to_dict</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">dtype</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Read psis from directory into dictionary of dfs with filtering based on dtype</span>
+
+<span class="sd">	:param str directory: Directory to get psis from </span>
+<span class="sd">	:param str dtype: Usually &#39;AT&#39; or &#39;ZRF1&#39;</span>
+<span class="sd">	:returns: Dictionary of pd.DataFrame</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">dfs</span> <span class="o">=</span> <span class="p">{}</span>
+	<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+			<span class="n">df</span> <span class="o">=</span> <span class="n">read_psi</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span><span class="n">f</span><span class="p">))</span>
+			<span class="n">num</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="nb">print</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+			<span class="n">dfs</span><span class="p">[</span><span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span></div>
+
+<span class="c1">###### Stand alone functions</span>
+
+<div class="viewcode-block" id="process_sample"><a class="viewcode-back" href="../API.html#cranium.process_sample">[docs]</a><span class="k">def</span> <span class="nf">process_sample</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">root</span><span class="p">,</span><span class="n">outdir</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">chs</span><span class="p">,</span><span class="n">prefixes</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">primary_key</span><span class="p">,</span><span class="n">comp_order</span><span class="p">,</span><span class="n">fit_dim</span><span class="p">,</span><span class="n">flip_dim</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Process single sample through :py:class:`brain` class and saves df to csv</span>
+
+<span class="sd">	.. warning:: Out of date and will probably fail</span>
+
+<span class="sd">	:param str num: Sample number</span>
+<span class="sd">	:param str root: Complete path to the root directory for this sample set</span>
+<span class="sd">	:param str name: Name describing this sample set</span>
+<span class="sd">	:param str outdir: Complete path to output directory</span>
+<span class="sd">	:param array chs: Array containing strings specifying the directories for each channel</span>
+<span class="sd">	:param array prefixes: Array containing strings specifying the file prefix for each channel</span>
+<span class="sd">	:param float threshold: Value between 0 and 1 to use as a cutoff for minimum pixel value</span>
+<span class="sd">	:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively</span>
+<span class="sd">	:param int deg: Degree of the function that should be fit to the model</span>
+<span class="sd">	:param str primary_key: Key for the primary structural channel which PCA and the model should be fit too</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+	<span class="nb">print</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="s1">&#39;Starting&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+
+	<span class="n">e</span> <span class="o">=</span> <span class="n">embryo</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">num</span><span class="p">,</span><span class="n">outdir</span><span class="p">)</span>
+	<span class="n">e</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">chs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">prefixes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">num</span><span class="o">+</span><span class="s1">&#39;_Probabilities.h5&#39;</span><span class="p">),</span>
+		<span class="s1">&#39;at&#39;</span><span class="p">)</span>
+	<span class="n">e</span><span class="o">.</span><span class="n">add_channel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">chs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">prefixes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">num</span><span class="o">+</span><span class="s1">&#39;_Probabilities.h5&#39;</span><span class="p">),</span><span class="s1">&#39;zrf1&#39;</span><span class="p">)</span>
+	<span class="n">e</span><span class="o">.</span><span class="n">process_channels</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span><span class="n">scale</span><span class="p">,</span><span class="n">deg</span><span class="p">,</span><span class="n">primary_key</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+	
+	<span class="nb">print</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="s1">&#39;Data processing complete&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+
+	<span class="n">e</span><span class="o">.</span><span class="n">save_projections</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+	<span class="n">e</span><span class="o">.</span><span class="n">save_psi</span><span class="p">()</span>
+
+	<span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+	<span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="s1">&#39;complete&#39;</span><span class="p">,</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="calculate_models"><a class="viewcode-back" href="../API.html#cranium.calculate_models">[docs]</a><span class="k">def</span> <span class="nf">calculate_models</span><span class="p">(</span><span class="n">Ldf</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Calculate model for each dataframe in list and add to new dataframe</span>
+
+<span class="sd">	:param list Ldf: List of dataframes containing aligned data</span>
+<span class="sd">	:returns: pd.Dataframe with a,b,c values for parabolic model</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">modeldf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:[],</span><span class="s1">&#39;b&#39;</span><span class="p">:[],</span><span class="s1">&#39;c&#39;</span><span class="p">:[]})</span>
+
+	<span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">Ldf</span><span class="p">:</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="n">cranium</span><span class="o">.</span><span class="n">brain</span><span class="p">()</span>
+		<span class="n">s</span><span class="o">.</span><span class="n">add_aligned_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">df_align</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+		<span class="n">modeldf</span> <span class="o">=</span> <span class="n">modeldf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:[</span><span class="n">s</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">cf</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="s1">&#39;b&#39;</span><span class="p">:[</span><span class="n">s</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">cf</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="s1">&#39;c&#39;</span><span class="p">:[</span><span class="n">s</span><span class="o">.</span><span class="n">mm</span><span class="o">.</span><span class="n">cf</span><span class="p">[</span><span class="mi">2</span><span class="p">]]}))</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">modeldf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="generate_kde"><a class="viewcode-back" href="../API.html#cranium.generate_kde">[docs]</a><span class="k">def</span> <span class="nf">generate_kde</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">absv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Generate list of KDEs from either dictionary or list of data</span>
+
+<span class="sd">	:param data: pd.DataFrames to convert</span>
+<span class="sd">	:type: dict or list</span>
+<span class="sd">	:param str var: Name of column to select from df</span>
+<span class="sd">	:param array x: Array of datapoints to evaluate KDE on</span>
+<span class="sd">	:param bool absv: (or None) Set to True to use absolute value of selected data for KDE calculation</span>
+<span class="sd">	:returns: List of KDE arrays</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+
+	<span class="c1">#Dictionary workflow</span>
+	<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span>  <span class="nb">type</span><span class="p">({}):</span>
+		<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">absv</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">absv</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+			<span class="n">kde</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">gaussian_kde</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+			<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kde</span><span class="p">)</span>
+	<span class="c1">#List workflow</span>
+	<span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">([]):</span>
+		<span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">absv</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">absv</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+			<span class="n">kde</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">gaussian_kde</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+			<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kde</span><span class="p">)</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">L</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="calculate_area_error"><a class="viewcode-back" href="../API.html#cranium.calculate_area_error">[docs]</a><span class="k">def</span> <span class="nf">calculate_area_error</span><span class="p">(</span><span class="n">pdf</span><span class="p">,</span><span class="n">Lkde</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Calculate area between PDF and each kde in Lkde</span>
+
+<span class="sd">	:param array pdf: Array of probability distribution function that is the same shape as kdes in Lkde</span>
+<span class="sd">	:param list Lkde: List of arrays of Kdes </span>
+<span class="sd">	:param array x: Array of datapoints used to generate pdf and kdes</span>
+<span class="sd">	:returns: List of error values for each kde in Lkde</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+
+	<span class="k">for</span> <span class="n">kde</span> <span class="ow">in</span> <span class="n">Lkde</span><span class="p">:</span>
+		<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simps</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pdf</span><span class="o">-</span><span class="n">kde</span><span class="p">),</span><span class="n">x</span><span class="p">))</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">L</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="rescale_variable"><a class="viewcode-back" href="../API.html#cranium.rescale_variable">[docs]</a><span class="k">def</span> <span class="nf">rescale_variable</span><span class="p">(</span><span class="n">Ddfs</span><span class="p">,</span><span class="n">var</span><span class="p">,</span><span class="n">newvar</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Rescale variable from -1 to 1 and save in newvar column on original dataframe</span>
+
+<span class="sd">	:param dict Ddfs: Dictionary of pd.DataFrames</span>
+<span class="sd">	:param str var: Name of column to select from dfs</span>
+<span class="sd">	:param str newvar: Name to use for new data in appended column</span>
+<span class="sd">	:returns: Dictionary of dataframes containing column of rescaled data</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="n">Dout</span> <span class="o">=</span> <span class="p">{}</span>
+
+	<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Ddfs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+		<span class="n">df</span> <span class="o">=</span> <span class="n">Ddfs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+		<span class="n">y</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+
+		<span class="c1">#Find min and max values</span>
+		<span class="n">mi</span><span class="p">,</span><span class="n">ma</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+		<span class="c1">#Divide dataframe</span>
+		<span class="n">dfmin</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+		<span class="n">dfmax</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+
+		<span class="c1">#Add rescaled variable to dataframe</span>
+		<span class="n">dfmin</span> <span class="o">=</span> <span class="n">dfmin</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">newvar</span><span class="p">:</span><span class="n">y</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mi</span><span class="p">)}))</span>
+		<span class="n">dfmax</span> <span class="o">=</span> <span class="n">dfmax</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">newvar</span><span class="p">:</span><span class="n">y</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ma</span><span class="p">)}))</span>
+
+		<span class="n">dfout</span> <span class="o">=</span> <span class="n">dfmin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dfmax</span><span class="p">)</span>
+		<span class="n">Dout</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfout</span>
+
+	<span class="k">return</span><span class="p">(</span><span class="n">Dout</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Morgan Schwartz.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

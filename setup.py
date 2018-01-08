@@ -4,27 +4,20 @@ def readme():
 	with open('README.rst') as f:
 		return f.read()
 
+def requirements():
+	with open('requirements.txt') as f:
+		return f.read()
+
 setup(name='cranium',
-	version='0.0.6',
+	version='0.1.0',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',
 	url='https://github.com/msschwartz21/craniumPy',
 	author='Morgan Schwartz',
 	author_email='mschwartz@smith.edu',
-	license='MIT',
+	license='GNU',
 	packages=['cranium'],
-	install_requires=[
-		'numpy',
-		'scipy',
-		'h5py',
-		'scikit-image',
-		'matplotlib',
-		'statsmodels',
-		'mpl_toolkits',
-		'pandas',
-		'plotly',
-		'yaml'
-		],
+	install_requires=requirements(),
 	include_package_data=True
 	)

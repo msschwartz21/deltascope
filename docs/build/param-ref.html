@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Parameter Reference &mdash; cranium 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="cranium 0.1.0 documentation" href="index.html"/>
+        <link rel="next" title="API" href="API.html"/>
+        <link rel="prev" title="Checklist" href="checklist.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> cranium
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data-prep.html">    Data Preparation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-process.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="checklist.html">Checklist</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parameter Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">cranium</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Parameter Reference</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/param-ref.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="parameter-reference">
+<span id="param-ref"></span><h1>Parameter Reference<a class="headerlink" href="#parameter-reference" title="Permalink to this headline">¶</a></h1>
+<dl class="envvar">
+<dt id="envvar-genthresh">
+<code class="descname">genthresh</code><a class="headerlink" href="#envvar-genthresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter defines the cutoff point that will divide the <a class="reference internal" href="API.html#cranium.brain.raw_data" title="cranium.brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a> into a set of true signal points and background points based on the probability that each point is true signal. The <code class="file docutils literal"><span class="pre">_Probabilties.h5</span></code> dataset is generated after running the Ilastik pixel classification workflow described <a class="reference internal" href="data-prep.html#signal-normalization"><span class="std std-ref">here</span></a>. Pixels with a value of 1 are likely to be background. Correspondingly, pixels with a value close to 0 are most likely to be true signal. We have found that a threshold of 0.5 is sufficient to divide true signal from background; however, if your data contains a lot of intermediate background values (0.4-0.7), you may benefit from a smaller threshold, e.g. 0.3.</p>
+<p>Recommended: <code class="docutils literal"><span class="pre">0.5</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-microns">
+<code class="descname">microns</code><a class="headerlink" href="#envvar-microns" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter is a list of the form <code class="samp docutils literal"><span class="pre">[</span><em><span class="pre">x</span></em><span class="pre">,</span><em><span class="pre">y</span></em><span class="pre">,</span><em><span class="pre">z</span></em><span class="pre">]</span></code> that specifies the dimensions of the voxel in microns. The data in <a class="reference internal" href="API.html#cranium.brain.raw_data" title="cranium.brain.raw_data"><code class="xref py py-attr docutils literal"><span class="pre">brain.raw_data</span></code></a> is scaled by <span class="target" id="index-0"></span><a class="reference internal" href="#envvar-microns"><code class="xref std std-envvar docutils literal"><span class="pre">microns</span></code></a> to control for datasets in which the <code class="docutils literal"><span class="pre">z</span></code> dimension is larger than the <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">y</span></code> dimensions.</p>
+<p>Example: <code class="docutils literal"><span class="pre">[0.16,0.16,0.21]</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-scale">
+<code class="descname">scale</code><a class="headerlink" href="#envvar-scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a deprecated parameter that should always be set to <code class="docutils literal"><span class="pre">[1,1,1]</span></code>.</p>
+<p>Required: <code class="docutils literal"><span class="pre">[1,1,1]</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-medthresh">
+<code class="descname">medthresh</code><a class="headerlink" href="#envvar-medthresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter serves the same purpose as <span class="target" id="index-1"></span><a class="reference internal" href="#envvar-genthresh"><code class="xref std std-envvar docutils literal"><span class="pre">genthresh</span></code></a>; however, it is used exclusively on data used for aligning samples using PCA. This threshold is typically more stringent than <span class="target" id="index-2"></span><a class="reference internal" href="#envvar-genthresh"><code class="xref std std-envvar docutils literal"><span class="pre">genthresh</span></code></a> to ensure that any noise in the data does not interfere with the alignment process.</p>
+<p>Recommended: <code class="docutils literal"><span class="pre">0.25</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-radius">
+<code class="descname">radius</code><a class="headerlink" href="#envvar-radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <span class="target" id="index-3"></span><a class="reference internal" href="#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> of the median filter can  be tuned to eliminate noisy signal. The typical value for <span class="target" id="index-4"></span><a class="reference internal" href="#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for <span class="target" id="index-5"></span><a class="reference internal" href="#envvar-radius"><code class="xref std std-envvar docutils literal"><span class="pre">radius</span></code></a> will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data.</p>
+<p>Recommended: <code class="docutils literal"><span class="pre">20</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-comporder">
+<code class="descname">comporder</code><a class="headerlink" href="#envvar-comporder" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: <code class="samp docutils literal"><span class="pre">[</span><em><span class="pre">x</span> <span class="pre">index</span></em><span class="pre">,</span><em><span class="pre">y</span> <span class="pre">index</span></em><span class="pre">,</span><em><span class="pre">z</span> <span class="pre">index</span></em><span class="pre">]</span></code>. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2.</p>
+<p>For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the <span class="target" id="index-6"></span><a class="reference internal" href="#envvar-comporder"><code class="xref std std-envvar docutils literal"><span class="pre">comporder</span></code></a> parameter would be <code class="samp docutils literal"><span class="pre">[0,2,1]</span></code>.</p>
+<p>Example: <code class="docutils literal"><span class="pre">[0,2,1]</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-fitdim">
+<code class="descname">fitdim</code><a class="headerlink" href="#envvar-fitdim" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. <code class="docutils literal"><span class="pre">'x','y','z'</span></code>.</p>
+<p>If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the <span class="target" id="index-7"></span><a class="reference internal" href="#envvar-fitdim"><code class="xref std std-envvar docutils literal"><span class="pre">fitdim</span></code></a> parameter would be <code class="docutils literal"><span class="pre">['x','z']</span></code>.</p>
+<p>Example: <code class="docutils literal"><span class="pre">['x','z']</span></code></p>
+</dd></dl>
+
+<dl class="envvar">
+<dt id="envvar-deg">
+<code class="descname">deg</code><a class="headerlink" href="#envvar-deg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter specifies the degree of the function that will be fit to the data. The default is <code class="docutils literal"><span class="pre">2</span></code>, which specifies a parabolic function. A deg of <code class="docutils literal"><span class="pre">1</span></code> would fit a linear function.</p>
+<p>Default: <code class="docutils literal"><span class="pre">2</span></code></p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The infrastructure to support degrees other than 2 is not currently in place. Check <a class="reference external" href="https://github.com/msschwartz21/craniumPy/issues/23">here</a> for updates.</p>
+</div>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="API.html" class="btn btn-neutral float-right" title="API" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="checklist.html" class="btn btn-neutral" title="Checklist" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Morgan Schwartz.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
