@@ -1,8 +1,10 @@
 # Change Log
 
-## [Unreleased]
+## [0.1.0] - 2018-01-08
 ### Added
 - Apply double median filter to primary channel to calculate PCA fit; Removes noise to create a cleaner dataset which fits the POC into the xz plane
+- Landmark code analysis
+- Implemented autodoc system for sphinx
 ### Changed
 - Fit model in the xz plane as opposed to the xy plane to match natural position of the parabolic commissure in approximately xz
 - Upside down samples are fliped using a 180 degree rotation matrix as opposed to multiplying the z axis by -1
