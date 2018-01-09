@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.4] - 2018-01-09
+### Changes
+- Temporarily removing the matplotlib dependency while working on beta testing
+
 ## [0.1.3] - 2018-01-08
 ### Changes
 - Manually added package requirements to setup.py install-requires
