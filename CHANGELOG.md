@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.8] - 2018-01-10
+### Changes
+- Update matplotlib requirement from 1.5 to 2.0 to avoid installation problems with matplotlib dependencies for freetype and pngg
+
 ## [0.1.7] - 2018-01-10
 ### Changes
 - Pip installing and importing mock library in place of unittest.mock
