@@ -1,5 +1,10 @@
 # Change Log
 
+## [Unreleased]
+### Changes
+### Additions
+- Json module implemented for config data structure
+
 ## [0.1.8] - 2018-01-10
 ### Changes
 - Update matplotlib requirement from 1.5 to 2.0 to avoid installation problems with matplotlib dependencies for freetype and pngg

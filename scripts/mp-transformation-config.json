@@ -1,0 +1,20 @@
+{
+	"rootdir": "",
+	"expname": "",
+	"c1-dir": "",
+	"c1-key": "",
+	"c2-dir": "",
+	"c2-key": "",
+	"c3-dir": "",
+	"c3-key": "",
+	"c4-dir": "",
+	"c4-key": "",
+	"genthresh": null,
+	"microns": [null,null,null],
+	"scale": [1,1,1],
+	"medthresh": null,
+	"radius": null,
+	"comporder": [null,null,null],
+	"fitdim": ["",""],
+	"deg": null
+}
