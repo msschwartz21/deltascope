@@ -16,7 +16,7 @@ setup(name='cranium',
 	url='https://github.com/msschwartz21/craniumPy',
 	author='Morgan Schwartz',
 	author_email='mschwartz@smith.edu',
-	license='GNU',
+	license='GNU GPL',
 	packages=['cranium'],
 	install_requires=[
 		'cycler==0.10',

@@ -4,6 +4,8 @@ Cranium Data Processing
 
 .. currentmodule:: cranium
 
+.. note:: This guide will describe a set of parameters that the user needs to specify when running cranium. A complete list of all parameters if available on the `Parameter Reference <param ref>`_ page.
+
 .. _thresh:
 
 Intensity Thresholding
@@ -34,7 +36,7 @@ This section of the code also includes a deprecated parameter :envvar:`scale`, w
 
 Code Instructions
 ------------------
-The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`.
+The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`. Raw image data will be imported by :func:`embryo.add_channel`.
 
 .. code-block:: python 
 

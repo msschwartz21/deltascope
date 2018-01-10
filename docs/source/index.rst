@@ -6,31 +6,56 @@
 Welcome to cranium's documentation!
 ===================================
 
-Contents:
+Contents
++++++++++
 
 .. toctree::
-	:numbered:
+	:maxdepth: 2
 
 	Start Here <start-here>
 	Data Preparation <data-prep>
     Data Processing <data-process>
+    Data Analysis <data-analysis>
     Checklist <checklist>
     Parameter Reference <param-ref>
     Useful Resources <resources>
+    Frequently Asked Questions <faq>
     API
 
-Is cranium right for you?
-++++++++++++++++++++++++++
+Features
++++++++++
 
-Can dos:
-* Align single 3D microscopy collections to an orientation that is consistent between samples
+- Compare sets of 3D biological images to identify differences
+- Automatically align the structure in the image to correct for variation introduced during mounting and imaging 
+- Generate descriptive graphs that quantify both the average and variation of the data
+- Use machine learning techniques to classify samples and identify regions of statistically significant difference
 
-Cannot:
-* Align cryosections to create a 3D volume from 2D slices
+Check out `Start Here <start here>`_ to find out if cranium is right for you.
 
-Issues
-+++++++
+Installation
+++++++++++++
 
+Package hosted on `PyPI <https://pypi.python.org/pypi/cranium>`_. See `Start Here <install>`_ for more information. ::
+
+	$ pip install cranium
+
+Support
+++++++++
+
+- Complete documentation is available on `Read the Docs <http://craniumpy.readthedocs.io/en/latest/>`_.
+- Check out the `Frequently Asked Question <faq>`_ page.
+- Submit an issue describing a problem or question on the project's Github `issue tracker <https://github.com/msschwartz21/craniumPy/issues>`_.
+
+Contribute
++++++++++++
+
+- Issue Tracker: https://github.com/msschwartz21/craniumPy/issues
+- Source Code: https://github.com/msschwartz21/craniumPy
+
+License
+++++++++
+
+This project is licensed under the GNU General Public License.
 
 Indices and tables
 ==================
