@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.7] - 2018-01-10
+### Changes
+- Pip installing and importing mock library in place of unittest.mock
+
 ## [0.1.6] - 2018-01-10
 ### Changes
 - Changed pytz requirement from 2017 to 2017.3 in response to build fail on RTD
