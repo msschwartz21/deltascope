@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.6] - 2018-01-10
+### Changes
+- Changed pytz requirement from 2017 to 2017.3 in response to build fail on RTD
+
 ## [0.1.5] - 2018-01-10
 ### Changes
 - Allowed any numpy package >1.0 and <2.0
