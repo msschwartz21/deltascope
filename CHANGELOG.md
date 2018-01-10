@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.1.5] - 2018-01-10
+### Changes
+- Allowed any numpy package >1.0 and <2.0
+- Softened other package requirements to allow any patch number
+### Added
+- Returned the matplotlib dependency
+
 ## [0.1.4] - 2018-01-09
 ### Changes
 - Temporarily removing the matplotlib dependency while working on beta testing
