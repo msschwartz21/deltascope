@@ -11,10 +11,12 @@ Contents:
 .. toctree::
 	:numbered:
 
+	Start Here <start-here>
 	Data Preparation <data-prep>
     Data Processing <data-process>
     Checklist <checklist>
     Parameter Reference <param-ref>
+    Useful Resources <resources>
     API
 
 Is cranium right for you?
