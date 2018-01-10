@@ -9,7 +9,7 @@ patsy==0.4
 Pillow==5.0
 pyparsing==2.2
 python-dateutil==2.6
-pytz==2017
+pytz==2017.3
 PyWavelets==0.5
 scikit-image==0.13
 scikit-learn==0.19
