@@ -707,7 +707,7 @@ class embryo:
 
 		for ch in self.chnls.keys():
 			write_data(os.path.join(self.outdir,
-				self.name+'_'+self.number+'_'+ch+'.psi'),
+				self.name+'_'+str(self.number)+'_'+ch+'.psi'),
 				self.chnls[ch].df_align[columns])
 
 		print('PSIs generated')

@@ -5,6 +5,7 @@ import os
 from functools import partial
 from sys import argv
 import re
+import json
 
 class paramsClass:
 	'''A class to read and validate parameters for multiprocessing transformation.
@@ -155,6 +156,8 @@ class paramsClass:
 			print('Fitdim input must be a list of \'x\', \'y\', or \'z\'. Modify in',path)
 			raise
 
+		self.scale = [1,1,1]
+
 		print('All parameter inputs are correct')
 
 def check_nums(P):
@@ -166,7 +169,7 @@ def check_nums(P):
 	Lnums = []
 
 	for i,f in enumerate(P.c1_files):
-		n = re.findall(r'\d+',f.split('.')[0])
+		n = re.findall(r'\d+',f.split('.')[0])[0]
 		for Lf in P.Lcfiles:
 			if n not in Lf[i]:
 				print('File numbers are mismatched between channel directories.')
@@ -216,11 +219,11 @@ def process(num,P=None):
 
 if __name__=='__main__':
 
-	config_path = argv
+	f,config_path = argv
 	P = paramsClass(config_path)
 
 	#Create out directory stamped with current date and time
-	outdir = os.path.join(root,'Output'+time.strftime("%m-%d-%H-%M",time.ctime))
+	outdir = os.path.join(P.rootdir,'Output'+time.strftime("%m-%d-%H-%M",time.localtime()))
 	os.mkdir(outdir)
 	P.add_outdir(outdir)
 	print('outdir',outdir)
@@ -234,7 +237,7 @@ if __name__=='__main__':
 		if i+5>n:
 			L = Lnums[i:n]
 		else:
-			L = nums[i:i+5]
+			L = Lnums[i:i+5]
 
 		pool = mp.Pool()
 		pool.map(processfxn,L)
