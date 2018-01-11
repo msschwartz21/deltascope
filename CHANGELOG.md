@@ -1,5 +1,28 @@
 # Change Log
 
+## [0.1.8] - 2018-01-10
+### Changes
+- Update matplotlib requirement from 1.5 to 2.0 to avoid installation problems with matplotlib dependencies for freetype and pngg
+
+## [0.1.7] - 2018-01-10
+### Changes
+- Pip installing and importing mock library in place of unittest.mock
+
+## [0.1.6] - 2018-01-10
+### Changes
+- Changed pytz requirement from 2017 to 2017.3 in response to build fail on RTD
+
+## [0.1.5] - 2018-01-10
+### Changes
+- Allowed any numpy package >1.0 and <2.0
+- Softened other package requirements to allow any patch number
+### Added
+- Returned the matplotlib dependency
+
+## [0.1.4] - 2018-01-09
+### Changes
+- Temporarily removing the matplotlib dependency while working on beta testing
+
 ## [0.1.3] - 2018-01-08
 ### Changes
 - Manually added package requirements to setup.py install-requires
