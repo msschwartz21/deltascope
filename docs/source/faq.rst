@@ -3,4 +3,7 @@
 Frequently Asked Questions
 ===========================
 
-.. note:: Coming Soon!
+My file paths are causing errors?
+++++++++++++++++++++++++++++++++++
+
+Try changing each individual slash in your path to have two slashes.
