@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+### Changes
+- Changed `convert_to_arr` to accomodate a main array and a list of additional arrays
+
 ## [0.1.3] - 2018-01-08
 ### Changes
 - Manually added package requirements to setup.py install-requires
