@@ -156,6 +156,12 @@ class paramsClass:
 			print('Fitdim input must be a list of \'x\', \'y\', or \'z\'. Modify in',path)
 			raise
 
+		if type(D['twoD']) == bool:
+			self.twoD = D['twoD']
+		else:
+			print('Specification for 2D transformation must be boolean. Modify in',path)
+			raise
+
 		self.scale = [1,1,1]
 
 		print('All parameter inputs are correct')
@@ -198,14 +204,23 @@ def process(num,P=None):
 		e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
 
 	#Calculate PCA transformation for structural channel, c1
-	e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
-	pca = e.chnls[P.c1_key].pcamed
-	e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+	if P.twoD == True:
+		e.chnls[P.c1_key].calculate_pca_median_2d(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+		pca = e.chnls[P.c1_key].pcamed
+		e.chnls[P.c1_key].pca_transform_2d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
+		#Transform additional channels
+		for i in range(len(P.Lcdir)):
+			e.chnls[P.Lckey[i]].pca_transform_2d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-	#Transform additional channels
-	for i in range(len(P.Lcdir)):
-		e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+	else:
+		e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+		pca = e.chnls[P.c1_key].pcamed
+		e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+
+		#Transform additional channels
+		for i in range(len(P.Lcdir)):
+			e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
 	print(num,'Starting coordinate transformation')
 	e.chnls[P.c1_key].transform_coordinates()

@@ -16,5 +16,6 @@
 	"radius": 20,
 	"comporder": [0,2,1],
 	"fitdim": ["x","z"],
-	"deg": 2
+	"deg": 2,
+	"twoD": false,
 }

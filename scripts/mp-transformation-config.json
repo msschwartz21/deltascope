@@ -16,5 +16,6 @@
 	"radius": null,
 	"comporder": [null,null,null],
 	"fitdim": ["",""],
-	"deg": null
+	"deg": null,
+	"twoD": null
 }

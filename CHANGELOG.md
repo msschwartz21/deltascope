@@ -5,6 +5,7 @@
 ### Additions
 - Json module implemented for config data structure
 - Added data folder with two samples and a config file for testing
+- Added 2D transformation option to mp-transformation.py
 
 ## [0.1.8] - 2018-01-10
 ### Changes
