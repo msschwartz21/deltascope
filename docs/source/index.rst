@@ -6,22 +6,6 @@
 Welcome to cranium's documentation!
 ===================================
 
-Contents
-+++++++++
-
-.. toctree::
-	:maxdepth: 2
-
-	Start Here <start-here>
-	Data Preparation <data-prep>
-    Data Processing <data-process>
-    Data Analysis <data-analysis>
-    Checklist <checklist>
-    Parameter Reference <param-ref>
-    Useful Resources <resources>
-    Frequently Asked Questions <faq>
-    API
-
 Features
 +++++++++
 
@@ -56,6 +40,22 @@ License
 ++++++++
 
 This project is licensed under the GNU General Public License.
+
+Contents
+=========
+
+.. toctree::
+
+	Start Here <start-here>
+	Data Preparation <data-prep>
+    Data Processing <data-process>
+    Data Analysis <data-analysis>
+    Checklist <checklist>
+    Parameter Reference <param-ref>
+    Useful Resources <resources>
+    Frequently Asked Questions <faq>
+    Batch Processing: Transformation <mp-transformation>
+    API
 
 Indices and tables
 ==================

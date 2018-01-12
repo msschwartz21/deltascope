@@ -168,4 +168,7 @@ This transformation does not require defining any parameters; however, it assume
 
 .. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required. 
 
-.. todo:: Add multiprocessing instructions
+Batch Processing
++++++++++++++++++
+
+In order to reduce processing time, we have implemented a basic multiprocessing tool that runs 5 samples in parallel at a time. For more information, see :ref:`mp transform`.
