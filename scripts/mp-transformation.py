@@ -199,40 +199,55 @@ def process(num,P=None):
 	tic = time.time()
 	print(num,'Starting sample')
 
-	e = cranium.embryo(P.expname,num,P.outdir)
+	#Extract sample number from c1 filename
+	snum = re.findall(r'\d+',P.c1_files[num].split('.')[0])[0]
+
+	e = cranium.embryo(P.expname,snum,P.outdir)
 
 	#Add channels and preprocess data
-	e.add_channel(os.path.join(P.c1_dir,P.c1_files[num]),P.c1_key)
-	e.chnls[P.c1_key].preprocess_data(P.genthresh,P.scale,P.microns)
-	for i in range(len(P.Lcdir)):
-		e.add_channel(os.path.join(P.Lcdir[i],P.Lcfiles[i][num]),P.Lckey[i])
-		e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
+	try:
+		e.add_channel(os.path.join(P.c1_dir,P.c1_files[num]),P.c1_key)
+		e.chnls[P.c1_key].preprocess_data(P.genthresh,P.scale,P.microns)
+		for i in range(len(P.Lcdir)):
+			e.add_channel(os.path.join(P.Lcdir[i],P.Lcfiles[i][num]),P.Lckey[i])
+			e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
+	except:
+		print(num,'failed on preprocess_data',time.time()-tic)
 
 	#Calculate PCA transformation for structural channel, c1
-	if P.twoD == True:
-		e.chnls[P.c1_key].calculate_pca_median_2d(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
-		pca = e.chnls[P.c1_key].pcamed
-		e.chnls[P.c1_key].pca_transform_2d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+	try:
+		if P.twoD == True:
+			e.chnls[P.c1_key].calculate_pca_median_2d(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+			pca = e.chnls[P.c1_key].pcamed
+			e.chnls[P.c1_key].pca_transform_2d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-		#Transform additional channels
-		for i in range(len(P.Lcdir)):
-			e.chnls[P.Lckey[i]].pca_transform_2d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+			#Transform additional channels
+			for i in range(len(P.Lcdir)):
+				e.chnls[P.Lckey[i]].pca_transform_2d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-	else:
-		e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
-		pca = e.chnls[P.c1_key].pcamed
-		e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+		else:
+			e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+			pca = e.chnls[P.c1_key].pcamed
+			e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-		#Transform additional channels
-		for i in range(len(P.Lcdir)):
-			e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+			#Transform additional channels
+			for i in range(len(P.Lcdir)):
+				e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+	except:
+		print(num,'failed on pca',time.time()-tic)
 
 	print(num,'Starting coordinate transformation')
-	e.chnls[P.c1_key].transform_coordinates()
-	for i in range(len(P.Lcdir)):
-		e.chnls[P.Lckey[i]].transform_coordinates()
+	try:
+		e.chnls[P.c1_key].transform_coordinates()
+		for i in range(len(P.Lcdir)):
+			e.chnls[P.Lckey[i]].transform_coordinates()
+	except:
+		print(num,'failed on coordinate transform',time.time()-tic)
 
-	e.save_psi()
+	try:
+		e.save_psi()
+	except:
+		print(num,'failed on save_psi',time.time()-tic)
 
 	toc = time.time()
 	print(num,'Complete',toc-tic)
