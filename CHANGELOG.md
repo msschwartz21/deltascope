@@ -7,6 +7,7 @@
 - Added data folder with two samples and a config file for testing
 - Added 2D transformation option to mp-transformation.py
 - Placing mp-transformation script in the cranium directory to function as a module
+- Added try/except statements to each processing step in mp-transformation to allow the script to continue running if a single sample failed
 
 ## [0.1.8] - 2018-01-10
 ### Changes
