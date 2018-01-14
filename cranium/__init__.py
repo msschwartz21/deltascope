@@ -972,21 +972,35 @@ def reformat_to_cart(df):
 
 	return(ndf)
 
-def convert_to_arr(xarr,tarr,wt,mt):
-	wtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
-	mtarr = np.zeros((len(xarr),len(tarr),mt.count(axis=0)['Unnamed: 0']))
+def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
+	'''
+	Convert a pandas dataframe containing landmarks as columns and samples as rows into a 3D numpy array
 
-	for c in mt.columns:
+	The columns of `mdf` determine which landmarks will be saved into the array. Any additional dataframes that need to be converted can be included in Ldf
+
+	:param np.array xarr: Array containing all unique x values of landmarks in the dataset
+	:param np.array tarr: Array containing all unique t values of landmarks in the dataset
+	:param pd.DataFrame mdf: Main landmark dataframe containing landmarks as columns and samples as rows
+	:param list Ldf: List of additional pd.DataFrames that should also be converted to arrays
+	:returns: Array of the main dataframe and list of arrays converted from Ldf
+	'''
+	marr = np.zeros((len(xarr),len(tarr),len(mdf.index)))
+	Larr = []
+	for df in Ldf:
+		Larr.append(np.zeros((len(xarr),len(tarr),len(df.index))))
+
+	for c in mdf.columns:
 		if len(c.split('_')) == 6:
 			amn,amx,tmn,tmx,p,dtype = c.split('_')
 			x = np.mean([float(amn),float(amx)])
 			t = np.mean([float(tmn),float(tmx)])
-
-			if dtype=='r':
-				wtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = wt[c]
-				mtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mt[c]
-
-	return(wtarr,mtarr)
+	        
+			if dtype == 'r':
+				marr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mdf[c]
+				for arr,df in zip(Larr,Ldf):
+					arr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = df[c]
+	                
+	return(marr,Larr)
 
 P = {
 	'zln':2,'zpt':3,'zfb':1,

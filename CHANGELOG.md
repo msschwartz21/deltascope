@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 ### Changes
+- Changed `convert_to_arr` to accomodate a main array and a list of additional arrays
 ### Additions
 - Json module implemented for config data structure
 - Added data folder with two samples and a config file for testing
