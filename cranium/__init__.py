@@ -14,6 +14,7 @@ import pandas as pd
 #import plotly.plotly as py
 #import plotly.graph_objs as go
 from scipy.optimize import minimize
+from sklearn.preprocessing import normalize
 import scipy
 from sklearn.decomposition import PCA
 from skimage.filters import median
@@ -1036,6 +1037,139 @@ def calc_variance(anum,dfs):
 			Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
 	        
 	return(svar,np.array(Lvar))
+
+class anumSelect:
+
+	def __init__(self,dfs):
+		'''
+		A class that assists in selecting the optimum value of anum
+
+		:param dict dfs: Dictionary of pd.DataFrames with samples to use for optimization
+		'''
+
+		self.dfs = dfs
+		self.Lsv,self.Lbv = [],[]
+		self.Msv,self.Mbv = [],[]
+		self.Llm = []
+
+	def calc_variance(self,anum,tstep,percbins,rnull):
+		'''
+		Calculate the variance between samples according to bin position and variance between adjacent bins 
+
+		:param int anum: Number of bins which the arclength axis should be divided into
+		:param float tstep: The size of each bin used for alpha
+		:param dict dfs: Dictionary of dfs which are going to be processed
+		:param list percbins: (or None) Must be a list of integers between 0 and 100 
+		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
+		'''
+
+		#Set up bins
+		lm = landmarks(percbins=percbins,rnull=rnull)
+		lm.calc_bins(self.dfs.values(),anum,tstep)
+
+		#Calculate landmarks
+		outlm = pd.DataFrame()
+		for k in self.dfs.keys():
+			outlm = lm.calc_perc(self.dfs[k],k,'s',outlm)
+
+		#Convert to arr for variance calculations
+		lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
+		self.Llm.append(lmarr)
+
+		#Calculate variance between samples
+		svar = np.var(lmarr,axis=2)
+
+		#Calculate variance between bins
+		Lvar = []
+		for i in range(1,len(lm.acbins-2)):
+			for t in range(0,len(lm.tbins)):
+				Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
+
+		self.Lsv.append(svar)
+		self.Msv.append(np.mean(svar))
+		self.Lbv.append(np.array(Lvar))
+		self.Mbv.append(np.mean(np.array(Lvar)))
+
+		print(anum,'calculation complete')
+
+	def param_sweep(self,tstep,amn=2,amx=50,step=1,percbins=[50],rnull=15):
+		'''
+		Calculate landmarks for each value of anum specified in input range
+
+		:param int amn: The minimum number of alpha bins that should be considered
+		:param int amx: The maximum number of alpha bins that should be considered
+		:param int step: The step size in the range of amn to amx
+		'''
+
+		for a in np.arange(amn,amx,step):
+			self.calc_variance(a,tstep,percbins,rnull)
+
+		print('Parameter sweep complete')
+
+	def plot_rawdata(self):
+		'''
+		Plot raw data from parameter sweep
+		'''
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
+		ax.plot(x,self.Msv[2:],c='g',ls='--',label='Raw Sample Variance')
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
+
+	def plot_fitted(self,dof):
+		'''
+		Plot polynomial fits over the raw data
+
+		:param int dof: Degree of the polynomial function to be fit
+		'''
+
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
+		ax.plot(x,self.Msv[2:],c='g',ls='--',label='Raw Sample Variance')
+
+		pbv = np.polyfit(x,self.Mbv[2:],dof)
+		fbv = np.poly1d(pbv)
+		ax.plot(x,fbv(x),c='b',label='Fit Bin Variance')
+
+		psv = np.polyfit(x,self.Msv[2:],dof)
+		fsv = np.poly1d(psv)
+		ax.plot(x,fsv(x),c='g',label='Fit Sample Variance')
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
+
+	def find_optimum_anum(self,dof,guess):
+		'''
+		Calculate optimum anum and plot
+
+		:param int dof: Degree of the polynomial function to be fit
+		:param int guess: Best guess of the optimum anum, which cannot be less than the maximum bin variance
+		'''
+
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		pbv = np.polyfit(x,normalize(self.Mbv[2:])[0],dof)
+		fbv = np.poly1d(pbv)
+		ax.plot(x,fbv(x),c='b',label='Bin Variance')
+
+		psv = np.polyfit(x,normalize(self.Msv[2:])[0],dof)
+		fsv = np.poly1d(psv)
+		ax.plot(x,fsv(x),c='g',label='Sample Variance')
+
+		opt = minimize(fbv+fsv,guess)
+		ax.axvline(opt.x,c='r',label='Optimum: '+str(np.round(opt.x[0],2)))
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
 
 P = {
 	'zln':2,'zpt':3,'zfb':1,
