@@ -8,6 +8,7 @@
 - Placing mp-transformation script in the cranium directory to function as a module
 - Added try/except statements to each processing step in mp-transformation to allow the script to continue running if a single sample failed
 - `calc_variance` function calculates bin variance and sample variance for a particular landmark size
+- `anumSelect` class for finding the optimum value of anum in landmark calculation
 ### Changes 
 - Changed `convert_to_arr` to accommodate a main array and a list of additional arrays
 - `read_psi_to_dict` now uses regular expression to find sample numbers instead of splitting and indexing the file path
