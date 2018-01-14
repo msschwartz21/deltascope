@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.2.0] - 2018-01-14
 ### Additions
 - Json module implemented for config data structure
 - Added data folder with two samples and a config file for testing
