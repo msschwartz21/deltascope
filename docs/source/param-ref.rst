@@ -3,11 +3,14 @@
 Parameter Reference
 ====================
 
+Transformation
+++++++++++++++++
+
 .. currentmodule:: cranium
 
 .. envvar:: genthresh
 		
-	This parameter defines the cutoff point that will divide the :attr:`brain.raw_data` into a set of true signal points and background points based on the probability that each point is true signal. The :file:`_Probabilties.h5` dataset is generated after running the Ilastik pixel classification workflow described :ref:`here <Signal Normalization>`. Pixels with a value of 1 are likely to be background. Correspondingly, pixels with a value close to 0 are most likely to be true signal. We have found that a threshold of 0.5 is sufficient to divide true signal from background; however, if your data contains a lot of intermediate background values (0.4-0.7), you may benefit from a smaller threshold, e.g. 0.3.
+	This parameter defines the cutoff point that will divide the :attr:`brain.raw_data` into a set of true signal points and background points based on the probability that each point is true signal. The :file:`_Probabilties.h5` dataset is generated after running the Ilastik pixel classification workflow described in :ref:`Signal Normalization`. Pixels with a value of 1 are likely to be background. Correspondingly, pixels with a value close to 0 are most likely to be true signal. We have found that a threshold of 0.5 is sufficient to divide true signal from background; however, if your data contains a lot of intermediate background values (0.4-0.7), you may benefit from a smaller threshold, e.g. 0.3.
 
 	Recommended: ``0.5``
 
@@ -58,3 +61,26 @@ Parameter Reference
 	Default: ``2``
 
 	.. warning:: The infrastructure to support degrees other than 2 is not currently in place. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
+
+.. _lm params:
+
+Landmark Calculation
+++++++++++++++++++++++
+
+.. envvar:: anum
+
+	This integer specifies the number of divisions along the alpha axis when calculating landmarks. See :ref:`sel anum` for guidance on setting this parameter.
+
+	Example: ``20``
+
+.. envvar:: tsize
+
+	This parameter sets the size of each radial wedge in the landmark calculation. The program works in radians so this parameter should be a float that can evenly divide into 2Pi. We have found that Pi/4 (45º) is a biologically appropriate division for our typical structures.
+
+	Example: ``0.79``
+
+.. envvar:: percbins
+
+	This parameter is a list of integers that specifies what percentile should be used to calculate the distribution of points along r. 
+
+	Example: ``[50]``

@@ -9,14 +9,14 @@ def requirements():
 		return (f.read())
 
 setup(name='cranium',
-	version='0.1.8',
+	version='0.2.0',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',
 	url='https://github.com/msschwartz21/craniumPy',
 	author='Morgan Schwartz',
 	author_email='mschwartz@smith.edu',
-	license='GNU',
+	license='GNU GPL',
 	packages=['cranium'],
 	install_requires=[
 		'cycler==0.10',

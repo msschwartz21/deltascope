@@ -1,8 +1,11 @@
+.. _data process:
 
 Cranium Data Processing
 ========================
 
 .. currentmodule:: cranium
+
+.. note:: This guide will describe a set of parameters that the user needs to specify when running cranium. A complete list of all parameters if available on the `Parameter Reference <param ref>`_ page.
 
 .. _thresh:
 
@@ -34,9 +37,11 @@ This section of the code also includes a deprecated parameter :envvar:`scale`, w
 
 Code Instructions
 ------------------
-The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`.
+The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`. Raw image data will be imported by :func:`embryo.add_channel`.
 
 .. code-block:: python 
+
+	import cranium
 
 	#Create an embryo object that facilitates data processing
 	e = cranium.embryo(experiment-name,sample-number,directory)
@@ -166,4 +171,7 @@ This transformation does not require defining any parameters; however, it assume
 
 .. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required. 
 
-.. todo:: Add multiprocessing instructions
+Batch Processing
++++++++++++++++++
+
+In order to reduce processing time, we have implemented a basic multiprocessing tool that runs 5 samples in parallel at a time. For more information, see :ref:`mp transform`.
