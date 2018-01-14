@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.1] - 2018-01-14
+### Changes
+- Correct unittest.mock import to mock in conf.py file
+
 ## [0.2.0] - 2018-01-14
 ### Additions
 - Json module implemented for config data structure
