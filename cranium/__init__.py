@@ -21,6 +21,7 @@ from skimage.morphology import disk
 from sklearn.metrics import mean_squared_error
 from scipy.integrate import simps
 import scipy.stats as stats
+import re
 
 class brain:
 	''' Object to manage biological data and associated functions. '''
@@ -985,6 +986,8 @@ def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
 	:returns: Array of the main dataframe and list of arrays converted from Ldf
 	'''
 	marr = np.zeros((len(xarr),len(tarr),len(mdf.index)))
+	xarr = np.round(xarr,2)
+	tarr = np.round(tarr,2)
 	Larr = []
 	for df in Ldf:
 		Larr.append(np.zeros((len(xarr),len(tarr),len(df.index))))
@@ -992,8 +995,8 @@ def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
 	for c in mdf.columns:
 		if len(c.split('_')) == 6:
 			amn,amx,tmn,tmx,p,dtype = c.split('_')
-			x = np.mean([float(amn),float(amx)])
-			t = np.mean([float(tmn),float(tmx)])
+			x = float(amn)#np.mean([float(amn),float(amx)])
+			t = float(tmn) #np.mean([float(tmn),float(tmx)])
 	        
 			if dtype == 'r':
 				marr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mdf[c]
@@ -1001,6 +1004,38 @@ def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
 					arr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = df[c]
 	                
 	return(marr,Larr)
+
+def calc_variance(anum,dfs):
+	'''
+	Calculate the variance between samples according to bin position and variance between adjacent bins 
+
+	:param int anum: Number of bins which the arclength axis should be divided into
+	:param dict dfs: Dictionary of dfs which are going to be processed
+	:returns: Two arrays: svar (anum,tnum) and bvar (anum*tnum,snum)
+	:rtype: np.array 
+	'''
+
+	#Set up bins
+	lm = landmarks(percbins=[50],rnull=15)
+	lm.calc_bins(dfs.values(),anum,np.pi/4)
+
+	 #Calculate landmarks
+	outlm = pd.DataFrame()
+	for k in dfs.keys():
+		outlm = lm.calc_perc(dfs[k],k,'wt',outlm)
+	    
+	#Convert to arr for variance calculation
+	lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
+
+	svar = np.var(lmarr,axis=2)
+
+	Lvar = []
+	for i in range(1,len(lm.acbins)-2):
+		for t in range(0,len(lm.tbins)):
+			#Save the variance of a particular bin and adjacent neighbors across a set of samples
+			Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
+	        
+	return(svar,np.array(Lvar))
 
 P = {
 	'zln':2,'zpt':3,'zfb':1,
@@ -1142,7 +1177,7 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[-1].split('.')[0]
+			num = re.findall(r'\d+',f.split('.')[0])[0]
 			print(num)
 			dfs[num] = df
 

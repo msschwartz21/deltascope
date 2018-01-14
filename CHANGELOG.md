@@ -1,14 +1,18 @@
 # Change Log
 
 ## [Unreleased]
-### Changes 
-- Changed `convert_to_arr` to accomodate a main array and a list of additional arrays
 ### Additions
 - Json module implemented for config data structure
 - Added data folder with two samples and a config file for testing
 - Added 2D transformation option to mp-transformation.py
 - Placing mp-transformation script in the cranium directory to function as a module
 - Added try/except statements to each processing step in mp-transformation to allow the script to continue running if a single sample failed
+- `calc_variance` function calculates bin variance and sample variance for a particular landmark size
+### Changes 
+- Changed `convert_to_arr` to accommodate a main array and a list of additional arrays
+- `read_psi_to_dict` now uses regular expression to find sample numbers instead of splitting and indexing the file path
+- `convert_to_arr`  uses the minimum bin value for cartesian as opposed to the mean so that it is compatible with lm.acbins and lm.tbins
+
 
 ## [0.1.8] - 2018-01-10
 ### Changes
