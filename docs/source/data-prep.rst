@@ -35,9 +35,9 @@ Signal Normalization
 
 Biological fluorescence microscopy data contains variation in signal intensity due to both biological and technical error. For example, the top of the sample is frequently brighter than the bottom because it is closer to the objective and also has not been as bleached by the collection of previous optical sections. If we were to try to select the set of points that represent 'true signal' by applying a single intensity threshold, points that represent background at the top of the stack may have the same intensity as points of true signal at the bottom of the stack. 
 
-We have implemented an adaptive thresholding protocol that avoids these challenges, utilizing the open-source software, `Ilastik`_. This software uses machine learning principles in order to predict the likelihood that a particular pixel contains true signal. The probability is calculated based on user annotation of images, in which regions of true signal and background are labeled. This protocol allows the user to apply their domain knowledge of the sample in order to best distinguish signal from background. Tutorials describing how to install and implement `Ilastik's pixel classification workflows <Ilastik PC>`_ are available on `Ilastik's website <Ilastik docs>`_.
+We have implemented an adaptive thresholding protocol that avoids these challenges, utilizing the open-source software, `Ilastik`_. This software uses machine learning principles in order to predict the likelihood that a particular pixel contains true signal. The probability is calculated based on user annotation of images, in which regions of true signal and background are labeled. This protocol allows the user to apply their domain knowledge of the sample in order to best distinguish signal from background. Tutorials describing how to install and implement `Ilastik's pixel classification workflows`_ are available on `Ilastik's website`_.
 
 .. _Ilastik: http://ilastik.org/
-.. _Ilastik docs: http://ilastik.org/documentation/index.html/
-.. _Ilastik PC: http://ilastik.org/documentation/pixelclassification/pixelclassification
+.. _Ilastik's website: http://ilastik.org/documentation/index.html/
+.. _Ilastik's pixel classification workflows: http://ilastik.org/documentation/pixelclassification/pixelclassification
 
