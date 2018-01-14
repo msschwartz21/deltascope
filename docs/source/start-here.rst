@@ -39,7 +39,7 @@ Cranium is most easily installed using `pip`_, Python's package installer. Howev
 
 .. note:: If you are unfamiliar with the command line, check out `this tutorial`_. Additional resources regarding the command line are available `here <resources>`_.
 
-.. warning:: Packages required for cranium depend on Visual C++ Build Tools, which can be downloaded `here <Build Tools>`_.
+.. warning:: Packages required for cranium depend on Visual C++ Build Tools, which can be downloaded at `build tools`_.
 
 .. _python set up:
 
@@ -57,4 +57,4 @@ If you're new to scientific computing with Python, we recommend that you install
 .. _matplotlib: https://matplotlib.org/
 .. _this tutorial: http://www.vikingcodeschool.com/web-development-basics/a-command-line-crash-course
 .. _pip tutorial: https://programminghistorian.org/lessons/installing-python-modules-pip
-.. _Build Tools: http://landinghub.visualstudio.com/visual-cpp-build-tools
+.. _build tools: http://landinghub.visualstudio.com/visual-cpp-build-tools
