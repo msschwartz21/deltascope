@@ -27,7 +27,64 @@ The calculation of unbiased landmarks relies on :ref:`cylcoord` that were previo
 
 	In order to calculate landmarks, we will subdivide the data along the alpha and theta axes before calculating the r value that describes the distribution of the data.
 
+Code Sample
+------------
+
+.. code-block:: python
+
+	import cranium
+	import numpy as np
+
+	anum = 30
+	tstep = np.pi/4
+
+	#Create a landmark object
+	lm = cranium.landmarks(percbins=[50],rnull=15)
+	lm.calc_bins(dfs.values(),anum,tstep)
+
+	#Calculate landmarks for each sample and append to a single dataframe
+	outlm = pd.DataFrame()
+	for k in dfs.keys():
+		outlm = lm.calc_perc(dfs[k],k,'stype',outlm)
+
 .. _sel anum:
 
 Selecting :envvar:`anum`
 +++++++++++++++++++++++++
+
+The :class:`anumSelect` can be used to identify the optimum number of sections along alpha. We use two measure of variance to test a range of :envvar:`anum`. The first test compares the variance of adjacent landmark wedges. The second test compares the variability of samples in a landmark. As shown in :numref:`anum opt`, the optimum value of :envvar:`anum` minimizes the variance of both tests.
+
+.. _anum opt:
+.. figure:: ./images/anumOpt.png
+	:align: center
+	:figclass: align-center
+
+	We select the value of :envvar:`anum` that minimizes both the bin variance and the sample variance.
+
+Code Sample
+------------
+
+.. code-block:: python
+
+	import cranium
+
+	#Create a optimization object
+	opt = cranium.anumSelect(dfs)
+
+	tstep = np.pi/4
+
+	#Initiate parameter sweep
+	opt.param_sweep(tstep,amn=2,amx=50,step=1,percbins=[50],rnull=15)
+
+	#Plot raw data
+	opt.plot_rawdata()
+
+	poly_degree = 4
+
+	#Test polynomial fit
+	opt.plot_fitted(poly_degree)
+
+	best_guess = 30
+
+	#Find the optimum value of anum
+	opt.find_optimum_anum(poly_degree,best_guess)

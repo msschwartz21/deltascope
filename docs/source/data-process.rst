@@ -41,6 +41,8 @@ The following instructions apply to processing a single sample. Details regardin
 
 .. code-block:: python 
 
+	import cranium
+
 	#Create an embryo object that facilitates data processing
 	e = cranium.embryo(experiment-name,sample-number,directory)
 

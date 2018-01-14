@@ -1045,6 +1045,31 @@ class anumSelect:
 		A class that assists in selecting the optimum value of anum
 
 		:param dict dfs: Dictionary of pd.DataFrames with samples to use for optimization
+		
+		.. attribute:: anumSelect.dfs
+
+			Dictionary of dataframes that will be used for the parameter sweep
+
+		.. attribute:: anumSelect.Lsv
+
+			List of sample variance arrays for each anum in the sweep
+
+		.. attribute:: anumSelect.Lbv
+
+			List of bin variance arrays for each anum in the sweep
+
+		.. attribute:: anumSelect.Msv
+
+			List of values of the average sample variance for each anum in the sweep
+
+		.. attribute:: anumSelect.Mbv
+
+			List of values of the average bin variance for each anum in the sweep
+
+		.. attribute:: anumSelect.Llm
+
+			List of landmark arrays for each anum in the sweep
+
 		'''
 
 		self.dfs = dfs
