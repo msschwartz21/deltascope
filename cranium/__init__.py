@@ -14,6 +14,7 @@ import pandas as pd
 #import plotly.plotly as py
 #import plotly.graph_objs as go
 from scipy.optimize import minimize
+from sklearn.preprocessing import normalize
 import scipy
 from sklearn.decomposition import PCA
 from skimage.filters import median
@@ -21,6 +22,7 @@ from skimage.morphology import disk
 from sklearn.metrics import mean_squared_error
 from scipy.integrate import simps
 import scipy.stats as stats
+import re
 
 class brain:
 	''' Object to manage biological data and associated functions. '''
@@ -972,21 +974,227 @@ def reformat_to_cart(df):
 
 	return(ndf)
 
-def convert_to_arr(xarr,tarr,wt,mt):
-	wtarr = np.zeros((len(xarr),len(tarr),wt.count(axis=0)['Unnamed: 0']))
-	mtarr = np.zeros((len(xarr),len(tarr),mt.count(axis=0)['Unnamed: 0']))
+def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
+	'''
+	Convert a pandas dataframe containing landmarks as columns and samples as rows into a 3D numpy array
 
-	for c in mt.columns:
+	The columns of `mdf` determine which landmarks will be saved into the array. Any additional dataframes that need to be converted can be included in Ldf
+
+	:param np.array xarr: Array containing all unique x values of landmarks in the dataset
+	:param np.array tarr: Array containing all unique t values of landmarks in the dataset
+	:param pd.DataFrame mdf: Main landmark dataframe containing landmarks as columns and samples as rows
+	:param list Ldf: List of additional pd.DataFrames that should also be converted to arrays
+	:returns: Array of the main dataframe and list of arrays converted from Ldf
+	'''
+	marr = np.zeros((len(xarr),len(tarr),len(mdf.index)))
+	xarr = np.round(xarr,2)
+	tarr = np.round(tarr,2)
+	Larr = []
+	for df in Ldf:
+		Larr.append(np.zeros((len(xarr),len(tarr),len(df.index))))
+
+	for c in mdf.columns:
 		if len(c.split('_')) == 6:
 			amn,amx,tmn,tmx,p,dtype = c.split('_')
-			x = np.mean([float(amn),float(amx)])
-			t = np.mean([float(tmn),float(tmx)])
+			x = float(amn)#np.mean([float(amn),float(amx)])
+			t = float(tmn) #np.mean([float(tmn),float(tmx)])
+	        
+			if dtype == 'r':
+				marr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mdf[c]
+				for arr,df in zip(Larr,Ldf):
+					arr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = df[c]
+	                
+	return(marr,Larr)
 
-			if dtype=='r':
-				wtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = wt[c]
-				mtarr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mt[c]
+def calc_variance(anum,dfs):
+	'''
+	Calculate the variance between samples according to bin position and variance between adjacent bins 
 
-	return(wtarr,mtarr)
+	:param int anum: Number of bins which the arclength axis should be divided into
+	:param dict dfs: Dictionary of dfs which are going to be processed
+	:returns: Two arrays: svar (anum,tnum) and bvar (anum*tnum,snum)
+	:rtype: np.array 
+	'''
+
+	#Set up bins
+	lm = landmarks(percbins=[50],rnull=15)
+	lm.calc_bins(dfs.values(),anum,np.pi/4)
+
+	 #Calculate landmarks
+	outlm = pd.DataFrame()
+	for k in dfs.keys():
+		outlm = lm.calc_perc(dfs[k],k,'wt',outlm)
+	    
+	#Convert to arr for variance calculation
+	lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
+
+	svar = np.var(lmarr,axis=2)
+
+	Lvar = []
+	for i in range(1,len(lm.acbins)-2):
+		for t in range(0,len(lm.tbins)):
+			#Save the variance of a particular bin and adjacent neighbors across a set of samples
+			Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
+	        
+	return(svar,np.array(Lvar))
+
+class anumSelect:
+
+	def __init__(self,dfs):
+		'''
+		A class that assists in selecting the optimum value of anum
+
+		:param dict dfs: Dictionary of pd.DataFrames with samples to use for optimization
+		
+		.. attribute:: anumSelect.dfs
+
+			Dictionary of dataframes that will be used for the parameter sweep
+
+		.. attribute:: anumSelect.Lsv
+
+			List of sample variance arrays for each anum in the sweep
+
+		.. attribute:: anumSelect.Lbv
+
+			List of bin variance arrays for each anum in the sweep
+
+		.. attribute:: anumSelect.Msv
+
+			List of values of the average sample variance for each anum in the sweep
+
+		.. attribute:: anumSelect.Mbv
+
+			List of values of the average bin variance for each anum in the sweep
+
+		.. attribute:: anumSelect.Llm
+
+			List of landmark arrays for each anum in the sweep
+
+		'''
+
+		self.dfs = dfs
+		self.Lsv,self.Lbv = [],[]
+		self.Msv,self.Mbv = [],[]
+		self.Llm = []
+
+	def calc_variance(self,anum,tstep,percbins,rnull):
+		'''
+		Calculate the variance between samples according to bin position and variance between adjacent bins 
+
+		:param int anum: Number of bins which the arclength axis should be divided into
+		:param float tstep: The size of each bin used for alpha
+		:param dict dfs: Dictionary of dfs which are going to be processed
+		:param list percbins: (or None) Must be a list of integers between 0 and 100 
+		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
+		'''
+
+		#Set up bins
+		lm = landmarks(percbins=percbins,rnull=rnull)
+		lm.calc_bins(self.dfs.values(),anum,tstep)
+
+		#Calculate landmarks
+		outlm = pd.DataFrame()
+		for k in self.dfs.keys():
+			outlm = lm.calc_perc(self.dfs[k],k,'s',outlm)
+
+		#Convert to arr for variance calculations
+		lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
+		self.Llm.append(lmarr)
+
+		#Calculate variance between samples
+		svar = np.var(lmarr,axis=2)
+
+		#Calculate variance between bins
+		Lvar = []
+		for i in range(1,len(lm.acbins-2)):
+			for t in range(0,len(lm.tbins)):
+				Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
+
+		self.Lsv.append(svar)
+		self.Msv.append(np.mean(svar))
+		self.Lbv.append(np.array(Lvar))
+		self.Mbv.append(np.mean(np.array(Lvar)))
+
+		print(anum,'calculation complete')
+
+	def param_sweep(self,tstep,amn=2,amx=50,step=1,percbins=[50],rnull=15):
+		'''
+		Calculate landmarks for each value of anum specified in input range
+
+		:param int amn: The minimum number of alpha bins that should be considered
+		:param int amx: The maximum number of alpha bins that should be considered
+		:param int step: The step size in the range of amn to amx
+		'''
+
+		for a in np.arange(amn,amx,step):
+			self.calc_variance(a,tstep,percbins,rnull)
+
+		print('Parameter sweep complete')
+
+	def plot_rawdata(self):
+		'''
+		Plot raw data from parameter sweep
+		'''
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
+		ax.plot(x,self.Msv[2:],c='g',ls='--',label='Raw Sample Variance')
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
+
+	def plot_fitted(self,dof):
+		'''
+		Plot polynomial fits over the raw data
+
+		:param int dof: Degree of the polynomial function to be fit
+		'''
+
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
+		ax.plot(x,self.Msv[2:],c='g',ls='--',label='Raw Sample Variance')
+
+		pbv = np.polyfit(x,self.Mbv[2:],dof)
+		fbv = np.poly1d(pbv)
+		ax.plot(x,fbv(x),c='b',label='Fit Bin Variance')
+
+		psv = np.polyfit(x,self.Msv[2:],dof)
+		fsv = np.poly1d(psv)
+		ax.plot(x,fsv(x),c='g',label='Fit Sample Variance')
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
+
+	def find_optimum_anum(self,dof,guess):
+		'''
+		Calculate optimum anum and plot
+
+		:param int dof: Degree of the polynomial function to be fit
+		:param int guess: Best guess of the optimum anum, which cannot be less than the maximum bin variance
+		'''
+
+		x = np.arange(2,len(self.Lsv))
+		fig,ax = plt.subplots()
+
+		pbv = np.polyfit(x,normalize(self.Mbv[2:])[0],dof)
+		fbv = np.poly1d(pbv)
+		ax.plot(x,fbv(x),c='b',label='Bin Variance')
+
+		psv = np.polyfit(x,normalize(self.Msv[2:])[0],dof)
+		fsv = np.poly1d(psv)
+		ax.plot(x,fsv(x),c='g',label='Sample Variance')
+
+		opt = minimize(fbv+fsv,guess)
+		ax.axvline(opt.x,c='r',label='Optimum: '+str(np.round(opt.x[0],2)))
+
+		ax.legend()
+		ax.set_xlabel('Number of Alpha Bins')
+		ax.set_ylabel('Relative Variance')
 
 P = {
 	'zln':2,'zpt':3,'zfb':1,
@@ -1128,7 +1336,7 @@ def read_psi_to_dict(directory,dtype):
 	for f in os.listdir(directory):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
-			num = f.split('_')[-1].split('.')[0]
+			num = re.findall(r'\d+',f.split('.')[0])[0]
 			print(num)
 			dfs[num] = df
 

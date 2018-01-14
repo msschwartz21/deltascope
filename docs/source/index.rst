@@ -49,7 +49,7 @@ Contents
 	Start Here <start-here>
 	Data Preparation <data-prep>
     Data Processing <data-process>
-    Data Analysis <data-analysis>
+    Landmark Calculation <landmark-calculation>
     Checklist <checklist>
     Parameter Reference <param-ref>
     Useful Resources <resources>

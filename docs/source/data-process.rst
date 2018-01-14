@@ -1,3 +1,4 @@
+.. _data process:
 
 Cranium Data Processing
 ========================
@@ -39,6 +40,8 @@ Code Instructions
 The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`. Raw image data will be imported by :func:`embryo.add_channel`.
 
 .. code-block:: python 
+
+	import cranium
 
 	#Create an embryo object that facilitates data processing
 	e = cranium.embryo(experiment-name,sample-number,directory)
