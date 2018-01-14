@@ -1,8 +1,12 @@
 # Change Log
 
 ## [Unreleased]
+### Additions
+- `calc_variance` function calculates bin variance and sample variance for a particular landmark size
 ### Changes
 - Changed `convert_to_arr` to accomodate a main array and a list of additional arrays
+- `read_psi_to_dict` now uses regular expression to find sample numbers instead of splitting and indexing the file path
+- `convert_to_arr`  uses the minimum bin value for cartesian as opposed to the mean so that it is compatable with lm.acbins and lm.tbins
 
 ## [0.1.3] - 2018-01-08
 ### Changes
