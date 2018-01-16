@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+### Changes
+- In lm.calc_bins, input is a dictionary of dfs as opposed to a list of df values from dfs.values()
+
 ## [0.2.1] - 2018-01-14
 ### Changes
 - Correct unittest.mock import to mock in conf.py file

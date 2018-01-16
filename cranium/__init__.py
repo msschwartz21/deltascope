@@ -784,7 +784,7 @@ class landmarks:
 
 		.. warning:: `tstep` does not handle scenarios where 2pi is not evenly divisible by tstep
 
-		:param list Ldf: List of dataframes that are being used for the analysis typically accessed by `dict.values()`
+		:param dict Ldf: Dict dataframes that are being used for the analysis
 		:param int ac_num: Integer indicating the number of divisions that should be made along alpha
 		:param float tstep: The size of each bin used for alpha
 
@@ -796,6 +796,8 @@ class landmarks:
 
 			List containing the boundaries of each bin along theta based on `tstep`
 		'''
+
+		Ldf = Ldf.values()
 
 		#Find the minimum and maximum values of alpha in the dataset
 		acmin,acmax = 0,0
@@ -1090,7 +1092,7 @@ class anumSelect:
 
 		#Set up bins
 		lm = landmarks(percbins=percbins,rnull=rnull)
-		lm.calc_bins(self.dfs.values(),anum,tstep)
+		lm.calc_bins(self.dfs,anum,tstep)
 
 		#Calculate landmarks
 		outlm = pd.DataFrame()

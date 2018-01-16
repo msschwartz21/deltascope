@@ -40,7 +40,7 @@ Code Sample
 
 	#Create a landmark object
 	lm = cranium.landmarks(percbins=[50],rnull=15)
-	lm.calc_bins(dfs.values(),anum,tstep)
+	lm.calc_bins(dfs,anum,tstep)
 
 	#Calculate landmarks for each sample and append to a single dataframe
 	outlm = pd.DataFrame()
