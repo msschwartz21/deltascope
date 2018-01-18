@@ -33,7 +33,8 @@ class brain:
 
 	def read_data(self,filepath):
 		'''
-		Reads 3D data from file and selects appropriate channel based on the assumption that the channel with the most zeros has zero as the value for no signal
+		Reads 3D data from file and selects appropriate channel based on the
+		assumption that the channel with the most zeros has zero as the value for no signal
 
 		:param str filepath: Filepath to hdf5 probability file
 		:return: Creates the variable :attr:`brain.raw_data`
@@ -106,7 +107,7 @@ class brain:
 		'''
 
 		df = df.sample(frac=subset)
-    
+
     	#Create figure and subplots
 		fig = plt.figure(figsize=(12,6))
 		ax = fig.add_subplot(131)
@@ -135,7 +136,7 @@ class brain:
 
 		#Adjust spacing and show plot
 		plt.subplots_adjust(wspace=0.4)
-		
+
 		return(fig)
 
 	def preprocess_data(self,threshold,scale,microns):
@@ -148,8 +149,8 @@ class brain:
 		:param array scale: Array with three values representing the constant by which to multiply x,y,z respectively
 		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
 
-		.. py:attribute:: brain.threshold 
-			
+		.. py:attribute:: brain.threshold
+
 			Value used to threshold the data prior to calculating the model
 
 		.. py:attribute:: brain.df_thresh
@@ -171,7 +172,7 @@ class brain:
 		#Scale xyz by value in scale array to force PCA axis selection
 		self.scale = scale
 		self.df_scl = pd.DataFrame({
-			'x':self.df_thresh.x * self.scale[0], 
+			'x':self.df_thresh.x * self.scale[0],
 			'y':self.df_thresh.y * self.scale[1],
 			'z':self.df_thresh.z * self.scale[2]})
 
@@ -205,7 +206,7 @@ class brain:
 		:param float threshold: Value between 0 and 1 indicating the lower cutoff for positive signal
 		:param int radius: Radius of neighborhood that should be considered for the median filter
 		:param array microns: Array with three values representing the x,y,z micron dimensions of the voxel
-		
+
 		.. py:attribute:: brain.median
 
 			Pandas dataframe containing data that has been processed with a median filter twice and thresholded
@@ -287,7 +288,7 @@ class brain:
 			})
 
 		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
-	
+
 	def align_data(self,df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None):
 		'''
 		Apply PCA transformation matrix and align data so that the vertex is at the origin
@@ -310,7 +311,7 @@ class brain:
 
 			Math model object fit to data in brain object
 		'''
-		
+
 		#If vertex for translation is not included
 		if vertex == None and deg==2:
 			#Calculate model
@@ -463,7 +464,7 @@ class brain:
 
 		dpoint = np.array([row.x,row.z])
 
-		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance, 
+		#Use scipy.optimize.minimize to find minimum solution of brain.find_distance,
 		#dpoint[0] is starting guess for x value
 		result = minimize(self.find_distance, dpoint[0], args=(dpoint))
 
@@ -493,7 +494,7 @@ class brain:
 		'''
 		Calculate arclength by integrating the derivative of the math model in xy plane
 
-		.. math:: 
+		.. math::
 
 			\int_{vertex}^{point} \sqrt{1 + (2ax + b)^2}
 
@@ -562,12 +563,12 @@ class brain:
 	def subset_data(self,df,sample_frac=0.5):
 		'''
 		Takes a random sample of the data based on the value between 0 and 1 defined for sample_frac
-		
+
 		Creates the variable :py:attr:`brain.subset`
 
 		:param pd.DataFrame: Dataframe which will be sampled
 		:param float sample_frac: (or None) Value between 0 and 1 specifying proportion of the dataset that should be randomly sampled for plotting
-		
+
 		.. py:attribute:: brain.subset
 
 			Random sample of the input dataframe
@@ -678,7 +679,7 @@ class embryo:
 		for ch in self.chnls.keys():
 			if ch != primary_key:
 				self.chnls[ch].preprocess_data(gthresh,scale,microns)
-				
+
 				self.chnls[ch].align_data(self.chnls[ch].df_thresh,
 					self.pca,comp_order,fit_dim,deg=deg,
 					mm = self.mm, vertex = self.vertex)
@@ -748,9 +749,9 @@ class landmarks:
 	'''
 	Class to handle calculation of landmarks to describe structural data
 
-	:param list percbins: (or None) Must be a list of integers between 0 and 100 
+	:param list percbins: (or None) Must be a list of integers between 0 and 100
 	:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
-	
+
 	.. py:attribute:: brain.lm_wt_rf
 
 		pd.DataFrame, which wildtype landmarks will be added to
@@ -762,7 +763,7 @@ class landmarks:
 	.. py:attribute:: brain.rnull
 
 		Integer specifying the value which null landmark calculations will be set to
-	
+
 	.. py:attribute:: brain.percbins
 
 		Integer specifying the percentiles which will be used to calculate landmarks
@@ -818,7 +819,7 @@ class landmarks:
 
 	def calc_perc(self,df,snum,dtype,out):
 		'''
-		Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined 
+		Calculate landmarks for a dataframe based on the bins and percentiles that have been previously defined
 
 		:param pd.DataFrame df: Dataframe containing columns x,y,z,alpha,r,theta
 		:param str snum: String containing a sample identifier that can be converted to an integer
@@ -976,7 +977,7 @@ def reformat_to_cart(df):
 
 	return(ndf)
 
-def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
+def convert_to_arr(xarr,tarr,DT,mdf,Ldf=[]):
 	'''
 	Convert a pandas dataframe containing landmarks as columns and samples as rows into a 3D numpy array
 
@@ -984,6 +985,7 @@ def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
 
 	:param np.array xarr: Array containing all unique x values of landmarks in the dataset
 	:param np.array tarr: Array containing all unique t values of landmarks in the dataset
+	:param str DT: Either ``r`` or ``pts`` indicating which data type should be saved to the array
 	:param pd.DataFrame mdf: Main landmark dataframe containing landmarks as columns and samples as rows
 	:param list Ldf: List of additional pd.DataFrames that should also be converted to arrays
 	:returns: Array of the main dataframe and list of arrays converted from Ldf
@@ -1000,22 +1002,22 @@ def convert_to_arr(xarr,tarr,mdf,Ldf=[]):
 			amn,amx,tmn,tmx,p,dtype = c.split('_')
 			x = float(amn)#np.mean([float(amn),float(amx)])
 			t = float(tmn) #np.mean([float(tmn),float(tmx)])
-	        
-			if dtype == 'r':
+
+			if dtype == DT:
 				marr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = mdf[c]
 				for arr,df in zip(Larr,Ldf):
 					arr[np.where(xarr==x)[0],np.where(tarr==t)[0]] = df[c]
-	                
+
 	return(marr,Larr)
 
 def calc_variance(anum,dfs):
 	'''
-	Calculate the variance between samples according to bin position and variance between adjacent bins 
+	Calculate the variance between samples according to bin position and variance between adjacent bins
 
 	:param int anum: Number of bins which the arclength axis should be divided into
 	:param dict dfs: Dictionary of dfs which are going to be processed
 	:returns: Two arrays: svar (anum,tnum) and bvar (anum*tnum,snum)
-	:rtype: np.array 
+	:rtype: np.array
 	'''
 
 	#Set up bins
@@ -1026,7 +1028,7 @@ def calc_variance(anum,dfs):
 	outlm = pd.DataFrame()
 	for k in dfs.keys():
 		outlm = lm.calc_perc(dfs[k],k,'wt',outlm)
-	    
+
 	#Convert to arr for variance calculation
 	lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
 
@@ -1037,7 +1039,7 @@ def calc_variance(anum,dfs):
 		for t in range(0,len(lm.tbins)):
 			#Save the variance of a particular bin and adjacent neighbors across a set of samples
 			Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
-	        
+
 	return(svar,np.array(Lvar))
 
 class anumSelect:
@@ -1047,7 +1049,7 @@ class anumSelect:
 		A class that assists in selecting the optimum value of anum
 
 		:param dict dfs: Dictionary of pd.DataFrames with samples to use for optimization
-		
+
 		.. attribute:: anumSelect.dfs
 
 			Dictionary of dataframes that will be used for the parameter sweep
@@ -1081,12 +1083,12 @@ class anumSelect:
 
 	def calc_variance(self,anum,tstep,percbins,rnull):
 		'''
-		Calculate the variance between samples according to bin position and variance between adjacent bins 
+		Calculate the variance between samples according to bin position and variance between adjacent bins
 
 		:param int anum: Number of bins which the arclength axis should be divided into
 		:param float tstep: The size of each bin used for alpha
 		:param dict dfs: Dictionary of dfs which are going to be processed
-		:param list percbins: (or None) Must be a list of integers between 0 and 100 
+		:param list percbins: (or None) Must be a list of integers between 0 and 100
 		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
 		'''
 
@@ -1198,6 +1200,157 @@ class anumSelect:
 		ax.set_xlabel('Number of Alpha Bins')
 		ax.set_ylabel('Relative Variance')
 
+class graphSet:
+
+	def __init__(self,tpairs,xarr,tarr):
+		'''
+		This object manages subobjects containing sample data, :class:`graphData`,
+		and generates the appropriate landmark graph
+
+		:param np.array tpairs: A list that specifies which theta bins should be paired together for graphing
+		:param np.array xarr: An array listing the bin division points along alpha
+		:param np.array tarr: Array listing the bin division points along theta
+
+		.. attribute:: graphSet.tpairs
+
+			A list that specifies which theta bins should be paired together for graphing
+
+		.. attribute:: graphSet.xarr
+
+			An array listing the bin division points along alpha
+
+		.. attribute:: graphSet.tarr
+
+			Array listing the bin division points along theta
+		'''
+
+		self.tpairs,self.xarr,self.tarr = tpairs,xarr,tarr
+
+		self.Ls,self.Lc = [],[]
+		self.Ds, self.Dc = {},{}
+
+	def add_data(self,gD,stype,ctype,dtype):
+		'''
+		Add :class:`graphData` object with descriptive tags of stype,ctype,color
+
+		:param obj gD: graphData object initialized for one sample set
+		:param str stype: String describing the sample type
+		:param str ctype: String describing channel type
+		:param str dtype: Either ``pts`` or ``r`` specifies which type of landmark data will be used
+		'''
+		gD.prepare_data(self.xarr,self.tarr,dtype)
+
+		self.add_to_dict(self.Ds,stype,ctype,gD)
+		self.add_to_dict(self.Dc,ctype,stype,gD)
+
+		#self.Ds.setdefault(stype).append({ctype:gD})
+		#self.Dc.setdefault(ctype).append({stype:gD})
+		self.Ls.append(stype)
+		self.Lc.append(ctype)
+
+	def add_to_dict(self,D,k1,k2,item):
+		'''Add :class:`graphData` object to a dictionary checking for exisiting keys
+
+		:param dict D: the dictionary which the data will be added to
+		:param str k1: Key for the first index into the Dictionary
+		:param str k2: Key for the second internal dictionary
+		:param obj item: :class:`graphData` object
+		'''
+
+		if k1 in D.keys():
+			D[k1][k2] = item
+		else:
+			D[k1] = {k2:item}
+
+	def make_figure(self,a,figsize=(10,8)):
+		'''
+		Creates a figure showing four theta slices and as many columns as ctypes
+
+		.. todo:: P value scatter plot is broken
+
+		:param float a: Alpha value for fill_between ribbons
+		:param tuple figsize: Tuple specifying the height and width of the figure
+
+		.. attribute:: graphSet.fig
+
+			Figure object created by :func:`graphSet.make_figure`
+
+		.. attribute:: graphSet.axr
+
+			Subplot axis array created by :func:`graphSet.make_figure`
+		'''
+
+		LsUn = np.unique(self.Ls)
+		LcUn = np.unique(self.Lc)
+
+		self.fig,self.axr = plt.subplots(4,len(LsUn),figsize=figsize)
+
+		for j,c in enumerate(LcUn):
+			dc = self.Dc[c]
+			parr = stats.ttest_ind(dc[LsUn[0]].arr,dc[LsUn[1]].arr,axis=2,nan_policy='omit')[1]
+			for i,p in enumerate(self.tpairs):
+				for s in LsUn:
+					go = dc[s]
+
+					ti1 = np.where(self.tarr==p[0])[0][0]
+					ti2 = np.where(self.tarr==p[1])[0][0]
+
+					axr[i,j].fill_between(self.xarr,go.avg[:,ti1]+go.sem[:,ti1],go.avg[:,ti1]-go.sem[:,ti1],alpha=a,color=go.c,zorder=1)
+					axr[i,j].fill_between(self.xarr,-go.avg[:,ti2]+go.sem[:,ti2],-go.avg[:,ti2]-go.sem[:,ti2],alpha=a,color=go.c,zorder=1)
+
+					axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
+					axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
+
+					# if s == 'mt':
+					# 	axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3)
+					# 	axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3)
+
+				axr[i,j].legend()
+
+class graphData:
+
+	def __init__(self,rawdf,color):
+		'''
+		Object to contain data and attributes needed for graphing landmark dataset
+
+		:param pd.DataFrame raw: Landmark dataframe with each column as a landmarks
+		:param str color: Hexcode or single letter color code
+
+		.. attribute:: graphData.c
+
+			Color code for this dataset
+
+		.. attribute:: graphData.rawdf
+
+			Dataframe containing each landmark as a column
+		'''
+		self.c = color
+		self.rawdf = rawdf
+
+	def prepare_data(self,xarr,tarr,dtype):
+		'''
+		Convert to array and calculate average and sem
+
+		:param arr xarr: List of min and max borders of the alpha bins
+		:param arr tarr: List of min and max borders of the theta bins
+		:param str dtype: Either ``pts`` or ``r`` specifies which data to save to array
+
+		.. attribute:: graphData.arr
+
+			Array containing the landmark data for this particular sample
+
+		.. attribute:: graphData.avg
+
+			Average of :attr:`graphData.arr`
+
+		.. attribute:: graphData.sem
+
+			Standard error of the mean for :attr:`graphData.arr`
+		'''
+		self.arr,L = convert_to_arr(xarr,tarr,dtype,self.rawdf)
+		self.avg = np.nanmean(self.arr,axis=2)
+		self.sem = stats.sem(self.arr,axis=2,nan_policy='omit')
+
 P = {
 	'zln':2,'zpt':3,'zfb':1,
 	'wtc':'b','mtc':'r',
@@ -1287,7 +1440,7 @@ def write_data(filepath,df):
 	write_header(f)
 
 	n = df.count()['x']
-    
+
 	#Write line with sample number
 	f.write(str(n)+' 0 0\n')
 
@@ -1329,7 +1482,7 @@ def read_psi_to_dict(directory,dtype):
 	'''
 	Read psis from directory into dictionary of dfs with filtering based on dtype
 
-	:param str directory: Directory to get psis from 
+	:param str directory: Directory to get psis from
 	:param str dtype: Usually 'AT' or 'ZRF1'
 	:returns: Dictionary of pd.DataFrame
 	'''
@@ -1373,7 +1526,7 @@ def process_sample(num,root,outdir,name,chs,prefixes,threshold,scale,deg,primary
 		'at')
 	e.add_channel(os.path.join(root,chs[1],prefixes[1]+'_'+num+'_Probabilities.h5'),'zrf1')
 	e.process_channels(threshold,scale,deg,primary_key,[0,2,1],['x','z'],'z')
-	
+
 	print(num,'Data processing complete',name)
 
 	e.save_projections(0.1)
@@ -1441,7 +1594,7 @@ def calculate_area_error(pdf,Lkde,x):
 	Calculate area between PDF and each kde in Lkde
 
 	:param array pdf: Array of probability distribution function that is the same shape as kdes in Lkde
-	:param list Lkde: List of arrays of Kdes 
+	:param list Lkde: List of arrays of Kdes
 	:param array x: Array of datapoints used to generate pdf and kdes
 	:returns: List of error values for each kde in Lkde
 	'''
