@@ -1262,14 +1262,17 @@ class graphSet:
 		else:
 			D[k1] = {k2:item}
 
-	def make_figure(self,a,figsize=(10,8)):
+	def make_figure(self,a,figsize=(10,8),p=True):
 		'''
 		Creates a figure showing four theta slices and as many columns as ctypes
 
 		.. todo:: P value scatter plot is broken
 
+		.. todo:: Control p val for multiple testing
+
 		:param float a: Alpha value for fill_between ribbons
 		:param tuple figsize: Tuple specifying the height and width of the figure
+		:param bool p: True if pvalue should be plotted
 
 		.. attribute:: graphSet.fig
 
@@ -1283,7 +1286,7 @@ class graphSet:
 		LsUn = np.unique(self.Ls)
 		LcUn = np.unique(self.Lc)
 
-		self.fig,self.axr = plt.subplots(4,len(LsUn),figsize=figsize)
+		self.fig,self.axr = plt.subplots(4,len(LsUn),figsize=figsize,sharey=True)
 
 		for j,c in enumerate(LcUn):
 			dc = self.Dc[c]
@@ -1295,17 +1298,18 @@ class graphSet:
 					ti1 = np.where(self.tarr==p[0])[0][0]
 					ti2 = np.where(self.tarr==p[1])[0][0]
 
-					axr[i,j].fill_between(self.xarr,go.avg[:,ti1]+go.sem[:,ti1],go.avg[:,ti1]-go.sem[:,ti1],alpha=a,color=go.c,zorder=1)
-					axr[i,j].fill_between(self.xarr,-go.avg[:,ti2]+go.sem[:,ti2],-go.avg[:,ti2]-go.sem[:,ti2],alpha=a,color=go.c,zorder=1)
+					self.axr[i,j].fill_between(self.xarr,go.avg[:,ti1]+go.sem[:,ti1],go.avg[:,ti1]-go.sem[:,ti1],alpha=a,color=go.c,zorder=1)
+					self.axr[i,j].fill_between(self.xarr,-go.avg[:,ti2]+go.sem[:,ti2],-go.avg[:,ti2]-go.sem[:,ti2],alpha=a,color=go.c,zorder=1)
 
-					axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
-					axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
+					self.axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
+					self.axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
 
-					# if s == 'mt':
-					# 	axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3)
-					# 	axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3)
+					if (s == 'mt') & (P==True):
+						self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3)
+						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3)
+						print('plot pval')
 
-				axr[i,j].legend()
+				self.axr[i,j].legend()
 
 class graphData:
 
