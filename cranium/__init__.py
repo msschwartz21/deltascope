@@ -1082,15 +1082,16 @@ class anumSelect:
 		self.Msv,self.Mbv = [],[]
 		self.Llm = []
 
-	def calc_variance(self,anum,tstep,percbins,rnull):
+	def calc_variance(self,anum,tstep,percbins,rnull,DT):
 		'''
 		Calculate the variance between samples according to bin position and variance between adjacent bins
 
 		:param int anum: Number of bins which the arclength axis should be divided into
 		:param float tstep: The size of each bin used for alpha
 		:param dict dfs: Dictionary of dfs which are going to be processed
-		:param list percbins: (or None) Must be a list of integers between 0 and 100
-		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
+		:param list percbins: Must be a list of integers between 0 and 100
+		:param int rnull: When the r value cannot be calculated it will be set to this value
+		:param str DT: Data type for which variance is measured, e.g. ``r`` or ``pts``
 		'''
 
 		#Set up bins
@@ -1103,7 +1104,7 @@ class anumSelect:
 			outlm = lm.calc_perc(self.dfs[k],k,'s',outlm)
 
 		#Convert to arr for variance calculations
-		lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,outlm)
+		lmarr,arr = convert_to_arr(lm.acbins,lm.tbins,DT,outlm)
 		self.Llm.append(lmarr)
 
 		#Calculate variance between samples
@@ -1122,17 +1123,21 @@ class anumSelect:
 
 		print(anum,'calculation complete')
 
-	def param_sweep(self,tstep,amn=2,amx=50,step=1,percbins=[50],rnull=15):
+	def param_sweep(self,tstep,amn=2,amx=50,astep=1,percbins=[50],rnull=15,DT='pts'):
 		'''
 		Calculate landmarks for each value of anum specified in input range
 
+		:param float tstep: The size of each theta wedge in radians
 		:param int amn: The minimum number of alpha bins that should be considered
 		:param int amx: The maximum number of alpha bins that should be considered
-		:param int step: The step size in the range of amn to amx
+		:param int astep: The step size in the range of amn to amx
+		:param list percbins: (or None) Must be a list of integers between 0 and 100
+		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
+		:param str DT: Default=``pts`` Data type for which variance is measured, e.g. ``r`` or ``pts``
 		'''
 
 		for a in np.arange(amn,amx,step):
-			self.calc_variance(a,tstep,percbins,rnull)
+			self.calc_variance(a,tstep,percbins,rnull,DT)
 
 		print('Parameter sweep complete')
 

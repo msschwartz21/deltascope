@@ -4,9 +4,11 @@
 ### Additions
 - Created a new class, `anumSelect`, which determines the optimum number of bins along alpha
 - Created two new glasses, `graphData` and `graphSet` to handle plotting landmark data
+- Created a new class `treeClassifier` which handles running the random forest classifier
 ### Changes
 - In lm.calc_bins, input is a dictionary of dfs as opposed to a list of df values from dfs.values()
-- `convert_to_arr` added option for selecting r or pts datatype 
+- `convert_to_arr` added option for selecting r or pts datatype (`DT`)
+- Added the datatype parameter required for `convert_to_arr` to the `anumSelect` functions
 
 ## [0.2.1] - 2018-01-14
 ### Changes
