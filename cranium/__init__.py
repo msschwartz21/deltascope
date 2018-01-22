@@ -60,10 +60,10 @@ class brain:
 		#Figure out which channels has more zeros and therefore is background
 		if np.count_nonzero(c1<0.1) > np.count_nonzero(c1>0.9):
 			#: Array of shape [z,y,x] containing raw probability data
-			self.raw_data = c1
+			self.raw_data = c2
 		else:
 			#: Array of shape [z,y,x] containing raw probability data
-			self.raw_data = c2
+			self.raw_data = c1
 
 	def create_dataframe(self,data,scale):
 		'''
