@@ -32,7 +32,7 @@ The following code requires a parameter :envvar:`micron`, which specifies the di
 
 This section of the code also includes a deprecated parameter :envvar:`scale`, which must be set to :samp:`[1,1,1]`.
 
-.. Todo:: please describe what and why envvar exists and why not to touch it or change it.
+.. TODO please describe what and why envvar exists and why not to touch it or change it.
 
 .. _CIthresh:
 
@@ -40,7 +40,7 @@ Code Instructions
 ------------------
 The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`. Raw image data will be imported by :func:`embryo.add_channel`.
 
-.. code-block:: python 
+.. code-block:: python
 
 	#Create an embryo object that facilitates data processing
 	e = cranium.embryo(experiment-name,sample-number,directory)
@@ -76,11 +76,11 @@ During typical collections of biological samples, each sample will be oriented s
 
 Structural Channel Processing
 ******************************
-We designate one channel, the ``structural channel``, which we will use for PCA to align samples. Since we are interested in the gross morphology of this channel, we apply two data preprocessing steps to reduce the data down to only essential points. First, we return to :attr:`brain.raw_data` and apply a new threshold, :envvar:`medthresh`, which is typically more stringent than :envvar:`genthresh`. This step ensures we are only considering points of signal with extremely high likelihood of being real. Second, we apply a median filter to the data twice, which smooths out the structure and eliminates small points of variation that may interfere with the alignment process of the gross structure. 
+We designate one channel, the ``structural channel``, which we will use for PCA to align samples. Since we are interested in the gross morphology of this channel, we apply two data preprocessing steps to reduce the data down to only essential points. First, we return to :attr:`brain.raw_data` and apply a new threshold, :envvar:`medthresh`, which is typically more stringent than :envvar:`genthresh`. This step ensures we are only considering points of signal with extremely high likelihood of being real. Second, we apply a median filter to the data twice, which smooths out the structure and eliminates small points of variation that may interfere with the alignment process of the gross structure.
 
 PCA outputs three new dimensions, the 1st, 2nd, and 3rd PCs. These components will be reassigned to the X, Y, and Z axes to help the user maintain orientation in regards to their data. In the case of the zebrafish post-optic commissure shown below (:numref:`pcafix`), the 1st PC is reassigned to the X axis and the 2nd and 3rd PCs are assigned to Z and Y respectively. These assignments honor the user's expectation of the sample's alignment in 3D space. The assignment of components to axes can be modified using the parameter :envvar:`comporder`.
 
-.. warning:: 
+.. warning::
 
 	In order for PCA to consistently align your samples in the same orientation, we are assuming that the three dimensions of your structure are of different relative sizes. Since PCA looks for the axes that capture the most variation in your data, a sample that has axes of the same relative size will not have any distinguishing characteristics that PCA can use to identify and separate different axes.
 
@@ -89,16 +89,16 @@ PCA outputs three new dimensions, the 1st, 2nd, and 3rd PCs. These components wi
 	:align: center
 	:figclass: align-center
 
-	This example illustrates the efficacy of PCA at changing the orientation of the zebrafish post optic commissure. In this case, the 1st PC is significantly longer than the 2nd and 3rd. While these two remaining components are similar in size, the typically longer depth of the 2nd PC distinguishes it from the 3rd PC. 
-	
-.. Todo:: Reference workarounds if data alignment in the 2nd and 3rd dimension are problematic.
+	This example illustrates the efficacy of PCA at changing the orientation of the zebrafish post optic commissure. In this case, the 1st PC is significantly longer than the 2nd and 3rd. While these two remaining components are similar in size, the typically longer depth of the 2nd PC distinguishes it from the 3rd PC.
+
+.. TODO Reference workarounds if data alignment in the 2nd and 3rd dimension are problematic.
 
 Model Fitting
 *************
 
 In addition to rotating the orientation of the data in 3D space, we also want to align the center of all samples at the origin. In order to determine the center of the data, we fit a simple mathematical model to the data that will also be used later in the analysis. The zebrafish post optic commissure shown above forms a parabolic structure, which can be described by y = ax^2 + bx + c. For simplicity, we fit the model in two dimensions, while holding one dimension constant. In the case of the POC, the parabolic structure lies flat in the XZ plane, which means that the structure can be described using exclusively the X and Z dimensions. The dimensions, which will be used to fit the 2D model, are specified in the parameter :envvar:`fitdim`. Additionally the :envvar:`deg` parameter specifies the degree of the function that fits to the data.
 
-.. Todo:: what if you need the third dimension for the equation?
+.. TODO what if you need the third dimension for the equation?
 
 .. _SPpca:
 
@@ -107,9 +107,9 @@ Setting Parameters
 
 :envvar:`medthresh` is typically set to 0.25, in comparison to a value of 0.5 for :envvar:`genthresh`. If your data contains aberrant signal that does not contribute to the gross morphology of the structure, an even lower :envvar:`medthresh` may help limit the negative influence of noisy signal. Additionally, the :envvar:`radius` of the median filter can also be tuned to eliminate noisy signal. The typical value for :envvar:`radius` is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for :envvar:`radius` will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data. Prior to running the median threshold, it is reccomended that the user load several HDF5 files containing the structure of interest into FIJI and test several median thresholds to determine which best resolves their structure. Utilize the best median threshold radius in :envvar:`radius`.
 
-The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`. 
+The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`.
 
-.. Todo:: The above needs to be written more clearly.  Too much jargon. The samefor below. Use more examples and explain their relavence.
+.. TODO The above needs to be written more clearly.  Too much jargon. The samefor below. Use more examples and explain their relavence.
 
 Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function, eg. y=mx +  b.
 
@@ -122,7 +122,7 @@ Code Instructions
 ------------------
 
 .. code::
-	
+
 	#Run PCA on the structural channel, in this case, c1
 	e.chnls['c1'].calculate_pca_median(e.chnls['c1'].raw_data,medthresh,radius,microns)
 
@@ -144,7 +144,7 @@ Code Instructions
 Cylindrical Coordinates
 +++++++++++++++++++++++
 
-.. _Gcylcoord: 
+.. _Gcylcoord:
 
 Goal
 -----
@@ -174,7 +174,7 @@ This transformation does not require defining any parameters; however, it assume
 	#Save processed data to .psi file
 	e.save_psi()
 
-.. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required. 
+.. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required.
 
 Batch Processing
 +++++++++++++++++

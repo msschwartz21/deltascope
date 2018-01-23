@@ -3,6 +3,8 @@
 Batch Processing: Transformation
 ==================================
 
+.. TODO Written with too many assumptions and jargon
+
 :file:`mp-transformation.py` can be run from the command line after setting parameters in :file:`mp-transformation-config.json`. When you run the script, you only need to provide the path to the config file as an argument ::
 
 	$ python mp-transformation.py "C:\\path\\to\\mp-transformation-config.json"
@@ -13,7 +15,7 @@ In addition to the parameters described in `Parameter Reference <param ref>`_, :
 
 	**Required**: String specifying the complete path to a directory where an output folder should be created
 
-.. envvar:: expname 
+.. envvar:: expname
 
 	**Required**: String specifying the experiment name that will be incorporated into output files
 
