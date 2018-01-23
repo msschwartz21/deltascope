@@ -88,3 +88,10 @@ Code Sample
 
 	#Find the optimum value of anum
 	opt.find_optimum_anum(poly_degree,best_guess)
+
+Graphing Landmark Data
+++++++++++++++++++++++++
+
+In order to facilitate easy visualization, the :class:`graphSet` and :class:`graphData` classes manage graphing commands and any necessary data transformation.
+
+.. todo:: Code sample for graphing functions

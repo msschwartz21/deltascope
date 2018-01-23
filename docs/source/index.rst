@@ -10,7 +10,7 @@ Features
 +++++++++
 
 - Compare sets of 3D biological images to identify differences
-- Automatically align the structure in the image to correct for variation introduced during mounting and imaging 
+- Automatically align the structure in the image to correct for variation introduced during mounting and imaging
 - Generate descriptive graphs that quantify both the average and variation of the data
 - Use machine learning techniques to classify samples and identify regions of statistically significant difference
 
@@ -48,14 +48,15 @@ Contents
 
 	Start Here <start-here>
 	Data Preparation <data-prep>
-    Data Processing <data-process>
-    Landmark Calculation <landmark-calculation>
-    Checklist <checklist>
-    Parameter Reference <param-ref>
-    Useful Resources <resources>
-    Frequently Asked Questions <faq>
-    Batch Processing: Transformation <mp-transformation>
-    API
+  Data Processing <data-process>
+  Landmark Calculation <landmark-calculation>
+	Sample Classification <classifier>
+  Checklist <checklist>
+  Parameter Reference <param-ref>
+  Useful Resources <resources>
+  Frequently Asked Questions <faq>
+  Batch Processing: Transformation <mp-transformation>
+  API
 
 Indices and tables
 ==================
@@ -63,4 +64,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
