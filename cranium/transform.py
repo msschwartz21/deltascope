@@ -729,3 +729,22 @@ class math_model:
 
 		self.cf = model
 		self.p = np.poly1d(model)
+
+def calculate_models(Ldf):
+	'''
+	Calculate model for each dataframe in list and add to new dataframe
+
+	:param list Ldf: List of dataframes containing aligned data
+	:returns: pd.Dataframe with a,b,c values for parabolic model
+	'''
+
+	modeldf = pd.DataFrame({'a':[],'b':[],'c':[]})
+
+	for df in Ldf:
+		s = cranium.brain()
+		s.add_aligned_df(df)
+		s.fit_model(s.df_align,2)
+
+		modeldf = modeldf.append(pd.DataFrame({'a':[s.mm.cf[0]],'b':[s.mm.cf[1]],'c':[s.mm.cf[2]]}))
+
+	return(modeldf)
