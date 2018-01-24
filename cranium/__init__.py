@@ -1108,13 +1108,13 @@ class anumSelect:
 		self.Llm.append(lmarr)
 
 		#Calculate variance between samples
-		svar = np.var(lmarr,axis=2)
+		svar = np.nanvar(lmarr,axis=2)
 
 		#Calculate variance between bins
 		Lvar = []
 		for i in range(1,len(lm.acbins-2)):
 			for t in range(0,len(lm.tbins)):
-				Lvar.append(np.var(lmarr[i-1:i+2,t],axis=0))
+				Lvar.append(np.nanvar(lmarr[i-1:i+2,t],axis=0))
 
 		self.Lsv.append(svar)
 		self.Msv.append(np.mean(svar))
@@ -1136,7 +1136,7 @@ class anumSelect:
 		:param str DT: Default=``pts`` Data type for which variance is measured, e.g. ``r`` or ``pts``
 		'''
 
-		for a in np.arange(amn,amx,step):
+		for a in np.arange(amn,amx,astep):
 			self.calc_variance(a,tstep,percbins,rnull,DT)
 
 		print('Parameter sweep complete')
