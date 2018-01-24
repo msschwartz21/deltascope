@@ -10,6 +10,7 @@
 - `convert_to_arr` added option for selecting r or pts datatype (`DT`)
 - Added the datatype parameter required for `convert_to_arr` to the `anumSelect` functions
 - `raw_data` funtion changed to select channel so that background = 1 and signal = 0 in line with expectation that pixel values function like a p value
+- Correct `calc_variance` to use `np.nanvar` instead of `np.var`
 
 ## [0.2.1] - 2018-01-14
 ### Changes
