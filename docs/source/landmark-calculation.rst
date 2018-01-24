@@ -32,20 +32,23 @@ Code Sample
 
 .. code-block:: python
 
-	import cranium
+	from cranium import landmark
 	import numpy as np
+	import pandas as pd
 
 	anum = 30
 	tstep = np.pi/4
 
 	#Create a landmark object
-	lm = cranium.landmarks(percbins=[50],rnull=15)
+	lm = landmark.landmarks(percbins=[50],rnull=np.nan)
 	lm.calc_bins(dfs,anum,tstep)
 
 	#Calculate landmarks for each sample and append to a single dataframe
 	outlm = pd.DataFrame()
 	for k in dfs.keys():
 		outlm = lm.calc_perc(dfs[k],k,'stype',outlm)
+
+.. TODO add psis to serve as landmark test data
 
 .. _sel anum:
 
@@ -66,10 +69,10 @@ Code Sample
 
 .. code-block:: python
 
-	import cranium
+	from cranium import landmark
 
 	#Create a optimization object
-	opt = cranium.anumSelect(dfs)
+	opt = landmark.anumSelect(dfs)
 
 	tstep = np.pi/4
 
@@ -94,4 +97,4 @@ Graphing Landmark Data
 
 In order to facilitate easy visualization, the :class:`graphSet` and :class:`graphData` classes manage graphing commands and any necessary data transformation.
 
-.. todo:: Code sample for graphing functions
+.. TODO Code sample for graphing functions

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.optimize import minimize
-from sklearn.preprocessing import normalize.scale
+from sklearn.preprocessing import normalize,scale
 from scipy.stats import sem
 
 class landmarks:
