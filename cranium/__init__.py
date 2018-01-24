@@ -1158,7 +1158,7 @@ class anumSelect:
 		'''
 		Plot raw data from parameter sweep
 		'''
-		x = np.arange(2,len(self.Lsv))
+		x = np.arange(self.amn,self.amx,self.astep)
 		fig,ax = plt.subplots()
 
 		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
@@ -1175,7 +1175,7 @@ class anumSelect:
 		:param int dof: Degree of the polynomial function to be fit
 		'''
 
-		x = np.arange(2,len(self.Lsv))
+		x = np.arange(self.amn,self.amx,self.astep)
 		fig,ax = plt.subplots()
 
 		ax.plot(x,self.Mbv[2:],c='b',ls='--',label='Raw Bin Variance')
@@ -1201,7 +1201,7 @@ class anumSelect:
 		:param int guess: Best guess of the optimum anum, which cannot be less than the maximum bin variance
 		'''
 
-		x = np.arange(2,len(self.Lsv))
+		x = np.arange(self.amn,self.amx,self.astep)
 		fig,ax = plt.subplots()
 
 		pbv = np.polyfit(x,normalize(self.Mbv[2:])[0],dof)
