@@ -478,3 +478,158 @@ class anumSelect:
 		ax.legend()
 		ax.set_xlabel('Number of Alpha Bins')
 		ax.set_ylabel('Relative Variance')
+
+class graphSet:
+
+	def __init__(self,tpairs,xarr,tarr):
+		'''
+		This object manages subobjects containing sample data, :class:`graphData`,
+		and generates the appropriate landmark graph
+
+		:param np.array tpairs: A list that specifies which theta bins should be paired together for graphing
+		:param np.array xarr: An array listing the bin division points along alpha
+		:param np.array tarr: Array listing the bin division points along theta
+
+		.. attribute:: graphSet.tpairs
+
+			A list that specifies which theta bins should be paired together for graphing
+
+		.. attribute:: graphSet.xarr
+
+			An array listing the bin division points along alpha
+
+		.. attribute:: graphSet.tarr
+
+			Array listing the bin division points along theta
+		'''
+
+		self.tpairs,self.xarr,self.tarr = tpairs,xarr,tarr
+
+		self.Ls,self.Lc = [],[]
+		self.Ds, self.Dc = {},{}
+
+	def add_data(self,gD,stype,ctype,dtype):
+		'''
+		Add :class:`graphData` object with descriptive tags of stype,ctype,color
+
+		:param obj gD: graphData object initialized for one sample set
+		:param str stype: String describing the sample type
+		:param str ctype: String describing channel type
+		:param str dtype: Either ``pts`` or ``r`` specifies which type of landmark data will be used
+		'''
+		gD.prepare_data(self.xarr,self.tarr,dtype)
+
+		self.add_to_dict(self.Ds,stype,ctype,gD)
+		self.add_to_dict(self.Dc,ctype,stype,gD)
+
+		#self.Ds.setdefault(stype).append({ctype:gD})
+		#self.Dc.setdefault(ctype).append({stype:gD})
+		self.Ls.append(stype)
+		self.Lc.append(ctype)
+
+	def add_to_dict(self,D,k1,k2,item):
+		'''Add :class:`graphData` object to a dictionary checking for exisiting keys
+
+		:param dict D: the dictionary which the data will be added to
+		:param str k1: Key for the first index into the Dictionary
+		:param str k2: Key for the second internal dictionary
+		:param obj item: :class:`graphData` object
+		'''
+
+		if k1 in D.keys():
+			D[k1][k2] = item
+		else:
+			D[k1] = {k2:item}
+
+	def make_figure(self,a,figsize=(10,8),p=True):
+		'''
+		Creates a figure showing four theta slices and as many columns as ctypes
+
+		.. todo:: P value scatter plot is broken
+
+		.. todo:: Control p val for multiple testing
+
+		:param float a: Alpha value for fill_between ribbons
+		:param tuple figsize: Tuple specifying the height and width of the figure
+		:param bool p: True if pvalue should be plotted
+
+		.. attribute:: graphSet.fig
+
+			Figure object created by :func:`graphSet.make_figure`
+
+		.. attribute:: graphSet.axr
+
+			Subplot axis array created by :func:`graphSet.make_figure`
+		'''
+
+		LsUn = np.unique(self.Ls)
+		LcUn = np.unique(self.Lc)
+
+		self.fig,self.axr = plt.subplots(4,len(LsUn),figsize=figsize,sharey=True)
+
+		for j,c in enumerate(LcUn):
+			dc = self.Dc[c]
+			parr = stats.ttest_ind(dc[LsUn[0]].arr,dc[LsUn[1]].arr,axis=2,nan_policy='omit')[1]
+			for i,p in enumerate(self.tpairs):
+				for s in LsUn:
+					go = dc[s]
+
+					ti1 = np.where(self.tarr==p[0])[0][0]
+					ti2 = np.where(self.tarr==p[1])[0][0]
+
+					self.axr[i,j].fill_between(self.xarr,go.avg[:,ti1]+go.sem[:,ti1],go.avg[:,ti1]-go.sem[:,ti1],alpha=a,color=go.c,zorder=1)
+					self.axr[i,j].fill_between(self.xarr,-go.avg[:,ti2]+go.sem[:,ti2],-go.avg[:,ti2]-go.sem[:,ti2],alpha=a,color=go.c,zorder=1)
+
+					self.axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
+					self.axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
+
+					if (s == 'mt') & (P==True):
+						self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3)
+						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3)
+						print('plot pval')
+
+				self.axr[i,j].legend()
+
+class graphData:
+
+	def __init__(self,rawdf,color):
+		'''
+		Object to contain data and attributes needed for graphing landmark dataset
+
+		:param pd.DataFrame raw: Landmark dataframe with each column as a landmarks
+		:param str color: Hexcode or single letter color code
+
+		.. attribute:: graphData.c
+
+			Color code for this dataset
+
+		.. attribute:: graphData.rawdf
+
+			Dataframe containing each landmark as a column
+		'''
+		self.c = color
+		self.rawdf = rawdf
+
+	def prepare_data(self,xarr,tarr,dtype):
+		'''
+		Convert to array and calculate average and sem
+
+		:param arr xarr: List of min and max borders of the alpha bins
+		:param arr tarr: List of min and max borders of the theta bins
+		:param str dtype: Either ``pts`` or ``r`` specifies which data to save to array
+
+		.. attribute:: graphData.arr
+
+			Array containing the landmark data for this particular sample
+
+		.. attribute:: graphData.avg
+
+			Average of :attr:`graphData.arr`
+
+		.. attribute:: graphData.sem
+
+			Standard error of the mean for :attr:`graphData.arr`
+		'''
+		self.arr,L = convert_to_arr(xarr,tarr,dtype,self.rawdf)
+		self.avg = np.nanmean(self.arr,axis=2)
+		self.sem = stats.sem(self.arr,axis=2,nan_policy='omit')
