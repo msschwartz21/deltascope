@@ -30,23 +30,7 @@ The calculation of unbiased landmarks relies on :ref:`cylcoord` that were previo
 Code Sample
 ------------
 
-.. code-block:: python
-
-	from cranium import landmark
-	import numpy as np
-	import pandas as pd
-
-	anum = 30
-	tstep = np.pi/4
-
-	#Create a landmark object
-	lm = landmark.landmarks(percbins=[50],rnull=np.nan)
-	lm.calc_bins(dfs,anum,tstep)
-
-	#Calculate landmarks for each sample and append to a single dataframe
-	outlm = pd.DataFrame()
-	for k in dfs.keys():
-		outlm = lm.calc_perc(dfs[k],k,'stype',outlm)
+.. literalinclude:: /../../cranium/tests/landmark_test.py
 
 .. TODO add psis to serve as landmark test data
 
@@ -67,30 +51,7 @@ The :class:`anumSelect` can be used to identify the optimum number of sections a
 Code Sample
 ------------
 
-.. code-block:: python
-
-	from cranium import landmark
-
-	#Create a optimization object
-	opt = landmark.anumSelect(dfs)
-
-	tstep = np.pi/4
-
-	#Initiate parameter sweep
-	opt.param_sweep(tstep,amn=2,amx=50,step=1,percbins=[50],rnull=15)
-
-	#Plot raw data
-	opt.plot_rawdata()
-
-	poly_degree = 4
-
-	#Test polynomial fit
-	opt.plot_fitted(poly_degree)
-
-	best_guess = 30
-
-	#Find the optimum value of anum
-	opt.find_optimum_anum(poly_degree,best_guess)
+.. literalinclude:: /../../cranium/tests/anum_test.py
 
 Graphing Landmark Data
 ++++++++++++++++++++++++
