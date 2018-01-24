@@ -1134,9 +1134,22 @@ class anumSelect:
 		:param list percbins: (or None) Must be a list of integers between 0 and 100
 		:param int rnull: (or None) When the r value cannot be calculated it will be set to this value
 		:param str DT: Default=``pts`` Data type for which variance is measured, e.g. ``r`` or ``pts``
-		'''
 
-		for a in np.arange(amn,amx,astep):
+		.. attribute:: anumSelect.amn
+
+			User defined minimum number of alpha bins considered in sweep
+
+		.. attribute:: anumSelect.amx
+
+			User defined maximum number of alpha bins considered in sweep
+
+		.. attribute:: anumSelect.astep
+
+			The step size in the range of amn to amx
+		'''
+		self.amn,self.amx,self.astep = amn,amx,astep
+
+		for a in np.arange(self.amn,self.amx,self.astep):
 			self.calc_variance(a,tstep,percbins,rnull,DT)
 
 		print('Parameter sweep complete')
