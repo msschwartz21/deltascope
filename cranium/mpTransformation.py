@@ -6,6 +6,7 @@ from functools import partial
 from sys import argv
 import re
 import json
+import numpy as np
 
 class paramsClass:
 	'''
@@ -179,12 +180,13 @@ def check_nums(P):
 	Lnums = []
 
 	for i,f in enumerate(P.c1_files):
-		n = re.findall(r'\d+',f.split('.')[0])[0]
-		for Lf in P.Lcfiles:
-			if n not in Lf[i]:
-				print('File numbers are mismatched between channel directories.')
-				raise
-		Lnums.append(i)
+		if os.path.isfile(f):
+			n = re.findall(r'\d+',f.split('.')[0])[0]
+			for Lf in P.Lcfiles:
+				if n not in Lf[i]:
+					print('File numbers are mismatched between channel directories.')
+					raise
+			Lnums.append(i)
 
 	return(Lnums)
 
@@ -251,6 +253,9 @@ if __name__=='__main__':
 	processfxn = partial(process,P=P)
 
 	Lnums = check_nums(P)
+	tnum = np.array([int(n) for n in Lnums])
+	Lnums = Lnums[tnum>=300]
+	print(Lnums)
 	n = len(Lnums)
 	# Initiate map pools in sets of 5 samples
 	for i in range(0,n,5):
