@@ -2,6 +2,8 @@ from cranium import landmark
 import numpy as np
 import pandas as pd
 
+# TODO add psi data to sample data directory
+
 anum = 30
 tstep = np.pi/4
 
