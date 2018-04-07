@@ -1281,7 +1281,7 @@ class graphSet:
 		else:
 			D[k1] = {k2:item}
 
-	def make_figure(self,a,figsize=(10,8),p=True):
+	def make_figure(self,a,figsize=(10,8),P=True):
 		'''
 		Creates a figure showing four theta slices and as many columns as ctypes
 
@@ -1309,7 +1309,7 @@ class graphSet:
 
 		for j,c in enumerate(LcUn):
 			dc = self.Dc[c]
-			parr = stats.ttest_ind(dc[LsUn[0]].arr,dc[LsUn[1]].arr,axis=2,nan_policy='omit')[1]
+			parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
 			for i,p in enumerate(self.tpairs):
 				for s in LsUn:
 					go = dc[s]
@@ -1371,8 +1371,15 @@ class graphData:
 			Standard error of the mean for :attr:`graphData.arr`
 		'''
 		self.arr,L = convert_to_arr(xarr,tarr,dtype,self.rawdf)
-		self.avg = np.nanmean(self.arr,axis=2)
-		self.sem = stats.sem(self.arr,axis=2,nan_policy='omit')
+
+		nanmask = np.nanmean(self.arr,axis=2)[:,:,np.newaxis] + np.ones((1,1,self.arr.shape[-1]))
+		nanmask = 2*nanmask
+
+		self.arr_masked = self.arr
+		self.arr_masked[np.isnan(self.arr)] = nanmask[np.isnan(self.arr)]
+
+		self.avg = np.nanmean(self.arr_masked,axis=2)		
+		self.sem = stats.sem(self.arr_masked,axis=2,nan_policy='omit')
 
 class treeClassifier:
 
