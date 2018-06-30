@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import h5py
+# import h5py ######### Updated recently and now module can't be started
 #import skimage.io as io
 import matplotlib.pyplot as plt
 import time
