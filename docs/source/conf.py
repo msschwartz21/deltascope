@@ -69,7 +69,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'cranium'
+project = 'deltascope'
 copyright = '2018, Morgan Schwartz'
 author = 'Morgan Schwartz'
 
@@ -279,7 +279,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cranium', 'cranium Documentation',
+    (master_doc, 'deltascope', 'deltascope Documentation',
      [author], 1)
 ]
 
@@ -293,8 +293,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'cranium', 'cranium Documentation',
-   author, 'cranium', 'One line description of project.',
+  (master_doc, 'deltascope', 'deltascope Documentation',
+   author, 'deltascope', 'One line description of project.',
    'Miscellaneous'),
 ]
 

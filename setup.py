@@ -8,16 +8,16 @@ def requirements():
 	with open('requirements.txt') as f:
 		return (f.read())
 
-setup(name='cranium',
+setup(name='deltascope',
 	version='0.2.1',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',
-	url='https://github.com/msschwartz21/craniumPy',
+	url='https://github.com/msschwartz21/deltascope',
 	author='Morgan Schwartz',
 	author_email='mschwartz@smith.edu',
 	license='GNU GPL',
-	packages=['cranium'],
+	packages=['deltascope'],
 	install_requires=[
 		'cycler==0.10',
 		'decorator==4.1',
