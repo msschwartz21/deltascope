@@ -168,7 +168,7 @@ class brain:
 
 		#Create new dataframe with values above threshold
 		self.threshold = threshold
-		self.df_thresh = self.df[self.df.value > self.threshold]
+		self.df_thresh = self.df[self.df.value < self.threshold]
 
 		#Scale xyz by value in scale array to force PCA axis selection
 		self.scale = scale
@@ -196,7 +196,7 @@ class brain:
 			out[z] = median(median(data[z],disk(radius)),disk(radius))
 
 		outdf = self.create_dataframe(out,microns)
-		thresh = outdf[outdf.value > threshold]
+		thresh = outdf[outdf.value < threshold]
 		return(thresh)
 
 	def calculate_pca_median(self,data,threshold,radius,microns):
