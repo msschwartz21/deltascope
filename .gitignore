@@ -29,3 +29,4 @@ Notebooks/
 dist/
 docs/build
 env-cranium
+shell_output

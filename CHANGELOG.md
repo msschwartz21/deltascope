@@ -1,5 +1,17 @@
 # Change Log
 
+## [Unreleased]
+### Additions
+- Created a new class, `anumSelect`, which determines the optimum number of bins along alpha
+- Created two new glasses, `graphData` and `graphSet` to handle plotting landmark data
+- Created a new class `treeClassifier` which handles running the random forest classifier
+### Changes
+- In lm.calc_bins, input is a dictionary of dfs as opposed to a list of df values from dfs.values()
+- `convert_to_arr` added option for selecting r or pts datatype (`DT`)
+- Added the datatype parameter required for `convert_to_arr` to the `anumSelect` functions
+- `raw_data` funtion changed to select channel so that background = 1 and signal = 0 in line with expectation that pixel values function like a p value
+- Correct `calc_variance` to use `np.nanvar` instead of `np.var`
+
 ## [0.2.1] - 2018-01-14
 ### Changes
 - Correct unittest.mock import to mock in conf.py file
@@ -13,7 +25,7 @@
 - Added try/except statements to each processing step in mp-transformation to allow the script to continue running if a single sample failed
 - `calc_variance` function calculates bin variance and sample variance for a particular landmark size
 - `anumSelect` class for finding the optimum value of anum in landmark calculation
-### Changes 
+### Changes
 - Changed `convert_to_arr` to accommodate a main array and a list of additional arrays
 - `read_psi_to_dict` now uses regular expression to find sample numbers instead of splitting and indexing the file path
 - `convert_to_arr`  uses the minimum bin value for cartesian as opposed to the mean so that it is compatible with lm.acbins and lm.tbins

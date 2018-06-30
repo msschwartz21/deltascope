@@ -40,7 +40,7 @@ Code Sample
 
 	#Create a landmark object
 	lm = cranium.landmarks(percbins=[50],rnull=15)
-	lm.calc_bins(dfs.values(),anum,tstep)
+	lm.calc_bins(dfs,anum,tstep)
 
 	#Calculate landmarks for each sample and append to a single dataframe
 	outlm = pd.DataFrame()
@@ -88,3 +88,10 @@ Code Sample
 
 	#Find the optimum value of anum
 	opt.find_optimum_anum(poly_degree,best_guess)
+
+Graphing Landmark Data
+++++++++++++++++++++++++
+
+In order to facilitate easy visualization, the :class:`graphSet` and :class:`graphData` classes manage graphing commands and any necessary data transformation.
+
+.. todo:: Code sample for graphing functions
