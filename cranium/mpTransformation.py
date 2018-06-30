@@ -178,9 +178,13 @@ def check_nums(P):
 	'''
 	Lnums = []
 
+	print('hello')
+
 	for i,f in enumerate(P.c1_files):
+		print(i,f)
 		if 'h5' in f:
 			n = re.findall(r'\d+',f.split('.')[0])[0]
+			print('n',n)
 			for Lf in P.Lcfiles:
 				if n not in Lf[i]:
 					print('File numbers are mismatched between channel directories.')
