@@ -16,7 +16,7 @@ Intensity Thresholding
 
 Goal
 ----
-At this point, each sample/channel should have been processed by Ilastik to create a new :file:`{c1_10}_Probabilities.h5` file. If you open this file in Fiji, it should contain three dimensions and two channels (signal and background, but for our purposes the two are interchangeable). Each pixel should have a value ranging between 0 and 1. If we are inspecting the signal channel, pixels with a value close to 0 are highly likely to be true signal. Correspondingly, pixels with a value close to 1 are likely to be background. The :file:`{c1_10}_Probabilities.h5` file by Ilastik contains two channels (signal and background), which are inverse images. For a given pixel, the background intensity value is 1 minus the signal intensity value. In order to simplify our data, we will apply a threshold that will divide the data into two sets of pixels: signal and background. In the steps that follow, we will only use the set of pixels that correspond to true signal. This set of pixels may be also referred to as a set of points or a point cloud. In order to avoid keeping track of which channel is the signal channel, we assume that after applying a threshold there will be more points will fall in the background group than in the signal group. 
+At this point, each sample/channel should have been processed by Ilastik to create a new :file:`{c1_10}_Probabilities.h5` file. If you open this file in Fiji utilizing the fiji HDF5 plugin, it should contain three dimensions and two channels (signal and background, but for our purposes the two are interchangeable). Each pixel should have a value ranging between 0 and 1. If we are inspecting the signal channel, pixels with a value close to 0 (low p value) are highly likely to be true signal. Correspondingly, pixels with a value close to 1 are likely to be background. The :file:`{c1_10}_Probabilities.h5` file by Ilastik contains two channels (signal and background), which are inverse images. For a given pixel, the background intensity value is 1 minus the signal intensity value. In order to simplify our data, we will apply a threshold that will divide the data into two sets of pixels: signal and background. In the steps that follow, we will only use the set of pixels that correspond to true signal. This set of pixels may be also referred to as a set of points or a point cloud. In order to avoid keeping track of which channel is the signal channel, we assume that after applying a threshold there will be more points will fall in the background group than in the signal group. If this is not true, better Ilastik training or a stricter threshold is reccomended, or Cranium will instead be examining the structure of your background.
 
 .. warning::
 
@@ -33,13 +33,15 @@ The following code requires a parameter :envvar:`micron`, which specifies the di
 
 This section of the code also includes a deprecated parameter :envvar:`scale`, which must be set to :samp:`[1,1,1]`.
 
+.. TODO please describe what and why envvar exists and why not to touch it or change it.
+
 .. _CIthresh:
 
 Code Instructions
 ------------------
 The following instructions apply to processing a single sample. Details regarding function parameters can be found under :py:class:`embryo` and :py:func:`brain.preprocess_data`. Raw image data will be imported by :func:`embryo.add_channel`.
 
-.. code-block:: python 
+.. code-block:: python
 
 	import cranium
 
@@ -77,36 +79,42 @@ During typical collections of biological samples, each sample will be oriented s
 
 Structural Channel Processing
 ******************************
-We designate one channel, the ``structural channel``, which we will use for PCA to align samples. Since we are interested in the gross morphology of this channel, we apply two data preprocessing steps to reduce the data down to only essential points. First, we return to :attr:`brain.raw_data` and apply a new threshold, :envvar:`medthresh`, which is typically more stringent than :envvar:`genthresh`. This step ensures we are only considering points of signal with extremely high likelihood of being real. Second, we apply a median filter to the data twice, which smooths out the structure and eliminates small points of variation that may interfere with the alignment process of the gross structure. 
+We designate one channel, the ``structural channel``, which we will use for PCA to align samples. Since we are interested in the gross morphology of this channel, we apply two data preprocessing steps to reduce the data down to only essential points. First, we return to :attr:`brain.raw_data` and apply a new threshold, :envvar:`medthresh`, which is typically more stringent than :envvar:`genthresh`. This step ensures we are only considering points of signal with extremely high likelihood of being real. Second, we apply a median filter to the data twice, which smooths out the structure and eliminates small points of variation that may interfere with the alignment process of the gross structure.
 
 PCA outputs three new dimensions, the 1st, 2nd, and 3rd PCs. These components will be reassigned to the X, Y, and Z axes to help the user maintain orientation in regards to their data. In the case of the zebrafish post-optic commissure shown below (:numref:`pcafix`), the 1st PC is reassigned to the X axis and the 2nd and 3rd PCs are assigned to Z and Y respectively. These assignments honor the user's expectation of the sample's alignment in 3D space. The assignment of components to axes can be modified using the parameter :envvar:`comporder`.
 
-.. warning:: 
+.. warning::
 
-	In order for PCA to consistently align your samples in the same orientation, we are assuming that the three dimensions of your data are of different relative sizes. Since PCA looks for the axes that capture the most variation in your data, a sample that has axes of the same relative size will not have any distinguishing characteristics that PCA can use to identify and separate different axes.
+	In order for PCA to consistently align your samples in the same orientation, we are assuming that the three dimensions of your structure are of different relative sizes. Since PCA looks for the axes that capture the most variation in your data, a sample that has axes of the same relative size will not have any distinguishing characteristics that PCA can use to identify and separate different axes.
 
 .. _pcafix:
 .. figure:: ./images/pcafix.jpg
 	:align: center
 	:figclass: align-center
 
-	This example illustrates the efficacy of PCA at changing the orientation of the zebrafish post optic commissure. In this case, the 1st PC is significantly longer than the 2nd and 3rd. While these two remaining components are similar in size, the typically longer depth of the 2nd PC distinguishes it from the 3rd PC. 
+	This example illustrates the efficacy of PCA at changing the orientation of the zebrafish post optic commissure. In this case, the 1st PC is significantly longer than the 2nd and 3rd. While these two remaining components are similar in size, the typically longer depth of the 2nd PC distinguishes it from the 3rd PC.
+
+.. TODO Reference workarounds if data alignment in the 2nd and 3rd dimension are problematic.
 
 Model Fitting
 *************
 
 In addition to rotating the orientation of the data in 3D space, we also want to align the center of all samples at the origin. In order to determine the center of the data, we fit a simple mathematical model to the data that will also be used later in the analysis. The zebrafish post optic commissure shown above forms a parabolic structure, which can be described by y = ax^2 + bx + c. For simplicity, we fit the model in two dimensions, while holding one dimension constant. In the case of the POC, the parabolic structure lies flat in the XZ plane, which means that the structure can be described using exclusively the X and Z dimensions. The dimensions, which will be used to fit the 2D model, are specified in the parameter :envvar:`fitdim`. Additionally the :envvar:`deg` parameter specifies the degree of the function that fits to the data.
 
+.. TODO what if you need the third dimension for the equation?
+
 .. _SPpca:
 
 Setting Parameters
 ------------------
 
-:envvar:`medthresh` is typically set to 0.25, in comparison to a value of 0.5 for :envvar:`genthresh`. If your data contains aberrant signal that does not contribute to the gross morphology of the structure, an even lower :envvar:`medthresh` may help limit the negative influence of noisy signal. Additionally, the :envvar:`radius` of the median filter can also be tuned to eliminate noisy signal. The typical value for :envvar:`radius` is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for :envvar:`radius` will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data.
+:envvar:`medthresh` is typically set to 0.25, in comparison to a value of 0.5 for :envvar:`genthresh`. If your data contains aberrant signal that does not contribute to the gross morphology of the structure, an even lower :envvar:`medthresh` may help limit the negative influence of noisy signal. Additionally, the :envvar:`radius` of the median filter can also be tuned to eliminate noisy signal. The typical value for :envvar:`radius` is 20, which refers to the number of neighboring points that are considered in the median filter. A smaller value for :envvar:`radius` will preserve small variation in signal, while a larger value will cause even more blunting and smoothing of the data. Prior to running the median threshold, it is reccomended that the user load several HDF5 files containing the structure of interest into FIJI and test several median thresholds to determine which best resolves their structure. Utilize the best median threshold radius in :envvar:`radius`.
 
-The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`. 
+The :envvar:`comporder` parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2. For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`.
 
-Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function. 
+.. TODO The above needs to be written more clearly.  Too much jargon. The samefor below. Use more examples and explain their relavence.
+
+Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function, eg. y=mx +  b.
 
 .. warning:: The ability to specify degrees other than 2 is still being developed. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
 
@@ -117,7 +125,7 @@ Code Instructions
 ------------------
 
 .. code::
-	
+
 	#Run PCA on the structural channel, in this case, c1
 	e.chnls['c1'].calculate_pca_median(e.chnls['c1'].raw_data,medthresh,radius,microns)
 
@@ -139,12 +147,12 @@ Code Instructions
 Cylindrical Coordinates
 +++++++++++++++++++++++
 
-.. _Gcylcoord: 
+.. _Gcylcoord:
 
 Goal
 -----
 
-The ultimate goal with this workflow of data processing is to enable us to study small differences in biological structures when comparing a set of control samples to experimental samples. While our samples are now aligned to all fall in the same region of 3D space, our points are still defined by the xyz coordinates defined by the microscope. In order to detect changes in our structure, we will define the position of points relative to the structure using a cylindrical coordinate system. We will rely on the previously defined mathematical model, :attr:`brain.mm`, to represent the underlying shape of our structure. From there we will define the position of each point relative to the mathematical model (:numref:`coordsystem`). The first dimension, R, is defined as the shortest distance between the point and the model. Second, alpha is defined as the distance from the point's intersection with the model to the midline or center of the structure. Third, the position of the point around the model is defined in theta. Following the completion of the transformation, the final dataset is saved to a :file:`.psi` file.
+The ultimate goal with this workflow of data processing is to enable us to study small differences in biological 3D structures when comparing a set of control samples to experimental samples. While our samples are now aligned to all fall in the same region of 3D space, our points are still defined by the xyz coordinates defined by the microscope. In order to detect changes in our structure, we will define the position of points relative to the structure using a cylindrical coordinate system. We will rely on the previously defined mathematical model, :attr:`brain.mm`, to represent the underlying shape of our structure. From there we will define the position of each point relative to the mathematical model (:numref:`coordsystem`). The first dimension, R, is defined as the shortest distance between the point and the model. Second, alpha is defined as the distance from the point's intersection with the model to the midline or center of the structure. Third, the position of the point around the model is defined in theta. Following the completion of the transformation, the final dataset is saved to a :file:`.psi` file.
 
 .. _coordsystem:
 .. figure:: ./images/cordsystem.jpg
@@ -169,7 +177,7 @@ This transformation does not require defining any parameters; however, it assume
 	#Save processed data to .psi file
 	e.save_psi()
 
-.. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required. 
+.. warning:: This processing step is time consuming. We recommend running multiple samples in parallel in order to reduce the total amount of computational time required.
 
 Batch Processing
 +++++++++++++++++
