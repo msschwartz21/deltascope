@@ -12,6 +12,7 @@
 - `raw_data` funtion changed to select channel so that background = 1 and signal = 0 in line with expectation that pixel values function like a p value
 - Correct `calc_variance` to use `np.nanvar` instead of `np.var`
 - Change names to deltascope in github and folders
+- Median threshold value is rescaled to accommodate 0-255 image data that is output by skimage.filters.median
 
 ## [0.2.1] - 2018-01-14
 ### Changes
