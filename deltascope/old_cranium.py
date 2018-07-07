@@ -31,6 +31,18 @@ class brain:
 	def __init__(self):
 		'''Initialize brain object'''
 
+	def setup_test_data(self,size=None,gthresh=0.5,scale=[1,1,1],microns=[0.16,0.16,0.21],mthresh=0.2,radius=20,comp_order=[0,2,1],fit_dim=['x','z'],deg=2):
+		'''Setup a test dataset to use for testing transform coordinates
+		:param int size: Number of points to sample for the test dataset
+		'''
+
+		self.read_data(os.path.abspath('..\data\C1\AT_01_Probabilities.h5'))
+		self.preprocess_data(gthresh,scale,microns)
+		self.calculate_pca_median(self.raw_data,mthresh,radius,microns)
+		self.pca_transform_3d(self.df_thresh,self.pcamed,comp_order,fit_dim,deg=deg)
+		self.mm = self.fit_model(self.df_align,2,['x','z'])
+		if size!=None:
+			self.df_align = self.df_align.sample(size)
 
 	def read_data(self,filepath):
 		'''
@@ -196,7 +208,7 @@ class brain:
 			out[z] = median(median(data[z],disk(radius)),disk(radius))
 
 		outdf = self.create_dataframe(out,microns)
-		thresh = outdf[outdf.value < threshold]
+		thresh = outdf[outdf.value < 255*(1-threshold)]
 		return(thresh)
 
 	def calculate_pca_median(self,data,threshold,radius,microns):

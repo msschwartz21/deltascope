@@ -7,6 +7,7 @@ from skimage.filters import median
 from skimage.morphology import disk
 import sympy as sp
 from scipy.spatial import KDTree
+import time
 
 class brain:
 	''' Object to manage biological data and associated functions. '''
@@ -14,7 +15,7 @@ class brain:
 	def __init__(self):
 		'''Initialize brain object'''
 
-	def setup_test_data(self,size,gthresh=0.5,scale=[1,1,1],microns=[0.16,0.16,0.21],mthresh=0.2,radius=20,comp_order=[0,2,1],fit_dim=['x','z'],deg=2):
+	def setup_test_data(self,size=None,gthresh=0.5,scale=[1,1,1],microns=[0.16,0.16,0.21],mthresh=0.2,radius=20,comp_order=[0,2,1],fit_dim=['x','z'],deg=2):
 		'''Setup a test dataset to use for testing transform coordinates
 		:param int size: Number of points to sample for the test dataset
 		'''
@@ -23,8 +24,9 @@ class brain:
 		self.preprocess_data(gthresh,scale,microns)
 		self.calculate_pca_median(self.raw_data,mthresh,radius,microns)
 		self.pca_transform_3d(self.df_thresh,self.pcamed,comp_order,fit_dim,deg=deg)
-		self.mm = self.fit_model(self.df_align,['x','z'])
-		self.df_align = self.df_align.sample(size)
+		self.mm = self.fit_model(self.df_align,2,['x','z'])
+		if size!= None:
+			self.df_align = self.df_align.sample(size)
 
 	def read_data(self,filepath):
 		'''
@@ -464,6 +466,43 @@ class brain:
 		self.tree = KDTree(self.grid[['s','t']])
 		# return(self.grid,self.tree)
 
+	def transform_cylindrical(self,df,xstep,rmax,rnum,mm):
+
+		tic = time.time()
+		from sympy.abc import alpha,rho
+		a,ds,dt,x = sp.symbols('a ds dt x')
+		sp_dalpha = alpha*(ds + 2*a*dt*alpha)/(alpha+4*a**2*alpha**3+rho)
+		F_dalpha = sp.lambdify((a,alpha,rho,ds,dt),sp_dalpha,'numpy')
+
+		self.setup_tree(df.x.min(),df.x.max(),xstep,rmax,rnum,mm.cf[0])
+		print('Tree setup complete')
+
+		# Find alpha position on parabola
+		nbd,nbi = self.tree.query(df[['x','z']])
+		tpt = df.loc[df.index]
+		npt = self.grid.loc[nbi]
+		ds = tpt.x - np.array(npt.s)
+		dt = tpt.z - np.array(npt.t)
+		alpha = F_dalpha(mm.cf[0],np.array(npt.alpha),np.array(npt.r),ds,dt) + np.array(npt.alpha)
+		alpha = alpha.astype('float64')
+		print(type(alpha))
+		print('Alpha query complete')
+
+		# Calculate arclength
+		x1,x2 = sp.symbols('x1 x2')
+		sp_integral = (1/(2*a))*( a*x*sp.sqrt((1 + 4*a**2*x**2)) + (1/2)*sp.log(2*a*x + sp.sqrt((1 + 4*a**2*x**2))) )
+		sp_arclength = sp_integral.subs(x,x2) - sp_integral.subs(x,x1)
+		F_arclength = sp.lambdify((a,x1,x2),sp_arclength,'numpy')
+		df['ac'] = F_arclength(np.array([mm.cf[0]]*alpha.shape[0]),np.zeros(alpha.shape[0]),alpha)
+		print('Arclength complete')
+
+		# Calculate theta
+		df['theta'] = np.arctan2(df.y-0,df.z-mm.cf[0]*np.power(alpha,2))
+
+		#Calculate r
+		df['r'] = np.sqrt( (df.z-mm.cf[0]*np.power(alpha,2))**2 + (df.y-0)**2 + (df.x-alpha)**2 )
+
+		return(df)
 
 class math_model:
 	'''
