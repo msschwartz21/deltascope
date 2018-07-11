@@ -475,8 +475,9 @@ class brain:
 		F_dalpha = sp.lambdify((a,alpha,rho,ds,dt),sp_dalpha,'numpy')
 
 		self.setup_tree(df.x.min(),df.x.max(),xstep,rmax,rnum,mm.cf[0])
-		print('Tree setup complete')
+		print(time.time()-tic,'Tree setup complete')
 
+		tic = time.time()
 		# Find alpha position on parabola
 		nbd,nbi = self.tree.query(df[['x','z']])
 		tpt = df.loc[df.index]
@@ -485,22 +486,26 @@ class brain:
 		dt = tpt.z - np.array(npt.t)
 		alpha = F_dalpha(mm.cf[0],np.array(npt.alpha),np.array(npt.r),ds,dt) + np.array(npt.alpha)
 		alpha = alpha.astype('float64')
-		print(type(alpha))
-		print('Alpha query complete')
+		print(tic-time.time(),'Alpha query complete')
 
+		tic = time.time()
 		# Calculate arclength
 		x1,x2 = sp.symbols('x1 x2')
 		sp_integral = (1/(2*a))*( a*x*sp.sqrt((1 + 4*a**2*x**2)) + (1/2)*sp.log(2*a*x + sp.sqrt((1 + 4*a**2*x**2))) )
 		sp_arclength = sp_integral.subs(x,x2) - sp_integral.subs(x,x1)
 		F_arclength = sp.lambdify((a,x1,x2),sp_arclength,'numpy')
 		df['ac'] = F_arclength(np.array([mm.cf[0]]*alpha.shape[0]),np.zeros(alpha.shape[0]),alpha)
-		print('Arclength complete')
+		print(tic-time.time(),'Arclength complete')
 
+		tic = time.time()
 		# Calculate theta
 		df['theta'] = np.arctan2(df.y-0,df.z-mm.cf[0]*np.power(alpha,2))
+		print(tic-time.time(),'theta')
 
+		tic = time.time()
 		#Calculate r
 		df['r'] = np.sqrt( (df.z-mm.cf[0]*np.power(alpha,2))**2 + (df.y-0)**2 + (df.x-alpha)**2 )
+		print(tic-time.time(),'r')
 
 		return(df)
 

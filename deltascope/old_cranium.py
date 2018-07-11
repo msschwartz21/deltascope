@@ -533,18 +533,19 @@ class brain:
 		theta = np.arctan2(row.y-yc,row.z-zc)
 		return(theta)
 
-	def find_r(self,row,zc,yc):
+	def find_r(self,row,zc,yc,xc):
 		'''
 		Calculate r using the Pythagorean theorem
 
 		:param pd.Series row: row from dataframe in the form of a pandas Series
 		:param float yc: Y position of the closest point in the curve to the data point
 		:param float zc: Z position of the closest point in the curve to the data point
+		:param float xc: X position of hte closest point in the curve to the data point
 		:returns: r, distance between the point and the model
 		:rtype: float
 		'''
 
-		r = np.sqrt((row.z-zc)**2 + (row.y-yc)**2)
+		r = np.sqrt((row.z-zc)**2 + (row.y-yc)**2 + (row.x-xc)**2)
 		return(r)
 
 	def calc_coord(self,row):
@@ -558,7 +559,7 @@ class brain:
 		xc,yc,zc = self.find_min_distance(row)
 		ac = self.find_arclength(xc)
 		theta = self.find_theta(row,zc,yc)
-		r = self.find_r(row,zc,yc)
+		r = self.find_r(row,zc,yc,xc)
 
 		return(pd.Series({'x':row.x,'y':row.y,'z':row.z,'xc':xc, 'yc':yc, 'zc':zc,
 					'r':r, 'ac':ac, 'theta':theta}))
@@ -1663,12 +1664,12 @@ def write_data(filepath,df):
 	n = df.count()['x']
 
 	#Write line with sample number
-	f.write(str(n)+' 0 0\n')
+	f.write('\n'+str(n)+' 0 0\n')
 
 	#Write translation matrix
 	f.write('1 0 0\n'+
 			'0 1 0\n'+
-			'0 0 1\n')
+			'0 0 1\n\n')
 
 	#Write dataframe to file using pandas to_csv function to format
 	try:

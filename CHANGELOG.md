@@ -13,6 +13,7 @@
 - Correct `calc_variance` to use `np.nanvar` instead of `np.var`
 - Change names to deltascope in github and folders
 - Median threshold value is rescaled to accommodate 0-255 image data that is output by skimage.filters.median
+- `find_r` was only calculating distance in Y and Z so added X as well
 
 ## [0.2.1] - 2018-01-14
 ### Changes

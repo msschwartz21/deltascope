@@ -1,4 +1,4 @@
-import cranium
+import old_cranium as cranium
 import multiprocessing as mp
 import time
 import os
