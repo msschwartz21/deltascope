@@ -5,6 +5,7 @@
 - Created a new class, `anumSelect`, which determines the optimum number of bins along alpha
 - Created two new glasses, `graphData` and `graphSet` to handle plotting landmark data
 - Created a new class `treeClassifier` which handles running the random forest classifier
+- Added functions to facilitate corrections to pca alignment
 ### Changes
 - In lm.calc_bins, input is a dictionary of dfs as opposed to a list of df values from dfs.values()
 - `convert_to_arr` added option for selecting r or pts datatype (`DT`)
@@ -14,6 +15,7 @@
 - Change names to deltascope in github and folders
 - Median threshold value is rescaled to accommodate 0-255 image data that is output by skimage.filters.median
 - `find_r` was only calculating distance in Y and Z so added X as well
+- median filter threshold in `calculate_pca_median` is set to select all points that do not have a value of 255 (background). User input signal is not used.
 
 ## [0.2.1] - 2018-01-14
 ### Changes

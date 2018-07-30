@@ -203,12 +203,12 @@ class brain:
 		'''
 
 		#Iterate over each plane and apply median filter twice
-		out = np.zeros(data.shape)
+		self.out = np.zeros(data.shape)
 		for z in range(data.shape[0]):
-			out[z] = median(median(data[z],disk(radius)),disk(radius))
+			self.out[z] = median(median(data[z],disk(radius)),disk(radius))
 
-		outdf = self.create_dataframe(out,microns)
-		thresh = outdf[outdf.value < 255*(1-threshold)]
+		outdf = self.create_dataframe(self.out,microns)
+		thresh = outdf[outdf.value != 255]
 		return(thresh)
 
 	def calculate_pca_median(self,data,threshold,radius,microns):
@@ -300,7 +300,7 @@ class brain:
 			'z':fit[:,comp_order[2]]
 			})
 
-		self.align_data(df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None)
+		self.align_data(df_fit,fit_dim,deg=deg,mm=mm,vertex=vertex,flip=flip)
 
 	def align_data(self,df_fit,fit_dim,deg=2,mm=None,vertex=None,flip=None):
 		'''
@@ -758,6 +758,52 @@ class math_model:
 
 		self.cf = model
 		self.p = np.poly1d(model)
+
+####### Alignment correction functions#########
+
+def find_anchors(df,dim):
+	''':param str dim: either y or z'''
+	mm = math_model(np.polyfit(df['x'],df[dim],2))
+
+	pt1 = {}
+	if mm.cf[0] > 0:
+		pt1[dim] = np.max(df[dim])
+	else:
+		pt1[dim] = np.min(df[dim])
+	pt1['x'] = df[df[dim] == pt1[dim]].x.values[0]
+
+	pt2 = {}
+	if abs(pt1['x']-np.min(df.x)) > abs(pt1['x']-np.max(df.x)):
+		pt2['x'] = np.min(df.x)
+	else:
+		pt2['x'] = np.max(df.x)
+	pt2[dim] = df[df.x == pt2['x']][dim].values[0]
+	return(pt1,pt2)
+
+def calc_rotation(pts,d):
+	dx = (pts.iloc[0].x - pts.iloc[1].x)/2
+	dy = (pts.iloc[0][d] - pts.iloc[1][d])/2
+
+	mp = [pts.iloc[1].x + dx, pts.iloc[1][d] + dy]
+
+	phi = np.arctan2(dy,dx)
+	if d == 'y':
+			A = np.array([[np.cos(phi),-np.sin(phi),0],
+						[np.sin(phi),np.cos(phi),0],
+						[0,0,1]])
+	else:
+		A = np.array([[np.cos(phi),0,-np.sin(phi)],
+						[0,1,0],
+						[np.sin(phi),0,np.cos(phi)]])
+
+		return(mp,A)
+
+def cant_correction(df,d):
+    pts = find_anchors(df,d)
+    mp,A = calc_rotation(pts,d)
+    rot = np.dot(np.array(df[['x','y','z']]),A)
+    rdf = pd.DataFrame({'x':rot[:,0],'y':rot[:,1],'z':rot[:,2]})
+    return(rdf)
 
 class landmarks:
 	'''
@@ -1322,7 +1368,7 @@ class graphSet:
 
 		for j,c in enumerate(LcUn):
 			dc = self.Dc[c]
-			parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
+			# parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
 			for i,p in enumerate(self.tpairs):
 				for s in LsUn:
 					go = dc[s]
