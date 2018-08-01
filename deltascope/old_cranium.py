@@ -1340,7 +1340,34 @@ class graphSet:
 		else:
 			D[k1] = {k2:item}
 
-	def make_figure(self,a,figsize=(10,8),P=True):
+	def start_figure(self,figsize=(10,8)):
+
+		self.LsUn = np.unique(self.Ls)
+		self.LcUn = np.unique(self.Lc)
+
+		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharey=True)
+
+	def add_plot(self,go,c,s,j,a=0.3):
+
+		# go = self.Dc[c][s]
+
+		for i,p in enumerate(self.tpairs):
+			ti1 = np.where(self.tarr==p[0])[0][0]
+			ti2 = np.where(self.tarr==p[1])[0][0]
+
+			self.axr[i,j].fill_between(self.xarr,go.avg[:,ti1]+go.sem[:,ti1],go.avg[:,ti1]-go.sem[:,ti1],alpha=a,color=go.c,zorder=1)
+			self.axr[i,j].fill_between(self.xarr,-go.avg[:,ti2]+go.sem[:,ti2],-go.avg[:,ti2]-go.sem[:,ti2],alpha=a,color=go.c,zorder=1)
+
+			self.axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
+			self.axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
+
+	def add_legends(self,I,J):
+
+		for i in range(I):
+			for j in range(J):
+				self.axr[i,j].legend()
+
+	def make_figure(self,a,P=True):
 		'''
 		Creates a figure showing four theta slices and as many columns as ctypes
 
@@ -1361,16 +1388,16 @@ class graphSet:
 			Subplot axis array created by :func:`graphSet.make_figure`
 		'''
 
-		LsUn = np.unique(self.Ls)
-		LcUn = np.unique(self.Lc)
+		self.LsUn = np.unique(self.Ls)
+		self.LcUn = np.unique(self.Lc)
 
-		self.fig,self.axr = plt.subplots(4,len(LsUn),figsize=figsize,sharey=True)
+		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharey=True)
 
-		for j,c in enumerate(LcUn):
+		for j,c in enumerate(self.LcUn):
 			dc = self.Dc[c]
-			parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
+			parr = stats.ttest_ind(dc[self.LsUn[0]].arr_masked,dc[self.LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
 			for i,p in enumerate(self.tpairs):
-				for s in LsUn:
+				for s in self.LsUn:
 					go = dc[s]
 
 					ti1 = np.where(self.tarr==p[0])[0][0]

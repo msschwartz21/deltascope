@@ -139,6 +139,13 @@ def save_both(k,dfa,dfz,outdir,expname):
 ######### Alignment functions ###############
 
 def calc_rotation(pts,d):
+    '''
+    Calculate a rotation matrix A based on two anchor points
+
+    :param pd.DataFrame pts: Two points in x and the dimension d
+    :param str d: Second dimension of the two points: 'z' or 'y'
+    :return: midpoint, rotation matrix
+    '''
     dx = (pts.iloc[0].x - pts.iloc[1].x)/2
     dy = (pts.iloc[0][d] - pts.iloc[1][d])/2
 
@@ -159,6 +166,15 @@ def calc_rotation(pts,d):
     return(mp,A)
 
 def xrotate(df,Ldf,d,pts=None):
+    '''
+    Define two anchor points and rotate data so that the anchor points are level
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :param str d: Second dimension of the plane that needs to be rotated: 'z' or 'y'
+    :param pd.DataFrame pts: Two points in x and the dimension d
+    :return: `df` after rotation, a list of rotated dataframes from `Ldf`, `pts`
+    '''
 
     if type(pts) == type(None):
         pt1,pt2 = cranium.find_anchors(df,d)
@@ -174,6 +190,13 @@ def xrotate(df,Ldf,d,pts=None):
     return(out,Lout,pts)
 
 def zyswitch(df,Ldf):
+    '''
+    Switch z and y axes by reassigning z to y and vice versa
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: `df` and `Ldf` after exchanging z and y
+    '''
 
     out = pd.DataFrame({'x':df.x,'y':df.z,'z':df.y})
     Lout = []
@@ -183,6 +206,13 @@ def zyswitch(df,Ldf):
     return(out,Lout)
 
 def vertex(df,Ldf):
+    '''
+    Calculate the vertex in the XZ plane and shift the vertex to the origin
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: `df` and `Ldf` after translation of the vertex to the origin
+    '''
 
     cf = np.polyfit(df.x,df.z,2)
     x = -cf[1]/(2*cf[0])
@@ -205,6 +235,13 @@ def vertex(df,Ldf):
     return(out,Lout)
 
 def flip(df,Ldf):
+    '''
+    Rotate by 180 degrees around the x axis
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: `df` and `Ldf` after rotation
+    '''
 
     A = np.array([[1,0,0],
                 [0,np.cos(np.pi),-np.sin(np.pi)],
@@ -218,6 +255,13 @@ def flip(df,Ldf):
     return(out,Lout)
 
 def yzrotate(df,Ldf,mm=None):
+    '''
+    Fit a line in YZ and rotate so the line is horizontal
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: `df` and `Ldf` after rotation to correct the lines, 1d line function, range of z values for the line
+    '''
 
     if mm == None:
         mm = np.polyfit(df.z,df.y,1)
@@ -236,6 +280,13 @@ def yzrotate(df,Ldf,mm=None):
     return(out,Lout,p,xrange)
 
 def check_yz(df,Ldf,mm=None):
+    '''
+    Fit line in YZ and rotate line to be horizontal using `yzrotate` then display graph
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: `df` and `Ldf` after rotation to correct the lines, array of graph subplots, 1d line function
+    '''
 
     out,Lout,p,xrange = yzrotate(df,Ldf,mm=mm)
     ax = make_graph([df,out]+Lout)
@@ -244,6 +295,13 @@ def check_yz(df,Ldf,mm=None):
     return(out,Lout,ax,p)
 
 def make_graph(Ldf):
+    '''
+    Plot the three projections of each dataframe in `Ldf`
+
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :return: Array of subplots with minimum dimension of 2x3
+    '''
+
     n = len(Ldf)
     fig,ax = plt.subplots(n,3,subplot_kw={'aspect':'equal','adjustable':'datalim'},figsize=(12,n*4))
 
@@ -254,6 +312,14 @@ def make_graph(Ldf):
     return(ax)
 
 def start(k,Da,LD):
+    '''
+    Extract `df_align` dataframes from `cranium.brain` objects and plots using `make_graph`
+
+    :param str k: Key corresponding to the relevant sample
+    :param dict Da: Dictionary containing brain objects for each sample with key `k`
+    :param list LD: List of any additional dictionaries from which `df_align` should be extracted
+    :returns: key, primary dataframe, list of additional dataframes, subplot array
+    '''
     df = Da[k].df_align
     Ldf = []
     for D in LD:
@@ -262,27 +328,42 @@ def start(k,Da,LD):
     return(k,df,Ldf,ax)
 
 def check_pts(df,Ldf,d):
+    '''
+    Calculates anchor points and plots before and after rotation
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :param str d: Second dimension of the plane that needs to be rotated: 'z' or 'y'
+    :returns: Rotated `df`, list of rotated dfs from `Ldf`, anchor points, subplot array
+    '''
     df1,Ldf1,pts = xrotate(df,Ldf,d)
     ax = make_graph([df,df1]+Ldf1)
     ax[0,1].scatter(pts.x,pts.z,c='r')
     return(df1,Ldf1,pts,ax)
 
 def revise_pts(df,Ldf,d,pts):
+    '''
+    Rotate and plot data based on `pts` parameter
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :param str d: Second dimension of the plane that needs to be rotated: 'z' or 'y'
+    :param pd.DataFrame pts: Two points in x and the dimension d
+    :returns: Rotated `df`, list of rotated dfs from `Ldf`, subplot array
+    '''
     df1,Ldf1,pts2 = xrotate(df,Ldf,d,pts=pts)
     ax = make_graph([df,df1]+Ldf1)
     ax[0,1].scatter(pts2.x,pts2.z,c='r')
     return(df1,Ldf1,ax)
 
 def ch_vertex(df,Ldf):
+    '''
+    Calculate vertex based on `df` and translate all dataframes to shift vertex to origin
+
+    :param pd.DataFrame df: Dataframe that will be used to calculate the anchor points and rotation
+    :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
+    :returns: Translated `df`, list of translated dataframes from `Ldf`, subplot array
+    '''
     df1,Ldf1 = vertex(df,Ldf)
     ax = make_graph([df1]+Ldf1)
     return(df1,Ldf1,ax)
-
-def generate_yot(b,pca=None):
-    if pca == None:
-        pca = b.pcamed
-        medarr = pca.transform(b.median[['x','y','z']])
-        med = pd.DataFrame({'x':medarr[:,0],'y':medarr[:,2],'z':medarr[:,1]})
-    arr = pca.transform(b.df_thresh[['x','y','z']])
-    df = pd.DataFrame({'x':arr[:,0],'y':arr[:,2],'z':arr[:,1]})
-    return(df,med)
