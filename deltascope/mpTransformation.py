@@ -4,6 +4,7 @@ import time
 import os
 from functools import partial
 from sys import argv
+from sys import exc_info
 import re
 import json
 
@@ -203,44 +204,55 @@ def process(num,P=None):
 
 	tic = time.time()
 	print(num,'Starting sample')
+	try:
+		e = cranium.embryo(P.expname,num,P.outdir)
 
-	e = cranium.embryo(P.expname,num,P.outdir)
-
-	#Add channels and preprocess data
-	e.add_channel(os.path.join(P.c1_dir,P.c1_files[num]),P.c1_key)
-	e.chnls[P.c1_key].preprocess_data(P.genthresh,P.scale,P.microns)
-	for i in range(len(P.Lcdir)):
-		e.add_channel(os.path.join(P.Lcdir[i],P.Lcfiles[i][num]),P.Lckey[i])
-		e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
-
-	#Calculate PCA transformation for structural channel, c1
-	if P.twoD == True:
-		e.chnls[P.c1_key].calculate_pca_median_2d(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
-		pca = e.chnls[P.c1_key].pcamed
-		e.chnls[P.c1_key].pca_transform_2d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
-
-		#Transform additional channels
+		#Add channels and preprocess data
+		e.add_channel(os.path.join(P.c1_dir,P.c1_files[num]),P.c1_key)
+		e.chnls[P.c1_key].preprocess_data(P.genthresh,P.scale,P.microns)
 		for i in range(len(P.Lcdir)):
-			e.chnls[P.Lckey[i]].pca_transform_2d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+			e.add_channel(os.path.join(P.Lcdir[i],P.Lcfiles[i][num]),P.Lckey[i])
+			e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
 
-	else:
-		e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
-		pca = e.chnls[P.c1_key].pcamed
-		e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+		#Calculate PCA transformation for structural channel, c1
+		if P.twoD == True:
+			e.chnls[P.c1_key].calculate_pca_median_2d(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+			pca = e.chnls[P.c1_key].pcamed
+			e.chnls[P.c1_key].pca_transform_2d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-		#Transform additional channels
-		for i in range(len(P.Lcdir)):
-			e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
+			#Transform additional channels
+			for i in range(len(P.Lcdir)):
+				e.chnls[P.Lckey[i]].pca_transform_2d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-	print(num,'Starting coordinate transformation')
-	e.chnls[P.c1_key].transform_coordinates()
-	for i in range(len(P.Lcdir)):
-		e.chnls[P.Lckey[i]].transform_coordinates()
+		else:
+			e.chnls[P.c1_key].calculate_pca_median(e.chnls[P.c1_key].raw_data,P.medthresh,P.radius,P.microns)
+			pca = e.chnls[P.c1_key].pcamed
+			e.chnls[P.c1_key].pca_transform_3d(e.chnls[P.c1_key].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-	e.save_psi()
+			#Transform additional channels
+			for i in range(len(P.Lcdir)):
+				e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 
-	toc = time.time()
-	print(num,'Complete',toc-tic)
+		# print(num,'Starting coordinate transformation')
+		# e.chnls[P.c1_key].transform_coordinates()
+		# for i in range(len(P.Lcdir)):
+		# 	e.chnls[P.Lckey[i]].transform_coordinates()
+
+		#e.save_psi()
+		columns = ['x','y','z']
+
+		for ch in e.chnls.keys():
+			cranium.write_data(os.path.join(e.outdir,
+				e.name+'_'+str(e.number)+'_'+ch+'.psi'),
+				e.chnls[ch].df_align[columns])
+
+		toc = time.time()
+		print(num,'Complete',toc-tic)
+
+	except:
+		toc = time.time()
+		print(num,'Failed',toc-tic,exc_info())
+
 
 if __name__=='__main__':
 
