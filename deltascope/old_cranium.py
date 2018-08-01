@@ -796,7 +796,7 @@ def calc_rotation(pts,d):
 						[0,1,0],
 						[np.sin(phi),0,np.cos(phi)]])
 
-		return(mp,A)
+	return(mp,A)
 
 def cant_correction(df,d):
     pts = find_anchors(df,d)
@@ -1368,7 +1368,7 @@ class graphSet:
 
 		for j,c in enumerate(LcUn):
 			dc = self.Dc[c]
-			# parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
+			parr = stats.ttest_ind(dc[LsUn[0]].arr_masked,dc[LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
 			for i,p in enumerate(self.tpairs):
 				for s in LsUn:
 					go = dc[s]
