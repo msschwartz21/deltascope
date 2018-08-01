@@ -1,4 +1,4 @@
-import cranium
+import old_cranium as cranium
 import multiprocessing as mp
 import time
 import os
@@ -6,7 +6,7 @@ import sys
 from functools import partial
 from random import randint
 
-def transform_file(f): 
+def transform_file(f):
 
 	print(f, 'starting')
 
@@ -14,20 +14,18 @@ def transform_file(f):
 
 	s = cranium.brain()
 	df = cranium.read_psi(f)
-	s.add_aligned_df(df[['x','y','z']])
-	s.transform_coordinates()
+	if 'ac' not in df.columns:
+		s.add_aligned_df(df[['x','y','z']])
+		s.transform_coordinates()
 
-	cranium.write_data(f,s.df_align)
+		cranium.write_data(f,s.df_align)
 
 	print(f,'complete',time.time()-tic)
 
 
 if __name__=='__main__':
 
-	outdirs = [ "C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\yot\\PostThetaFix10_17"
-	#"C:\\Users\\zfishlab\\Desktop\\zrf1wt13umyot21um\\wt\\PostThetaFix10_17"
-		
-	]
+	outdirs = ["D:\You-Too Experiment Quantification Paper\Output-07-30-youtoo"]
 
 	for outdir in outdirs:
 
