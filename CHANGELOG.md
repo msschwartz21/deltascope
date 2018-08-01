@@ -6,6 +6,7 @@
 - Created two new glasses, `graphData` and `graphSet` to handle plotting landmark data
 - Created a new class `treeClassifier` which handles running the random forest classifier
 - Added functions to facilitate corrections to pca alignment
+- Added utility.py which contains functions that assist with manual alignment correction
 ### Changes
 - In lm.calc_bins, input is a dictionary of dfs as opposed to a list of df values from dfs.values()
 - `convert_to_arr` added option for selecting r or pts datatype (`DT`)
