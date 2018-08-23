@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import re
 import h5py
-import old_cranium as cranium
+import deltascope as cranium
 
 def read_h5prob_to_dict(fdir):
     '''
