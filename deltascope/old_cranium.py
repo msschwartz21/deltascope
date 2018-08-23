@@ -1367,7 +1367,7 @@ class graphSet:
 			for j in range(J):
 				self.axr[i,j].legend()
 
-	def make_figure(self,a,P=True):
+	def make_figure(self,a,figsize=(10,8),P=True,pthresh=None,cbar=False):
 		'''
 		Creates a figure showing four theta slices and as many columns as ctypes
 
@@ -1377,7 +1377,8 @@ class graphSet:
 
 		:param float a: Alpha value for fill_between ribbons
 		:param tuple figsize: Tuple specifying the height and width of the figure
-		:param bool p: True if pvalue should be plotted
+		:param bool P: True if pvalue should be plotted
+		:param float pthresh: None or float value for p-value threshold
 
 		.. attribute:: graphSet.fig
 
@@ -1396,6 +1397,13 @@ class graphSet:
 		for j,c in enumerate(self.LcUn):
 			dc = self.Dc[c]
 			parr = stats.ttest_ind(dc[self.LsUn[0]].arr_masked,dc[self.LsUn[1]].arr_masked,axis=2,nan_policy='omit')[1]
+
+			if pthresh != None:
+				bhthresh = pthresh/(len(self.xarr)*len(self.tarr))
+				parr[parr<pthresh] = 0
+				parr[parr>pthresh] = 1
+				print(bhthresh)
+
 			for i,p in enumerate(self.tpairs):
 				for s in self.LsUn:
 					go = dc[s]
@@ -1410,11 +1418,14 @@ class graphSet:
 					self.axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
 
 					if (s == 'mt') & (P==True):
-						self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3)
-						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3)
-						print('plot pval')
+						cax = self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3,vmin=0,vmax=1)
+						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3,vmin=0,vmax=1)
+						# print('plot pval')
+						if cbar==True:
+							plt.colorbar(cax,ax=self.axr[i,j])
 
 				self.axr[i,j].legend()
+				self.axr[i,j].set_xlim([-100,100])
 
 class graphData:
 

@@ -16,8 +16,8 @@ def read_h5prob_to_dict(fdir):
     D = {}
     for f in os.listdir(fdir):
         if 'h5' in f:
-            num = re.findall(r'\d+',f.split('.')[0])[0]
-            file = h5py.File(os.path.join(mtzrf,f))
+            num = re.findall(r'\d+',f.split('.')[0])[1]
+            file = h5py.File(os.path.join(fdir,f))
             D[num] = file.get('exported_data')
 
     return(D)
@@ -136,6 +136,24 @@ def save_both(k,dfa,dfz,outdir,expname):
     save_at(k,dfa,outdir,expname)
     save_zrf(k,dfz,outdir,expname)
 
+def save_caax(k,df,outdir,expname):
+
+    cranium.write_data(os.path.join(outdir,'caax_'+k+'_'+expname+'.psi'),df)
+
+def save_all(k,dfa,dfz,dfc,outdir,expname):
+    '''
+    Save dataframe as psi file in outdir
+
+    :param str k: Sample number
+    :param pd.DataFrame dfa: AT dataframe containing 'x','y','z'
+    :param pd.DataFrame dfa: Zrf dataframe containing 'x','y','z'
+    :param str outdir: Filepath to destination directory for psi
+    :param str expname: Descriptive name for experiment to be used in filename
+    '''
+    save_at(k,dfa,outdir,expname)
+    save_zrf(k,dfz,outdir,expname)
+    save_caax(k,dfc,outdir,expname)
+
 ######### Alignment functions ###############
 
 def calc_rotation(pts,d):
@@ -205,7 +223,7 @@ def zyswitch(df,Ldf):
 
     return(out,Lout)
 
-def vertex(df,Ldf):
+def vertex(df,Ldf,pts=None):
     '''
     Calculate the vertex in the XZ plane and shift the vertex to the origin
 
@@ -214,7 +232,10 @@ def vertex(df,Ldf):
     :return: `df` and `Ldf` after translation of the vertex to the origin
     '''
 
-    cf = np.polyfit(df.x,df.z,2)
+    if type(pts)!=type(None):
+        cf = np.polyfit(pts.x,pts.z,2)
+    else:
+        cf = np.polyfit(df.x,df.z,2)
     x = -cf[1]/(2*cf[0])
     z = np.poly1d(cf)(x)
     y = np.mean(df.y)
@@ -232,7 +253,12 @@ def vertex(df,Ldf):
             'z':d.z-z
         }))
 
-    return(out,Lout)
+    if type(pts)!=type(None):
+        cfout = np.polyfit(pts.x-x,pts.z-z,2)
+    else:
+        cfout = np.polyfit(out.x,out.z,2)
+
+    return(out,Lout,cfout)
 
 def flip(df,Ldf):
     '''
@@ -294,7 +320,7 @@ def check_yz(df,Ldf,mm=None):
 
     return(out,Lout,ax,p)
 
-def make_graph(Ldf):
+def make_graph(Ldf,Lim=[]):
     '''
     Plot the three projections of each dataframe in `Ldf`
 
@@ -302,16 +328,19 @@ def make_graph(Ldf):
     :return: Array of subplots with minimum dimension of 2x3
     '''
 
-    n = len(Ldf)
+    n = len(Ldf)+len(Lim)
     fig,ax = plt.subplots(n,3,subplot_kw={'aspect':'equal','adjustable':'datalim'},figsize=(12,n*4))
 
     for i,d in enumerate(Ldf):
         scatter_df(ax,i,d.sample(frac=0.1))
         plot_lines(ax,i)
 
+    for i,im in enumerate(Lim):
+        imshow_arr(ax,len(Ldf)+i,im,np.min)
+
     return(ax)
 
-def start(k,Da,LD):
+def start(k,Da,LD,im=False):
     '''
     Extract `df_align` dataframes from `cranium.brain` objects and plots using `make_graph`
 
@@ -320,11 +349,18 @@ def start(k,Da,LD):
     :param list LD: List of any additional dictionaries from which `df_align` should be extracted
     :returns: key, primary dataframe, list of additional dataframes, subplot array
     '''
+    Lim = []
+    Lim.append(Da[k].raw_data)
     df = Da[k].df_align
     Ldf = []
     for D in LD:
         Ldf.append(D[k].df_align)
-    ax = make_graph([df]+Ldf)
+        Lim.append(D[k].raw_data)
+
+    if im==True:
+        ax = make_graph([df]+Ldf,Lim)
+    else:
+        ax = make_graph([df]+Ldf,[])
     return(k,df,Ldf,ax)
 
 def check_pts(df,Ldf,d):
@@ -338,7 +374,10 @@ def check_pts(df,Ldf,d):
     '''
     df1,Ldf1,pts = xrotate(df,Ldf,d)
     ax = make_graph([df,df1]+Ldf1)
-    ax[0,1].scatter(pts.x,pts.z,c='r')
+    if d=='z':
+        ax[0,1].scatter(pts.x,pts[d],c='r')
+    if d=='y':
+        ax[0,0].scatter(pts.x,pts[d],c='r')
     return(df1,Ldf1,pts,ax)
 
 def revise_pts(df,Ldf,d,pts):
@@ -353,10 +392,13 @@ def revise_pts(df,Ldf,d,pts):
     '''
     df1,Ldf1,pts2 = xrotate(df,Ldf,d,pts=pts)
     ax = make_graph([df,df1]+Ldf1)
-    ax[0,1].scatter(pts2.x,pts2.z,c='r')
+    if d=='z':
+        ax[0,1].scatter(pts2.x,pts2[d],c='r')
+    if d=='y':
+        ax[0,0].scatter(pts2.x,pts2[d],c='r')
     return(df1,Ldf1,ax)
 
-def ch_vertex(df,Ldf):
+def ch_vertex(df,Ldf,pts=None):
     '''
     Calculate vertex based on `df` and translate all dataframes to shift vertex to origin
 
@@ -364,6 +406,8 @@ def ch_vertex(df,Ldf):
     :param list Ldf: List of additionally dataframes that should be rotated based on the calculation from `df`
     :returns: Translated `df`, list of translated dataframes from `Ldf`, subplot array
     '''
-    df1,Ldf1 = vertex(df,Ldf)
+    df1,Ldf1,mm = vertex(df,Ldf,pts=pts)
     ax = make_graph([df1]+Ldf1)
-    return(df1,Ldf1,ax)
+    xrange = np.arange(df1.x.min(),df1.x.max())
+    ax[0,1].plot(xrange,np.poly1d(mm)(xrange),c='m')
+    return(df1,Ldf1,mm,ax)
