@@ -27,6 +27,7 @@
 
 Notebooks/
 dist/
-docs/build
+docs/build/
 env-cranium
 shell_output
+build/
