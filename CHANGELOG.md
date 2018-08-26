@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+### Changes
+- Add sys path to sphinx conf file
+
 ## [0.2.3] - 2018-01-14
 ### Changes
 - Correct unittest.mock import to mock in conf.py file

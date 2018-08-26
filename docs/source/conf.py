@@ -17,7 +17,7 @@ import sys
 import os
 import shlex
 
-#sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../..'))
 sys.path.append('C:\Users\zfishlab\Code\deltascope')
 # sys.path.append(os.path.join(os.path.dirname(__name__), '..'))
 # sys.path.insert(0,'C:\\Users\\zfishlab\\Code\\deltascope\\deltascope')
