@@ -9,7 +9,7 @@ def requirements():
 		return (f.read())
 
 setup(name='deltascope',
-	version='0.2.3',
+	version='0.2.4',
 	description='Python package to quantify biological structure',
 	long_description=readme(),
 	keywords='biology image analysis quantification',
