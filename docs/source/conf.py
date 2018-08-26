@@ -34,7 +34,7 @@ class Mock(MagicMock):
 MOCK_MODULES = ['scipy', 'scipy.optimize','scipy.integrate','scipy.stats',
 'numpy', 'pandas','h5py',
 'matplotlib','matplotlib.pyplot',
-'sklearn','sklearn.preprocessing','sklearn.decomposition','sklearn.metrics',
+'sklearn','sklearn.preprocessing','sklearn.decomposition','sklearn.metrics','sklearn.ensemble',
 'skimage','skimage.filters','skimage.morphology']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
