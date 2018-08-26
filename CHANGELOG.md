@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.3] - 2018-01-14
+### Changes
+- Correct unittest.mock import to mock in conf.py file
+
 ## [0.2.2] 2018-08-26
 ### Additions
 - Created a new class, `anumSelect`, which determines the optimum number of bins along alpha
