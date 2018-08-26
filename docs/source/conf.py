@@ -31,8 +31,11 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return MagicMock()
 
-MOCK_MODULES = ['scipy', 'numpy', 'pandas','h5py',
-'matplotlib','sklearn','skimage']
+MOCK_MODULES = ['scipy', 'scipy.optimize','scipy.integrate','scipy.stats',
+'numpy', 'pandas','h5py',
+'matplotlib','matplotlib.pylot',
+'sklearn','sklearn.preprocessing','sklearn.decomposition','sklearn.metrics',
+'skimage','skimage.filters','skimage.morphology']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 #import deltascope
