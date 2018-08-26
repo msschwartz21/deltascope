@@ -62,7 +62,7 @@ In addition to the parameters described in `Parameter Reference <param ref>`_, :
 API
 ++++
 
-.. currentmodule:: cranium.mpTransformation
+.. currentmodule:: deltascope.mpTransformation
 
-.. automodule:: cranium.mpTransformation
+.. automodule:: deltascope.mpTransformation
 	:members:

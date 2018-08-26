@@ -1,11 +1,11 @@
 .. _data process:
 
-Cranium Data Processing
+deltascope Data Processing
 ========================
 
-.. currentmodule:: cranium
+.. currentmodule:: deltascope
 
-.. note:: This guide will describe a set of parameters that the user needs to specify when running cranium. A complete list of all parameters if available on the `Parameter Reference <param ref>`_ page.
+.. note:: This guide will describe a set of parameters that the user needs to specify when running deltascope. A complete list of all parameters if available on the `Parameter Reference <param ref>`_ page.
 
 .. _thresh:
 
@@ -16,11 +16,11 @@ Intensity Thresholding
 
 Goal
 ----
-At this point, each sample/channel should have been processed by Ilastik to create a new :file:`{c1_10}_Probabilities.h5` file. If you open this file in Fiji utilizing the fiji HDF5 plugin, it should contain three dimensions and two channels (signal and background, but for our purposes the two are interchangeable). Each pixel should have a value ranging between 0 and 1. If we are inspecting the signal channel, pixels with a value close to 0 (low p value) are highly likely to be true signal. Correspondingly, pixels with a value close to 1 are likely to be background. The :file:`{c1_10}_Probabilities.h5` file by Ilastik contains two channels (signal and background), which are inverse images. For a given pixel, the background intensity value is 1 minus the signal intensity value. In order to simplify our data, we will apply a threshold that will divide the data into two sets of pixels: signal and background. In the steps that follow, we will only use the set of pixels that correspond to true signal. This set of pixels may be also referred to as a set of points or a point cloud. In order to avoid keeping track of which channel is the signal channel, we assume that after applying a threshold there will be more points will fall in the background group than in the signal group. If this is not true, better Ilastik training or a stricter threshold is reccomended, or Cranium will instead be examining the structure of your background.
+At this point, each sample/channel should have been processed by Ilastik to create a new :file:`{c1_10}_Probabilities.h5` file. If you open this file in Fiji utilizing the fiji HDF5 plugin, it should contain three dimensions and two channels (signal and background, but for our purposes the two are interchangeable). Each pixel should have a value ranging between 0 and 1. If we are inspecting the signal channel, pixels with a value close to 0 (low p value) are highly likely to be true signal. Correspondingly, pixels with a value close to 1 are likely to be background. The :file:`{c1_10}_Probabilities.h5` file by Ilastik contains two channels (signal and background), which are inverse images. For a given pixel, the background intensity value is 1 minus the signal intensity value. In order to simplify our data, we will apply a threshold that will divide the data into two sets of pixels: signal and background. In the steps that follow, we will only use the set of pixels that correspond to true signal. This set of pixels may be also referred to as a set of points or a point cloud. In order to avoid keeping track of which channel is the signal channel, we assume that after applying a threshold there will be more points will fall in the background group than in the signal group. If this is not true, better Ilastik training or a stricter threshold is reccomended, or deltascope will instead be examining the structure of your background.
 
 .. warning::
 
-	If your data contains more points of signal than background, cranium will select your background channel as the signal channel. In order to correct this assumption, the inequality in :py:func:`brain.read_data` will need to be changed to equate a large number of points with signal instead of background.
+	If your data contains more points of signal than background, deltascope will select your background channel as the signal channel. In order to correct this assumption, the inequality in :py:func:`brain.read_data` will need to be changed to equate a large number of points with signal instead of background.
 
 .. _SIthresh:
 
@@ -43,10 +43,10 @@ The following instructions apply to processing a single sample. Details regardin
 
 .. code-block:: python
 
-	import cranium
+	import deltascope
 
 	#Create an embryo object that facilitates data processing
-	e = cranium.embryo(experiment-name,sample-number,directory)
+	e = deltascope.embryo(experiment-name,sample-number,directory)
 
 	#For each channel in your sample, add a channel with a unique name, e.g. 'c1' or 'c2'
 	e.add_channel(c1-filepath,c1-name)
@@ -68,7 +68,7 @@ Goal
 
 Principle Component Analysis
 *****************************
-During typical collections of biological samples, each sample will be oriented slightly differently in relation to the microscope due to variations in the shape and size of the sample as well as human error during the mounting process. As a result of this variation, we cannot directly compare samples in 3D space without realigning them. We have implemented principle component analysis in order to automate the process of alignment without a need for human supervision. :numref:`FIGpca` shown below illustrates how PCA can be used to align a set of points in 2D. Cranium uses the same process in 3D to identify biologically meaningful axes present in biological structures.
+During typical collections of biological samples, each sample will be oriented slightly differently in relation to the microscope due to variations in the shape and size of the sample as well as human error during the mounting process. As a result of this variation, we cannot directly compare samples in 3D space without realigning them. We have implemented principle component analysis in order to automate the process of alignment without a need for human supervision. :numref:`FIGpca` shown below illustrates how PCA can be used to align a set of points in 2D. deltascope uses the same process in 3D to identify biologically meaningful axes present in biological structures.
 
 .. _FIGpca:
 .. figure:: ./images/pca.jpg
@@ -116,7 +116,7 @@ The :envvar:`comporder` parameter controls how principle components are reassign
 
 Finally, the remaining two parameters determines how the model will be fit to the data. :envvar:`fitdim` determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``. :envvar:`deg` specifies the degree of the function that will be fit to the data. The default is ``2``, which specifies a parabolic function. A deg of ``1`` would fit a linear function, eg. y=mx +  b.
 
-.. warning:: The ability to specify degrees other than 2 is still being developed. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
+.. warning:: The ability to specify degrees other than 2 is still being developed. Check `here <https://github.com/msschwartz21/deltascopePy/issues/23>`_ for updates.
 
 
 .. _CIpca:

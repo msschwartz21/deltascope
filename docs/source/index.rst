@@ -1,9 +1,9 @@
-.. cranium documentation master file, created by
+.. deltascope documentation master file, created by
    sphinx-quickstart on Thu Jan  4 13:33:50 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to cranium's documentation!
+Welcome to deltascope's documentation!
 ===================================
 
 Features
@@ -14,27 +14,27 @@ Features
 - Generate descriptive graphs that quantify both the average and variation of the data
 - Use machine learning techniques to classify samples and identify regions of statistically significant difference
 
-Check out `Start Here <start here>`_ to find out if cranium is right for you.
+Check out `Start Here <start here>`_ to find out if deltascope is right for you.
 
 Installation
 ++++++++++++
 
-Package hosted on `PyPI <https://pypi.python.org/pypi/cranium>`_. See `Start Here <install>`_ for more information. ::
+Package hosted on `PyPI <https://pypi.python.org/pypi/deltascope>`_. See `Start Here <install>`_ for more information. ::
 
-	$ pip install cranium
+	$ pip install deltascope
 
 Support
 ++++++++
 
-- Complete documentation is available on `Read the Docs <http://craniumpy.readthedocs.io/en/latest/>`_.
+- Complete documentation is available on `Read the Docs <http://deltascope.readthedocs.io/en/latest/>`_.
 - Check out the `Frequently Asked Question <faq>`_ page.
-- Submit an issue describing a problem or question on the project's Github `issue tracker <https://github.com/msschwartz21/craniumPy/issues>`_.
+- Submit an issue describing a problem or question on the project's Github `issue tracker <https://github.com/msschwartz21/deltascope/issues>`_.
 
 Contribute
 +++++++++++
 
-- Issue Tracker: https://github.com/msschwartz21/craniumPy/issues
-- Source Code: https://github.com/msschwartz21/craniumPy
+- Issue Tracker: https://github.com/msschwartz21/deltascope/issues
+- Source Code: https://github.com/msschwartz21/deltascope
 
 License
 ++++++++

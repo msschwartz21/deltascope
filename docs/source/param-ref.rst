@@ -6,10 +6,10 @@ Parameter Reference
 Transformation
 ++++++++++++++++
 
-.. currentmodule:: cranium
+.. currentmodule:: deltascope
 
 .. envvar:: genthresh
-		
+
 	This parameter defines the cutoff point that will divide the :attr:`brain.raw_data` into a set of true signal points and background points based on the probability that each point is true signal. The :file:`_Probabilties.h5` dataset is generated after running the Ilastik pixel classification workflow described in :ref:`Signal Normalization`. Pixels with a value of 1 are likely to be background. Correspondingly, pixels with a value close to 0 are most likely to be true signal. We have found that a threshold of 0.5 is sufficient to divide true signal from background; however, if your data contains a lot of intermediate background values (0.4-0.7), you may benefit from a smaller threshold, e.g. 0.3.
 
 	Recommended: ``0.5``
@@ -42,13 +42,13 @@ Transformation
 
 	This parameter controls how principle components are reassigned to the typical Cartesian coordinate system (XYZ) that most users are familiar with. It takes the form of an array of length 3 that specifies the index of the component that will be assigned to the X, Y, or Z axis: :samp:`[{x index},{y index},{z index}]`. Please note that the index that matches each principle component starts counting at 0, e.g. 1st PC = 0, 2nd PC = 1, and 3rd PC = 2.
 
-	For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`. 
+	For example, if we want to assign the 1st PC to the x axis, the 2nd to the Z axis, and the 3rd to the y axis, the :envvar:`comporder` parameter would be :samp:`[0,2,1]`.
 
 	Example: ``[0,2,1]``
 
 .. envvar:: fitdim
 
-	This parameter determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``. 
+	This parameter determines which 2 axes will be used to fit the 2D model. It takes the form of a list of 2 of the 3 dimensions specified as a lowercase string, e.g. ``'x','y','z'``.
 
 	If we wanted to fit a model in the XZ plane, while holding the Y axis constant, the :envvar:`fitdim` parameter would be ``['x','z']``.
 
@@ -60,7 +60,7 @@ Transformation
 
 	Default: ``2``
 
-	.. warning:: The infrastructure to support degrees other than 2 is not currently in place. Check `here <https://github.com/msschwartz21/craniumPy/issues/23>`_ for updates.
+	.. warning:: The infrastructure to support degrees other than 2 is not currently in place. Check `here <https://github.com/msschwartz21/deltascopePy/issues/23>`_ for updates.
 
 .. _lm params:
 
@@ -81,6 +81,6 @@ Landmark Calculation
 
 .. envvar:: percbins
 
-	This parameter is a list of integers that specifies what percentile should be used to calculate the distribution of points along r. 
+	This parameter is a list of integers that specifies what percentile should be used to calculate the distribution of points along r.
 
 	Example: ``[50]``

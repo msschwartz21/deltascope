@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.2.2] 2018-08-26
 ### Additions
 - Created a new class, `anumSelect`, which determines the optimum number of bins along alpha
 - Created two new glasses, `graphData` and `graphSet` to handle plotting landmark data
@@ -17,6 +17,8 @@
 - Median threshold value is rescaled to accommodate 0-255 image data that is output by skimage.filters.median
 - `find_r` was only calculating distance in Y and Z so added X as well
 - median filter threshold in `calculate_pca_median` is set to select all points that do not have a value of 255 (background). User input signal is not used.
+- Move content from old_cranium back into __init__.py
+- Change documentation references to cranium to deltascope
 
 ## [0.2.1] - 2018-01-14
 ### Changes

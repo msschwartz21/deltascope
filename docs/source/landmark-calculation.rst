@@ -32,14 +32,14 @@ Code Sample
 
 .. code-block:: python
 
-	import cranium
+	import deltascope
 	import numpy as np
 
 	anum = 30
 	tstep = np.pi/4
 
 	#Create a landmark object
-	lm = cranium.landmarks(percbins=[50],rnull=15)
+	lm = deltascope.landmarks(percbins=[50],rnull=15)
 	lm.calc_bins(dfs,anum,tstep)
 
 	#Calculate landmarks for each sample and append to a single dataframe
@@ -66,10 +66,10 @@ Code Sample
 
 .. code-block:: python
 
-	import cranium
+	import deltascope
 
 	#Create a optimization object
-	opt = cranium.anumSelect(dfs)
+	opt = deltascope.anumSelect(dfs)
 
 	tstep = np.pi/4
 

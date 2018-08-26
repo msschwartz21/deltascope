@@ -3,5 +3,5 @@
 API
 ====
 
-.. automodule:: cranium
+.. automodule:: deltascope
 	:members:

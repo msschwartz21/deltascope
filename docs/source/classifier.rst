@@ -18,14 +18,14 @@ Coding Instructions
 
 .. code-block:: python
 
-  import cranium
+  import deltascope
   import pandas as pd
 
   #Read csv file that contains landmark data for both sample groups
   df = pd.read_csv(landmark_file)
 
   #Create the tree classifier object
-  tc = cranium.treeClassifier(df)
+  tc = deltascope.treeClassifier(df)
 
   #Apply pca to automatically reduce the dimensionality to the optimum number of dimensions
   tc.apply_pca()
