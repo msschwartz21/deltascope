@@ -12,8 +12,8 @@
 `process_after_gui.py`
 	This script follows the same convention as `mpTransformation.py` by including a conditional statement to determine if it should behave as a module or a script. This code accompanied the scripts in the `gui` folder.  The gui allows rudimentar manual curation of commisure alignments and then saves the untransformed data to psi files. This script reads in the already aligned data from psi files and converts the coordinate system. For most purposes, this script will not be useful unless someone want to revive the gui. Generally, the alignment process implemented in jupyter notebooks replaces the need for a gui.
 
-	`test_transform.py`
-		I honestly can't remember why I wrote this code. It looks like I intended to run this script from the command line on a single file at a time. Maybe I was using it to benchmark speed...?
+`test_transform.py`
+	I honestly can't remember why I wrote this code. It looks like I intended to run this script from the command line on a single file at a time. Maybe I was using it to benchmark speed...?
 
-	`utility.py`
-		The majority of this code was written to facilitate the manual alignment of commissures in jupyter notebooks. At some point, it could be appropriate to integrate this code into `__init__.py`, but I haven't done it because it will require going back and fixing the import statements in a bunch of notebooks.
+`utility.py`
+	The majority of this code was written to facilitate the manual alignment of commissures in jupyter notebooks. At some point, it could be appropriate to integrate this code into `__init__.py`, but I haven't done it because it will require going back and fixing the import statements in a bunch of notebooks.
