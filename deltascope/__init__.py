@@ -1951,16 +1951,24 @@ class paramsClass:
 	Validated parameters can be read as attributes of the object
 	'''
 
-	def __init__(self,path):
+	def __init__(self,path=None,dparams=None):
 		'''
 		Read json data in config file and validate that parameter inputs are correct
 
-		:param str path: Complete path to the config file
+		:param str path: optional, Complete path to the config file
+		:param dict dparams: optional, Dictionary with configuration parameters
 		'''
 
-		# Read file containing config data and parse json data
-		config_data = open(path).read()
-		params = json.loads(config_data)
+		
+		if dparams!=None:
+			params = dparams
+		elif path!=None:
+			# Read file containing config data and parse json data
+			config_data = open(path).read()
+			params = json.loads(config_data)
+		else:
+			print('''No valid input in form of path to config file
+				or existing parameter dictionary''')
 
 		self.check_config(params,path)
 
