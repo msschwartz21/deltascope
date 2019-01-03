@@ -25,6 +25,7 @@ from scipy.integrate import simps
 import scipy.stats as stats
 import re
 from sklearn.ensemble import RandomForestClassifier
+import tqdm
 
 class brain:
 	''' Object to manage biological data and associated functions. '''
@@ -1795,11 +1796,10 @@ def read_psi_to_dict(directory,dtype):
 	'''
 
 	dfs = {}
-	for f in os.listdir(directory):
+	for f in tqdm.tqdm(os.listdir(directory)):
 		if dtype in f:
 			df = read_psi(os.path.join(directory,f))
 			num = re.findall(r'\d+',f.split('.')[0])[0]
-			print(num)
 			dfs[num] = df
 
 	return(dfs)
