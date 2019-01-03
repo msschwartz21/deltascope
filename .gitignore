@@ -17,15 +17,19 @@
 *.psi
 *.jpg
 *.pdf
+*.dot
 
 # Other
 .DS_Store
-*.ipynb
 
 #Amira
 *.hx
 
-Notebooks/
+#checkpoints
+.ipynb_checkpoints
+
+notebooks/*.ipynb
+notebooks/*/*.ipynb
 dist/
 docs/build/
 env-cranium
