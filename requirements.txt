@@ -6,3 +6,7 @@ scipy
 scikit-learn
 scikit-image
 tqdm
+ipympl
+nodejs
+jupyter labextension install @jupyter-widgets/jupyterlab-manager
+jupyter labextension install jupyter-matplotlib
