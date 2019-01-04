@@ -5,6 +5,7 @@ import os
 from functools import partial
 from sys import argv
 import re
+import traceback
 
 # Define parameters or config file
 # An input from a file will override dictionary input from dparams
@@ -14,25 +15,25 @@ config_path = None # or transformation_config.json
 
 # Fill out dictionary to specify parameters here
 dparams = {
-			"rootdir": "",
-			"expname": "",
-			"c1-dir": "",
-			"c1-key": "",
-			"c2-dir": "",
-			"c2-key": "",
+			"rootdir": "../test",
+			"expname": "test",
+			"c1-dir": "Output_01-03-17-38",
+			"c1-key": "AT",
+			"c2-dir": "Output_01-03-17-38",
+			"c2-key": "ZRF",
 			"c3-dir": "",
 			"c3-key": "",
 			"c4-dir": "",
 			"c4-key": "",
-			"genthresh": None,
-			"microns": [None,None,None],
+			"genthresh": 0.5,
+			"microns": [0.16,0.16,0.21],
 			"scale": [1,1,1],
-			"medthresh": None,
-			"radius": None,
-			"comporder": [None,None,None],
-			"fitdim": ["",""],
-			"deg": None,
-			"twoD": None
+			"medthresh": 0.25,
+			"radius": 20,
+			"comporder": [0,2,1],
+			"fitdim": ["x","z"],
+			"deg": 2,
+			"twoD": False
 		}
 
 # -----------------------------------------
@@ -83,6 +84,7 @@ def process(num,P=None):
 			e.chnls[P.Lckey[i]].preprocess_data(P.genthresh,P.scale,P.microns)
 	except:
 		print(num,'failed on preprocess_data',time.time()-tic)
+		traceback.print_exc()
 
 	#Calculate PCA transformation for structural channel, c1
 	try:
@@ -105,6 +107,7 @@ def process(num,P=None):
 				e.chnls[P.Lckey[i]].pca_transform_3d(e.chnls[P.Lckey[i]].df_thresh,pca,P.comporder,P.fitdim,deg=P.deg)
 	except:
 		print(num,'failed on pca',time.time()-tic)
+		traceback.print_exc()
 
 	print(num,'Starting coordinate transformation')
 	try:
@@ -113,19 +116,20 @@ def process(num,P=None):
 			e.chnls[P.Lckey[i]].transform_coordinates()
 	except:
 		print(num,'failed on coordinate transform',time.time()-tic)
+		traceback.print_exc()
 
 	try:
 		e.save_psi()
 	except:
 		print(num,'failed on save_psi',time.time()-tic)
+		traceback.print_exc()
 
 	toc = time.time()
 	print(num,'Complete',toc-tic)
 
 if __name__=='__main__':
 
-	f,config_path = argv
-	P = paramsClass(path=config_path, 
+	P = ds.paramsClass(path=config_path, 
 					dparams=dparams)
 
 	#Create out directory stamped with current date and time
