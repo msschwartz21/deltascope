@@ -26,6 +26,7 @@ import scipy.stats as stats
 import re
 from sklearn.ensemble import RandomForestClassifier
 import tqdm
+import glob
 
 class brain:
 	''' Object to manage biological data and associated functions. '''
@@ -1998,24 +1999,23 @@ class paramsClass:
 		else:
 			print('Root directory path (rootdir) must specify an existing directory. Modify in',path)
 			raise
-
-		#Check that c1, structural channel, is defined
-		if D['c1-dir'] == '':
-			print('C1 directory path (c1-dir) is not defined. Modify in',path)
-			raise
-		elif os.path.isdir(D['c1-dir']):
-			self.c1_dir = D['c1-dir']
-			self.c1_files = os.listdir(self.c1_dir)
-		else:
-			print('C1 directory path (c1-dir) is not defined. Modify in',path)
-			raise
-
 		#Check c1 key
 		if D['c1-key'] == '':
 			print('C1 directory key (c1-key) is not defined. Modify in',path)
 			raise
 		else:
 			self.c1_key = D['c1-key']
+		
+		#Check that c1, structural channel, is defined
+		if D['c1-dir'] == '':
+			print('C1 directory path (c1-dir) is not defined. Modify in',path)
+			raise
+		elif os.path.isdir(D['c1-dir']):
+			self.c1_dir = D['c1-dir']
+			self.c1_files = glob.glob(os.path.join(self.c1_dir,D['c1-key']+'*.psi'))
+		else:
+			print('C1 directory path (c1-dir) is not defined. Modify in',path)
+			raise
 
 		#Check other channels and add to list if valid
 		self.Lcdir = []
@@ -2025,7 +2025,7 @@ class paramsClass:
 			if D[d] != '':
 				if os.path.isdir(D[d]):
 					self.Lcdir.append(D[d])
-					self.Lcfiles.append(os.listdir(D[d]))
+					self.Lcfiles.append(glob.glob(os.path.join(D[d],D['c1-key']+'*.psi')))
 					if D[k] == '':
 						print('Channel key (',k,') is not defined. Modify in',path)
 						raise
