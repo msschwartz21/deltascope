@@ -1798,7 +1798,7 @@ def read_psi_to_dict(directory,dtype):
 
 	dfs = {}
 	for f in tqdm.tqdm(os.listdir(directory)):
-		if dtype in f:
+		if (dtype in f)&('psi' in f):
 			df = read_psi(os.path.join(directory,f))
 			num = re.findall(r'\d+',f.split('.')[0])[0]
 			dfs[num] = df
