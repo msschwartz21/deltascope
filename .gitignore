@@ -35,3 +35,6 @@ docs/build/
 env-cranium
 shell_output
 build/
+
+# Experiment folders
+experiments
