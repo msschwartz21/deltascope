@@ -1370,7 +1370,7 @@ class graphSet:
 			for j in range(J):
 				self.axr[i,j].legend()
 
-	def make_figure(self,a,figsize=(10,8),P=True,pthresh=None,cbar=False):
+	def make_figure(self,a,mt_key,figsize=(10,8),P=True,pthresh=None,cbar=False):
 		'''
 		Creates a figure showing four theta slices and as many columns as ctypes
 
@@ -1379,9 +1379,11 @@ class graphSet:
 		.. todo:: Control p val for multiple testing
 
 		:param float a: Alpha value for fill_between ribbons
+		:param str mt_key: String indicating the data type of the experimental group
 		:param tuple figsize: Tuple specifying the height and width of the figure
 		:param bool P: True if pvalue should be plotted
 		:param float pthresh: None or float value for p-value threshold
+		:param bool cbar: Default false, if true plots colorbar for p values
 
 		.. attribute:: graphSet.fig
 
@@ -1420,9 +1422,9 @@ class graphSet:
 					self.axr[i,j].plot(self.xarr,go.avg[:,ti1],c=go.c,zorder=2,label=c+s)
 					self.axr[i,j].plot(self.xarr,-go.avg[:,ti2],c=go.c,zorder=2)
 
-					if (s == 'mt') & (P==True):
-						cax = self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3,vmin=0,vmax=1)
-						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3,vmin=0,vmax=1)
+					if (s == mt_key) & (P==True):
+						cax = self.axr[i,j].scatter(self.xarr,go.avg[:,ti1],c=parr[:,ti1],cmap='Greys_r',zorder=3,vmin=0,vmax=1,edgecolors='k')
+						self.axr[i,j].scatter(self.xarr,-go.avg[:,ti2],c=parr[:,ti2],cmap='Greys_r',zorder=3,vmin=0,vmax=1,edgecolors='k')
 						# print('plot pval')
 						if cbar==True:
 							plt.colorbar(cax,ax=self.axr[i,j])
@@ -1798,7 +1800,7 @@ def read_psi_to_dict(directory,dtype):
 
 	dfs = {}
 	for f in tqdm.tqdm(os.listdir(directory)):
-		if dtype in f:
+		if (dtype in f)&('psi' in f):
 			df = read_psi(os.path.join(directory,f))
 			num = re.findall(r'\d+',f.split('.')[0])[0]
 			dfs[num] = df
