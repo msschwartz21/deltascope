@@ -18,6 +18,7 @@
 *.jpg
 *.pdf
 *.dot
+*.mp4
 
 # Other
 .DS_Store
