@@ -13,19 +13,17 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from mock import MagicMock
 import sphinx_rtd_theme
 import sys
 import os
 import shlex
 
-# sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../..'))
 # sys.path.append('C:\Users\zfishlab\Code\deltascope')
 # sys.path.append(os.path.join(os.path.dirname(__name__), '..'))
 # sys.path.insert(0,'C:\\Users\\zfishlab\\Code\\deltascope\\deltascope')
 # sys.path.append(os.path.abspath('../../deltascope'))
-
-
-from mock import MagicMock
 
 
 class Mock(MagicMock):
@@ -41,7 +39,7 @@ MOCK_MODULES = ['scipy', 'scipy.optimize', 'scipy.integrate', 'scipy.stats',
                 'skimage', 'skimage.filters', 'skimage.morphology']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
-#import deltascope
+import deltascope
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
