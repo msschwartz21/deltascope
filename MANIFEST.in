@@ -1,7 +1,3 @@
 include README.rst
-
-include data/C1/AT_01_Probabilities.h5
-include data/C1/AT_02_Probabilities.h5
-include data/C2/ZRF1_01_Probabilities.h5
-include data/C2/ZRF1_02_Probabilities.h5
-include data/mp-transformation-config-EXAMPLE.json
+include scripts/*
+include gui/*
