@@ -19,6 +19,9 @@
 *.pdf
 *.dot
 *.mp4
+*.ai
+*.psd
+*.svg
 
 # Other
 .DS_Store
@@ -40,3 +43,4 @@ build/
 # Experiment folders
 experiments
 sandbox
+figures
