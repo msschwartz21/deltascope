@@ -74,7 +74,7 @@ if __name__=='__main__':
             if i+5>n:
                 L = files[i:n]
             else:
-                L = fiels[i:i+5]
+                L = files[i:i+5]
                 
             pool = mp.Pool()
             pool.map(transform,L)
