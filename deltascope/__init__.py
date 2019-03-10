@@ -1283,7 +1283,7 @@ class anumSelect:
 
 class graphSet:
 
-	def __init__(self,tpairs,xarr,tarr):
+	def __init__(self,tpairs,xarr,tarr,sharey=True):
 		'''
 		This object manages subobjects containing sample data, :class:`graphData`,
 		and generates the appropriate landmark graph
@@ -1306,6 +1306,7 @@ class graphSet:
 		'''
 
 		self.tpairs,self.xarr,self.tarr = tpairs,xarr,tarr
+		self.sharey = sharey
 
 		self.Ls,self.Lc = [],[]
 		self.Ds, self.Dc = {},{}
@@ -1348,7 +1349,7 @@ class graphSet:
 		self.LsUn = np.unique(self.Ls)
 		self.LcUn = np.unique(self.Lc)
 
-		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharey=True)
+		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharex=True,sharey=self.sharey)
 
 	def add_plot(self,go,c,s,j,a=0.3):
 
@@ -1397,7 +1398,7 @@ class graphSet:
 		self.LsUn = np.unique(self.Ls)
 		self.LcUn = np.unique(self.Lc)
 
-		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharey=True)
+		self.fig,self.axr = plt.subplots(4,len(self.LsUn),figsize=figsize,sharey=True,sharex=True)
 
 		for j,c in enumerate(self.LcUn):
 			dc = self.Dc[c]
@@ -1405,8 +1406,8 @@ class graphSet:
 
 			if pthresh != None:
 				bhthresh = pthresh/(len(self.xarr)*len(self.tarr))
-				parr[parr<pthresh] = 0
-				parr[parr>pthresh] = 1
+				parr[parr<bhthresh] = 0
+				parr[parr>bhthresh] = 1
 				print(bhthresh)
 
 			for i,p in enumerate(self.tpairs):
@@ -1430,7 +1431,6 @@ class graphSet:
 							plt.colorbar(cax,ax=self.axr[i,j])
 
 				self.axr[i,j].legend()
-				self.axr[i,j].set_xlim([-100,100])
 
 class graphData:
 
