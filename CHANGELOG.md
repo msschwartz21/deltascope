@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.0.0] - 2019-07-08
+Official publication release.
+### Additions
+- Added experimental files associated with publication
+
 ## [0.2.6] - 2019-02-11
 ### Changes
 - Restore read the docs build functionality for autodocs

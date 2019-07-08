@@ -12,7 +12,7 @@ def requirements():
 
 
 setuptools.setup(name='deltascope',
-                 version='0.2.6',
+                 version='1.0.0',
                  description='Python package to quantify biological structure',
                  long_description=readme(),
                  keywords='biology image analysis quantification',
