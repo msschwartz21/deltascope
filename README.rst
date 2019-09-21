@@ -17,6 +17,10 @@ Installation
 Package hosted on `PyPI <https://pypi.python.org/pypi/deltascope>`_. ::
 
 	$ pip install deltascope
+	
+Datasets
+++++++++
+Datasets utilized in the original publication are available through the `Smith College data repository <https://scholarworks.smith.edu/deltascope/>`_.
 
 Support
 ++++++++
@@ -35,3 +39,7 @@ License
 ++++++++
 
 This project is licensed under the GNU General Public License.
+
+Citation
+++++++++
+Schwartz, M. S., Schnabl, J. M., Litz, M., Baumer, B. S., & Barresi, M. J. (2019). ΔSCOPE: A new method to quantify 3D biological structures and identify differences in zebrafish forebrain development. `bioRxiv, 715698. <https://www.biorxiv.org/content/10.1101/715698v1>`_
